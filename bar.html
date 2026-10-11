@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>El bar de Messi · Soy Numerito</title>
+<meta name="description" content="Simulador gratis: mete a Messi en un bar y mira qué les pasa a la media y a la mediana de los sueldos.">
+<link rel="stylesheet" href="estilo.css">
+<style>
+  /* Tarjeta tipo ventana, igual que en el vídeo del ep. 1 (S08) */
+  .ventana { background: var(--blanco); border: var(--borde); border-radius: 20px; box-shadow: var(--sombra); overflow: hidden; }
+  .ventana-barra { background: var(--tinta); color: var(--papel); display: flex; align-items: center; gap: 8px; padding: 10px 16px; font-size: 15px; }
+  .ventana-barra i { width: 12px; height: 12px; border-radius: 50%; display: block; }
+  .ventana-barra span { margin-left: 8px; }
+  .ventana-cuerpo { padding: 18px 16px 16px; display: grid; gap: 14px; }
+
+  .cifras { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .chip { border: 3px solid var(--tinta); border-radius: 999px; padding: 4px 14px; font-weight: 800; font-size: 20px;
+    font-variant-numeric: tabular-nums; display: inline-flex; gap: 8px; align-items: baseline; }
+  .chip small { font-weight: 500; font-size: 15px; }
+  .chip.media { background: var(--amarillo); }
+  .chip.mediana { background: var(--verde); }
+  .bajo-media { color: var(--gris); font-size: 15px; }
+  .bajo-media b { color: var(--tinta); }
+
+  .grafico { position: relative; touch-action: none; user-select: none; -webkit-user-select: none; }
+  .grafico svg { display: block; width: 100%; overflow: visible; }
+  .grafico text { font-family: var(--letra); }
+  .hit { cursor: ns-resize; }
+  .persona:focus { outline: none; }
+  .persona:focus-visible .cuerpo { stroke: var(--azul); stroke-width: 5; }
+  .pista { color: var(--gris); font-size: 14px; margin: 0; }
+  @media (max-width: 520px) {
+    .controles { gap: 8px; }
+    .controles .boton { font-size: 14px; padding: 6px 12px; }
+    .contador { min-width: 5.5em; font-size: 14px; }
+  }
+
+  .controles { display: flex; flex-wrap: wrap; gap: 10px; }
+  .grupo { display: inline-flex; gap: 6px; align-items: center; }
+  .contador { font-weight: 800; font-variant-numeric: tabular-nums; min-width: 6.5em; text-align: center; font-size: 15px; }
+
+  /* Numerito comenta lo que pasa */
+  .comentario { display: flex; gap: 14px; align-items: flex-end; margin: 26px 0 0; }
+  .comentario svg { width: 64px; flex: none; }
+  .burbuja { position: relative; background: var(--blanco); border: var(--borde); border-radius: 18px; padding: 12px 16px;
+    box-shadow: 4px 4px 0 var(--tinta); font-size: 17px; min-width: 0; }
+  .burbuja::before { content: ''; position: absolute; left: -14px; bottom: 16px; border: 7px solid transparent;
+    border-right: 10px solid var(--tinta); }
+
+  .calculo { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; margin-top: 30px; }
+  .calculo section { border-top: 4px solid var(--tinta); padding-top: 12px; min-width: 0; }
+  .calculo .marca { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--tinta); border-radius: 50%; vertical-align: -1px; margin-right: 6px; }
+  .calculo p { margin: 0 0 8px; }
+  .cuenta { font-variant-numeric: tabular-nums; background: var(--blanco); border: 2px solid var(--tinta); border-radius: 10px;
+    padding: 8px 12px; font-size: 15px; overflow-wrap: anywhere; }
+</style>
+</head>
+<body>
+<div class="pagina">
+  <header class="cabecera">
+    <a class="logo" href="./">
+      <svg viewBox="0 0 220 300" aria-hidden="true"><path d="M70 40 Q118 4 140 18 Q156 28 156 60 L156 228 L190 228 Q206 228 206 246 L206 262 Q206 280 188 280 L46 280 Q28 280 28 262 L28 246 Q28 228 46 228 L82 228 L82 96 Q66 104 52 100 Q34 94 36 76 Q38 58 70 40 Z" fill="#FFD23F" stroke="#141414" stroke-width="14" stroke-linejoin="round"/></svg>
+      soy numerito
+    </a>
+    <span class="lema">Estadística que se entiende</span>
+  </header>
+
+  <h1>¿Si Messi entra en un bar, todos se hacen millonarios?</h1>
+  <p class="entradilla">Arrastra los sueldos de la gente del bar, mete a Messi y mira qué les pasa a la media y a la mediana.</p>
+
+  <div class="ventana">
+    <div class="ventana-barra" aria-hidden="true"><i style="background:var(--coral)"></i><i style="background:var(--amarillo)"></i><i style="background:var(--verde)"></i><span>Simulador · El bar</span></div>
+    <div class="ventana-cuerpo">
+      <div class="cifras" aria-live="polite">
+        <span class="chip media"><small>Media</small><span id="v-media">2.000 €</span></span>
+        <span class="chip mediana"><small>Mediana</small><span id="v-mediana">2.000 €</span></span>
+        <span class="bajo-media" id="v-bajo"></span>
+      </div>
+      <div class="grafico" id="grafico">
+        <svg id="svg" role="group" aria-label="Sueldos de la gente del bar"></svg>
+      </div>
+      <p class="pista">Arrastra una barra arriba o abajo (en el móvil, la barra que mueves se pone amarilla). Con el teclado: tabulador para elegir persona y flechas para cambiar su sueldo. Línea amarilla discontinua: la media. Línea verde: la mediana. La cara verde marca a la persona del medio.</p>
+      <div class="controles">
+        <button class="boton coral" id="b-messi" type="button" aria-pressed="false">Que entre Messi</button>
+        <span class="grupo">
+          <button class="boton" id="b-menos" type="button" aria-label="Quitar una persona">−</button>
+          <span class="contador" id="v-n">10 personas</span>
+          <button class="boton" id="b-mas" type="button" aria-label="Añadir una persona">+</button>
+        </span>
+        <button class="boton" id="b-ordenar" type="button" aria-pressed="false">Ordenar por sueldo</button>
+        <button class="boton" id="b-grupos" type="button">Bar de dos grupos</button>
+        <button class="boton" id="b-reset" type="button">Empezar de nuevo</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="comentario">
+    <svg viewBox="0 0 220 300" aria-hidden="true">
+      <path d="M70 40 Q118 4 140 18 Q156 28 156 60 L156 228 L190 228 Q206 228 206 246 L206 262 Q206 280 188 280 L46 280 Q28 280 28 262 L28 246 Q28 228 46 228 L82 228 L82 96 Q66 104 52 100 Q34 94 36 76 Q38 58 70 40 Z" fill="#FFD23F" stroke="#141414" stroke-width="8" stroke-linejoin="round"/>
+      <ellipse cx="102" cy="132" rx="15" ry="19" fill="#fff" stroke="#141414" stroke-width="5"/><circle cx="106" cy="136" r="8" fill="#141414"/>
+      <ellipse cx="140" cy="132" rx="15" ry="19" fill="#fff" stroke="#141414" stroke-width="5"/><circle cx="144" cy="136" r="8" fill="#141414"/>
+      <ellipse cx="94" cy="166" rx="9" ry="6" fill="#FF8A8A"/><ellipse cx="150" cy="166" rx="9" ry="6" fill="#FF8A8A"/>
+      <path d="M110 164 Q122 180 134 164" fill="none" stroke="#141414" stroke-width="5" stroke-linecap="round"/>
+    </svg>
+    <p class="burbuja" id="v-comentario" aria-live="polite"></p>
+  </div>
+
+  <div class="calculo">
+    <section>
+      <h2><span class="marca" style="background:var(--amarillo)"></span>Cómo sale la media</h2>
+      <p>Juntas todos los sueldos en un bote y lo repartes a partes iguales.</p>
+      <div class="cuenta" id="c-media"></div>
+    </section>
+    <section>
+      <h2><span class="marca" style="background:var(--verde)"></span>Cómo sale la mediana</h2>
+      <p>Ordenas los sueldos de menor a mayor y miras el del medio.</p>
+      <div class="cuenta" id="c-mediana"></div>
+    </section>
+  </div>
+
+  <footer class="pie">
+    <span>Lo explicamos en el vídeo «Media vs mediana» del canal <a href="https://www.youtube.com/@soynumerito">Soy Numerito en YouTube</a>.</span>
+    <span>Los sueldos son inventados. Lo de Messi es una cifra redonda para el ejemplo: cinco millones al mes.</span>
+    <span>Esta página no usa cookies ni guarda nada de lo que hagas.</span>
+  </footer>
+</div>
+
+<script>
+(() => {
+  // Mismos sueldos que el gancho del ep. 1 (remotion/src/ep01/S01.tsx): media y mediana 2.000 €.
+  const INICIO = [2100, 1500, 2300, 2000, 1800, 2500, 1700, 2000, 2200, 1900];
+  const DOS_GRUPOS = [1000, 5000, 1000, 5000, 1000, 5000, 1000, 5000, 1000, 5000];
+  const MESSI = 5000000, TOPE = 6000, PASO = 50, MIN_N = 2, MAX_N = 15;
+  const C = { tinta: '#141414', azul: '#3A5BFF', coral: '#FF5A36', amarillo: '#FFD23F', verde: '#22C27A', blanco: '#FFFFFF', linea: '#D9CFBB', gris: '#6E6658' };
+
+  let gente = INICIO.map((v, i) => ({ id: i, v }));
+  let siguienteId = gente.length, messi = false, ordenado = false, arrastrando = null, foco = null;
+
+  const $ = (id) => document.getElementById(id);
+  const svg = $('svg');
+  const eur = (x) => Math.round(x).toLocaleString('de-DE') + ' €';
+  const corto = (x) => (x >= 1000 ? (x / 1000).toLocaleString('de-DE', { maximumFractionDigits: 1 }) + 'k' : String(x));
+
+  const todos = () => (messi ? [...gente, { id: 'messi', v: MESSI, messi: true }] : gente);
+  const visibles = () => (ordenado ? [...todos()].sort((a, b) => a.v - b.v) : todos());
+
+  function estadisticas() {
+    const xs = todos(), n = xs.length;
+    const orden = [...xs].sort((a, b) => a.v - b.v);
+    const suma = xs.reduce((s, p) => s + p.v, 0);
+    const media = suma / n;
+    const medio = n % 2 ? [orden[(n - 1) / 2]] : [orden[n / 2 - 1], orden[n / 2]];
+    const mediana = medio.reduce((s, p) => s + p.v, 0) / medio.length;
+    return { n, suma, media, mediana, medio, orden, bajo: xs.filter((p) => p.v < media).length };
+  }
+
+  // ---------- gráfico ----------
+  let geo = null;
+  function medir() {
+    const ancho = $('grafico').clientWidth;
+    const alto = ancho < 520 ? 300 : 360;
+    const m = { izq: 44, der: 8, arr: 34, aba: 46 };
+    geo = { ancho, alto, m, pw: ancho - m.izq - m.der, ph: alto - m.arr - m.aba };
+  }
+  const y = (v) => geo.m.arr + geo.ph * (1 - Math.min(v, TOPE) / TOPE);
+
+  function dibujar() {
+    const { ancho, alto, m, pw, ph } = geo;
+    const e = estadisticas(), lista = visibles();
+    const idsMedio = new Set(e.medio.map((p) => p.id));
+    const hueco = pw / lista.length, bw = Math.min(56, hueco * 0.62), r = Math.min(12, hueco * 0.3);
+    const base = m.arr + ph;
+    let s = '', cifras = '';
+
+    // rejilla y eje (1.000 € en 1.000 €)
+    for (let v = 0; v <= TOPE; v += 1000) {
+      s += `<line x1="${m.izq}" x2="${ancho - m.der}" y1="${y(v)}" y2="${y(v)}" stroke="${v ? C.linea : C.tinta}" stroke-width="${v ? 1 : 3}"/>`;
+      s += `<text x="${m.izq - 8}" y="${y(v) + 4}" text-anchor="end" font-size="12" fill="${C.gris}">${v ? v / 1000 + 'k' : '0'}</text>`;
+    }
+    s += `<text x="${m.izq - 8}" y="${m.arr - 18}" text-anchor="end" font-size="11" fill="${C.gris}">€/mes</text>`;
+
+    lista.forEach((p, i) => {
+      const cx = m.izq + hueco * (i + 0.5), x = cx - bw / 2, top = p.messi ? m.arr + 6 : y(p.v), h = base - top;
+      const medio = idsMedio.has(p.id);
+      const activa = arrastrando && arrastrando.dedo && String(arrastrando.id) === String(p.id);
+      const etiqueta = p.messi ? 'Messi, 5.000.000 € al mes' : `Persona ${i + 1}, ${eur(p.v)} al mes`;
+      s += p.messi
+        ? `<g class="persona" data-id="messi" aria-label="${etiqueta}" role="img">`
+        : `<g class="persona" data-id="${p.id}" tabindex="0" role="slider" aria-label="Sueldo de la persona ${i + 1}" aria-valuemin="0" aria-valuemax="${TOPE}" aria-valuenow="${p.v}" aria-valuetext="${eur(p.v)} al mes">`;
+      if (!p.messi) s += `<rect class="hit" data-id="${p.id}" x="${cx - hueco / 2}" y="${m.arr}" width="${hueco}" height="${ph}" fill="transparent"/>`;
+      if (h > 0) s += `<path class="cuerpo" d="M${x} ${base} V${top + Math.min(10, h)} Q${x} ${top} ${x + Math.min(10, bw / 2)} ${top} H${x + bw - Math.min(10, bw / 2)} Q${x + bw} ${top} ${x + bw} ${top + Math.min(10, h)} V${base}" fill="${p.messi ? C.coral : activa ? C.amarillo : C.azul}" stroke="${C.tinta}" stroke-width="${activa ? 4 : 3}" pointer-events="none"/>`;
+      if (p.messi) {
+        // corte en zigzag: la barra real mediría cientos de veces más
+        const zy = m.arr + 34;
+        s += `<path d="M${x - 4} ${zy} l${bw / 4 + 1} -7 l${bw / 4 + 1} 7 l${bw / 4 + 1} -7 l${bw / 4 + 1} 7 v7 l${-(bw / 4 + 1)} -7 l${-(bw / 4 + 1)} 7 l${-(bw / 4 + 1)} -7 l${-(bw / 4 + 1)} 7 z" fill="${C.blanco}" stroke="none"/>`;
+        s += `<text x="${Math.min(cx, ancho - m.der - 2)}" y="${m.arr - 8}" text-anchor="end" font-size="13" font-weight="800" fill="${C.coral}">5.000.000 € ↑</text>`;
+      } else if (activa) {
+        const t = eur(p.v), tw = t.length * 8 + 16, tx = Math.max(m.izq, Math.min(ancho - m.der - tw, cx - tw / 2));
+        cifras += `<rect x="${tx}" y="${top - 34}" width="${tw}" height="24" rx="12" fill="${C.tinta}"/><text x="${tx + tw / 2}" y="${top - 17}" text-anchor="middle" font-size="13" font-weight="800" fill="${C.blanco}">${t}</text>`;
+      } else if (hueco > 22) {
+        cifras += `<text x="${cx}" y="${top - 7}" text-anchor="middle" font-size="${hueco > 40 ? 12 : 10}" font-weight="800" fill="${C.tinta}" stroke="${C.blanco}" stroke-width="3" paint-order="stroke" pointer-events="none">${corto(p.v)}</text>`;
+      }
+      // cara
+      const fy = base + r + 8;
+      s += `<circle cx="${cx}" cy="${fy}" r="${r}" fill="${p.messi ? C.coral : medio ? C.verde : C.blanco}" stroke="${C.tinta}" stroke-width="2.5" pointer-events="none"/>`;
+      s += `<circle cx="${cx - r * 0.35}" cy="${fy - r * 0.15}" r="${Math.max(1.3, r * 0.13)}" fill="${C.tinta}"/><circle cx="${cx + r * 0.35}" cy="${fy - r * 0.15}" r="${Math.max(1.3, r * 0.13)}" fill="${C.tinta}"/>`;
+      s += `<path d="M${cx - r * 0.4} ${fy + r * 0.25} Q${cx} ${fy + r * 0.6} ${cx + r * 0.4} ${fy + r * 0.25}" fill="none" stroke="${C.tinta}" stroke-width="1.8" stroke-linecap="round"/>`;
+      if (p.messi) s += `<text x="${cx}" y="${fy + r + 13}" text-anchor="middle" font-size="11" font-weight="800" fill="${C.tinta}">Messi</text>`;
+      s += `</g>`;
+    });
+
+    // líneas de media y mediana (encima de las barras). Sus valores ya están en los chips de colores.
+    const linea = (v, color, discontinua) => {
+      if (v > TOPE) {
+        const txt = '↑ media ' + eur(v);
+        return `<line x1="${m.izq}" x2="${ancho - m.der}" y1="${m.arr}" y2="${m.arr}" stroke="${color}" stroke-width="4" stroke-dasharray="10 6"/>` +
+          `<rect x="${m.izq}" y="${m.arr - 28}" width="${txt.length * 7.4 + 18}" height="22" rx="11" fill="${color}" stroke="${C.tinta}" stroke-width="2"/>` +
+          `<text x="${m.izq + 9}" y="${m.arr - 12}" font-size="13" font-weight="800" fill="${C.tinta}">${txt}</text>`;
+      }
+      const ly = y(v);
+      return `<line x1="${m.izq}" x2="${ancho - m.der}" y1="${ly}" y2="${ly}" stroke="${C.tinta}" stroke-width="7" stroke-linecap="round" pointer-events="none"${discontinua ? ' stroke-dasharray="14 8"' : ''}/>` +
+        `<line x1="${m.izq}" x2="${ancho - m.der}" y1="${ly}" y2="${ly}" stroke="${color}" stroke-width="4" stroke-linecap="round" pointer-events="none"${discontinua ? ' stroke-dasharray="14 8"' : ''}/>`;
+    };
+    s += linea(e.mediana, C.verde, false);
+    s += linea(e.media, C.amarillo, true);
+    s += cifras;
+
+    svg.setAttribute('viewBox', `0 0 ${ancho} ${alto}`);
+    svg.setAttribute('height', alto);
+    svg.innerHTML = s;
+    if (foco != null) { const g = svg.querySelector(`.persona[data-id="${foco}"]`); if (g) g.focus({ preventScroll: true }); }
+    textos(e);
+  }
+
+  // ---------- textos ----------
+  function textos(e) {
+    $('v-media').textContent = eur(e.media);
+    $('v-mediana').textContent = eur(e.mediana);
+    $('v-bajo').innerHTML = `<b>${e.bajo} de ${e.n}</b> cobran menos que la media`;
+    $('v-n').textContent = `${gente.length} personas`;
+    $('b-menos').disabled = gente.length <= MIN_N;
+    $('b-mas').disabled = gente.length >= MAX_N;
+    $('b-messi').textContent = messi ? 'Que se vaya Messi' : 'Que entre Messi';
+    $('b-messi').setAttribute('aria-pressed', messi);
+    $('b-ordenar').setAttribute('aria-pressed', ordenado);
+
+    const lista = todos().map((p) => (p.messi ? '5.000.000' : p.v.toLocaleString('de-DE')));
+    $('c-media').textContent = `(${lista.join(' + ')}) ÷ ${e.n} = ${eur(e.suma)} ÷ ${e.n} = ${eur(e.media)}`;
+    const pos = e.n % 2 ? `la ${(e.n + 1) / 2}.ª` : `la ${e.n / 2}.ª y la ${e.n / 2 + 1}.ª`;
+    $('c-mediana').textContent = e.n % 2
+      ? `Hay ${e.n} personas (impar): la del medio es ${pos}, que cobra ${eur(e.mediana)}.`
+      : `Hay ${e.n} personas (par): en el medio hay dos, ${pos}. Se hace la media de sus sueldos: (${e.medio.map((p) => p.v.toLocaleString('de-DE')).join(' + ')}) ÷ 2 = ${eur(e.mediana)}.`;
+
+    $('v-comentario').textContent = comentario(e);
+  }
+
+  function comentario(e) {
+    const cerca = (v) => todos().some((p) => Math.abs(p.v - v) <= Math.max(150, v * 0.1));
+    const ratio = e.media / Math.max(1, e.mediana);
+    if (messi) return `Con Messi, la media salta a ${eur(e.media)}, pero la mediana sigue en ${eur(e.mediana)}. Nadie más ha cobrado ni un euro extra: la media reparte el sueldo de Messi entre todos, y la mediana solo mira a quien está en el medio.`;
+    if (!cerca(e.media) && !cerca(e.mediana)) return `Media y mediana dan ${eur(e.media === e.mediana ? e.media : e.mediana)}, pero en el bar nadie cobra nada parecido. Ninguna de las dos te dice si hay un caso típico: para eso hay que mirar los datos.`;
+    if (ratio > 1.1) return `La media (${eur(e.media)}) está por encima de la mediana (${eur(e.mediana)}): unos pocos sueldos altos tiran de la media hacia arriba. Por eso ${e.bajo} de ${e.n} cobran menos que la media.`;
+    if (ratio < 0.9) return `Ahora la media (${eur(e.media)}) está por debajo de la mediana (${eur(e.mediana)}): unos pocos sueldos muy bajos tiran de la media hacia abajo.`;
+    if (e.media === e.mediana && gente.every((p, i) => p.v === INICIO[i]) && gente.length === INICIO.length) return 'Diez sueldos normales: la media y la mediana coinciden en 2.000 €. Ahora pulsa «Que entre Messi».';
+    return `Media y mediana están cerca (${eur(e.media)} y ${eur(e.mediana)}). Suele pasar cuando los sueldos se reparten de forma parecida por encima y por debajo del centro. Prueba a subir mucho una sola barra.`;
+  }
+
+  // ---------- interacción ----------
+  const valorEn = (clientY) => {
+    const caja = svg.getBoundingClientRect();
+    const py = (clientY - caja.top) * (geo.alto / caja.height);
+    const v = (1 - (py - geo.m.arr) / geo.ph) * TOPE;
+    return Math.max(0, Math.min(TOPE, Math.round(v / PASO) * PASO));
+  };
+  const poner = (id, v) => { const p = gente.find((q) => String(q.id) === String(id)); if (p && p.v !== v) { p.v = v; dibujar(); } };
+
+  // Con el ratón, la barra salta a donde haces clic. Con el dedo solo cuenta el arrastre (un toque no cambia nada),
+  // y la barra elegida se marca, para que se vea cuál se mueve aunque el dedo caiga en la columna de al lado.
+  svg.addEventListener('pointerdown', (ev) => {
+    const hit = ev.target.closest('.hit');
+    if (!hit) return;
+    ev.preventDefault();
+    const p = gente.find((q) => String(q.id) === hit.dataset.id);
+    arrastrando = { id: hit.dataset.id, y0: ev.clientY, v0: p.v, dedo: ev.pointerType !== 'mouse' };
+    foco = arrastrando.id;
+    svg.setPointerCapture(ev.pointerId);
+    if (arrastrando.dedo) dibujar(); else poner(arrastrando.id, valorEn(ev.clientY));
+  });
+  svg.addEventListener('pointermove', (ev) => {
+    if (!arrastrando) return;
+    if (!arrastrando.dedo) return poner(arrastrando.id, valorEn(ev.clientY));
+    const caja = svg.getBoundingClientRect();
+    const euros = ((arrastrando.y0 - ev.clientY) * (geo.alto / caja.height) / geo.ph) * TOPE;
+    poner(arrastrando.id, Math.max(0, Math.min(TOPE, Math.round((arrastrando.v0 + euros) / PASO) * PASO)));
+  });
+  const soltar = () => { const habia = arrastrando; arrastrando = null; if (habia && habia.dedo) dibujar(); };
+  svg.addEventListener('pointerup', soltar);
+  svg.addEventListener('pointercancel', soltar);
+
+  svg.addEventListener('focusin', (ev) => { const g = ev.target.closest('.persona'); if (g && g.dataset.id !== 'messi') foco = g.dataset.id; });
+  svg.addEventListener('focusout', (ev) => { if (!svg.contains(ev.relatedTarget)) foco = null; });
+  svg.addEventListener('keydown', (ev) => {
+    const g = ev.target.closest('.persona[role="slider"]');
+    if (!g) return;
+    const p = gente.find((q) => String(q.id) === g.dataset.id);
+    const pasos = { ArrowUp: PASO, ArrowRight: PASO, ArrowDown: -PASO, ArrowLeft: -PASO, PageUp: 500, PageDown: -500 };
+    let v = null;
+    if (ev.key in pasos) v = p.v + pasos[ev.key];
+    if (ev.key === 'Home') v = 0;
+    if (ev.key === 'End') v = TOPE;
+    if (v == null) return;
+    ev.preventDefault();
+    poner(p.id, Math.max(0, Math.min(TOPE, v)));
+  });
+
+  $('b-messi').onclick = () => { messi = !messi; dibujar(); };
+  $('b-ordenar').onclick = () => { ordenado = !ordenado; dibujar(); };
+  $('b-mas').onclick = () => {
+    if (gente.length >= MAX_N) return;
+    gente.push({ id: siguienteId++, v: 1500 + Math.round(Math.random() * 20) * 50 });
+    dibujar();
+  };
+  $('b-menos').onclick = () => { if (gente.length > MIN_N) { gente.pop(); dibujar(); } };
+  $('b-grupos').onclick = () => { gente = DOS_GRUPOS.map((v) => ({ id: siguienteId++, v })); messi = false; foco = null; dibujar(); };
+  $('b-reset').onclick = () => { gente = INICIO.map((v) => ({ id: siguienteId++, v })); messi = false; ordenado = false; foco = null; dibujar(); };
+
+  new ResizeObserver(() => { medir(); dibujar(); }).observe($('grafico'));
+  medir(); dibujar();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+/* Estilo A · pop editorial de Soy Numerito (mismos colores que remotion/src/ep01/tema.tsx).
+   Un solo aspecto, claro, a propósito: es la identidad del canal. */
+@font-face {
+  font-family: 'Bricolage Grotesque';
+  src: url('bricolage.woff2') format('woff2');
+  font-weight: 400 800;
+  font-display: swap;
+}
+
+:root {
+  --papel: #F5EEDF;
+  --tinta: #141414;
+  --azul: #3A5BFF;
+  --coral: #FF5A36;
+  --amarillo: #FFD23F;
+  --verde: #22C27A;
+  --blanco: #FFFFFF;
+  --gris: #6E6658;      /* texto secundario: gris cálido, tirando al papel */
+  --linea: #D9CFBB;     /* rejilla del gráfico */
+  --letra: 'Bricolage Grotesque', 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
+  --borde: 4px solid var(--tinta);
+  --sombra: 6px 6px 0 var(--tinta);
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--papel);
+  color: var(--tinta);
+  font-family: var(--letra);
+  font-size: 17px;
+  line-height: 1.5;
+}
+.pagina { max-width: 980px; margin: 0 auto; padding: 20px 16px 48px; }
+
+a { color: var(--tinta); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+a:hover { color: var(--azul); }
+:focus-visible { outline: 3px solid var(--azul); outline-offset: 3px; }
+
+/* Cabecera con el logo */
+.cabecera { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.logo { display: inline-flex; align-items: center; gap: 10px; font-weight: 800; font-size: 20px; text-decoration: none; }
+.logo svg { width: 28px; height: auto; }
+.lema { color: var(--gris); font-size: 15px; }
+
+h1 { font-size: clamp(32px, 6vw, 56px); line-height: 1.02; letter-spacing: -0.02em; margin: 28px 0 10px; font-weight: 800; text-wrap: balance; }
+h2 { font-size: 22px; margin: 0 0 8px; font-weight: 800; }
+.entradilla { font-size: 19px; max-width: 60ch; margin: 0 0 24px; }
+
+/* Botones pop */
+.boton {
+  font: inherit; font-weight: 800; font-size: 16px; color: var(--tinta);
+  background: var(--blanco); border: 3px solid var(--tinta); border-radius: 999px;
+  padding: 8px 16px; box-shadow: 3px 3px 0 var(--tinta); cursor: pointer;
+  transition: transform .08s, box-shadow .08s;
+}
+.boton:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--tinta); }
+.boton:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--tinta); }
+.boton:disabled { opacity: .45; cursor: not-allowed; transform: none; box-shadow: 3px 3px 0 var(--tinta); }
+.boton[aria-pressed="true"] { background: var(--tinta); color: var(--papel); }
+.boton.coral { background: var(--coral); color: var(--blanco); }
+.boton.coral[aria-pressed="true"] { background: var(--tinta); color: var(--papel); }
+
+.pie { margin-top: 40px; padding-top: 16px; border-top: 2px solid var(--tinta); color: var(--gris); font-size: 14px; display: grid; gap: 6px; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }

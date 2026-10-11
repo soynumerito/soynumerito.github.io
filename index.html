@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Soy Numerito · Simuladores</title>
+<meta name="description" content="Simuladores gratis de Soy Numerito para jugar con los ejemplos de los vídeos. Estadística que se entiende.">
+<link rel="stylesheet" href="estilo.css">
+<style>
+  .portada { display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: end; }
+  .portada svg { width: clamp(90px, 18vw, 150px); height: auto; }
+  .simuladores { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 22px; margin-top: 8px; }
+  .sim { display: grid; gap: 10px; background: var(--blanco); border: var(--borde); border-radius: 20px; box-shadow: var(--sombra);
+    padding: 18px; text-decoration: none; transition: transform .1s, box-shadow .1s; min-width: 0; }
+  .sim:hover { color: var(--tinta); transform: translate(-2px, -2px); box-shadow: 8px 8px 0 var(--tinta); }
+  .sim .ep { font-size: 13px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--gris); }
+  .sim h2 { margin: 0; }
+  .sim p { margin: 0; }
+  .sim .ir { font-weight: 800; color: var(--azul); }
+  .redes { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
+  .redes a { text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="pagina">
+  <header class="cabecera">
+    <span class="logo">
+      <svg viewBox="0 0 220 300" aria-hidden="true"><path d="M70 40 Q118 4 140 18 Q156 28 156 60 L156 228 L190 228 Q206 228 206 246 L206 262 Q206 280 188 280 L46 280 Q28 280 28 262 L28 246 Q28 228 46 228 L82 228 L82 96 Q66 104 52 100 Q34 94 36 76 Q38 58 70 40 Z" fill="#FFD23F" stroke="#141414" stroke-width="14" stroke-linejoin="round"/></svg>
+      soy numerito
+    </span>
+    <span class="lema">Estadística que se entiende</span>
+  </header>
+
+  <div class="portada">
+    <div>
+      <h1>Simuladores</h1>
+      <p class="entradilla">Los ejemplos de los vídeos, para que juegues con ellos. Cambia los números y mira qué pasa.</p>
+    </div>
+    <svg viewBox="0 0 220 300" aria-hidden="true">
+      <path d="M70 40 Q118 4 140 18 Q156 28 156 60 L156 228 L190 228 Q206 228 206 246 L206 262 Q206 280 188 280 L46 280 Q28 280 28 262 L28 246 Q28 228 46 228 L82 228 L82 96 Q66 104 52 100 Q34 94 36 76 Q38 58 70 40 Z" fill="#FFD23F" stroke="#141414" stroke-width="7" stroke-linejoin="round"/>
+      <path d="M86 136 Q102 120 118 136" fill="none" stroke="#141414" stroke-width="7" stroke-linecap="round"/>
+      <ellipse cx="140" cy="132" rx="15" ry="19" fill="#fff" stroke="#141414" stroke-width="5"/><circle cx="144" cy="136" r="8" fill="#141414"/>
+      <ellipse cx="94" cy="166" rx="9" ry="6" fill="#FF8A8A"/><ellipse cx="150" cy="166" rx="9" ry="6" fill="#FF8A8A"/>
+      <path d="M106 162 Q124 184 142 160" fill="none" stroke="#141414" stroke-width="5" stroke-linecap="round"/>
+    </svg>
+  </div>
+
+  <div class="simuladores">
+    <a class="sim" href="bar">
+      <span class="ep">Episodio 1 · Media vs mediana</span>
+      <h2>El bar de Messi</h2>
+      <p>Mete a Messi en un bar y mira cómo se dispara la media mientras la mediana casi no se mueve.</p>
+      <span class="ir">Abrir el simulador →</span>
+    </a>
+  </div>
+
+  <div class="redes">
+    <a class="boton" href="https://www.youtube.com/@soynumerito">YouTube</a>
+    <a class="boton" href="https://www.tiktok.com/@soynumerito">TikTok</a>
+    <a class="boton" href="https://www.instagram.com/soynumerito">Instagram</a>
+  </div>
+
+  <footer class="pie">
+    <span>Esta web no usa cookies ni guarda nada de lo que hagas.</span>
+  </footer>
+</div>
+</body>
+</html>
