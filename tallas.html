@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>La talla normal · Soy Numerito</title>
-<meta name="description" content="Simulador gratis: sube y baja las ventas de cada talla de una tienda inventada y mira dónde caen la moda, la media y la mediana.">
+<meta name="description" content="Simulador gratis: sube y baja las ventas de cada talla de zapatilla de una tienda inventada y mira dónde caen la moda, la media y la mediana.">
 <link rel="stylesheet" href="estilo.css">
 <style>
   .ventana { background: var(--blanco); border: var(--borde); border-radius: 20px; box-shadow: var(--sombra); overflow: hidden; }
@@ -58,10 +58,10 @@
   </header>
 
   <h1>¿Existe la talla normal?</h1>
-  <p class="entradilla">La tienda de un club deportivo inventado. Sube y baja las ventas de cada talla y mira dónde caen la moda, la media y la mediana.</p>
+  <p class="entradilla">La tienda de zapatillas de un club deportivo inventado. Sube y baja las ventas de cada talla y mira dónde caen la moda, la media y la mediana.</p>
 
   <div class="ventana">
-    <div class="ventana-barra" aria-hidden="true"><i style="background:var(--coral)"></i><i style="background:var(--amarillo)"></i><i style="background:var(--verde)"></i><span>Simulador · La tienda</span></div>
+    <div class="ventana-barra" aria-hidden="true"><i style="background:var(--coral)"></i><i style="background:var(--amarillo)"></i><i style="background:var(--verde)"></i><span>Simulador · La tienda de zapatillas</span></div>
     <div class="ventana-cuerpo">
       <div class="cifras" aria-live="polite">
         <span class="chip moda"><small id="e-moda">Moda</small><span id="v-moda"></span></span>
@@ -70,9 +70,9 @@
         <span class="total" id="v-total"></span>
       </div>
       <div class="grafico" id="grafico">
-        <svg id="svg" role="group" aria-label="Prendas vendidas por talla"></svg>
+        <svg id="svg" role="group" aria-label="Pares de zapatillas vendidos por talla"></svg>
       </div>
-      <p class="pista">Arrastra una barra arriba o abajo (en el móvil, la barra que mueves se pone amarilla). Con el teclado: tabulador para elegir talla y flechas para cambiar sus ventas. Corona: la moda. Línea amarilla discontinua: la media. Línea verde: la mediana. Para calcular la media y la mediana, cada talla se pasa a su número: XS = 34, S = 36, M = 38, L = 40, XL = 42.</p>
+      <p class="pista">Arrastra una barra arriba o abajo (en el móvil, la barra que mueves se pone amarilla). Con el teclado: tabulador para elegir talla y flechas para cambiar sus ventas. Corona: la moda. Línea amarilla discontinua: la media. Línea verde: la mediana. La media y la mediana se calculan con el número de cada talla (38 a 42).</p>
       <div class="controles">
         <button class="boton" id="b-reset" type="button">La tienda del vídeo</button>
         <button class="boton" id="b-una" type="button">Una sola joroba</button>
@@ -100,12 +100,12 @@
     </section>
     <section>
       <h2><span class="marca" style="background:var(--amarillo)"></span>Cómo sale la media</h2>
-      <p>Cada talla vale su número, y cada prenda vendida cuenta una vez.</p>
+      <p>Cada talla vale su número, y cada par vendido cuenta una vez.</p>
       <div class="cuenta" id="c-media"></div>
     </section>
     <section>
       <h2><span class="marca" style="background:var(--verde)"></span>Cómo sale la mediana</h2>
-      <p>Pones todas las prendas en fila, de la más pequeña a la más grande, y miras la del medio.</p>
+      <p>Pones todos los pares en fila, del número más pequeño al más grande, y miras el del medio.</p>
       <div class="cuenta" id="c-mediana"></div>
     </section>
   </div>
@@ -119,8 +119,8 @@
 
 <script>
 (() => {
-  // La tienda del ep. 3: 300 prendas en un mes. Media 38,2 · mediana 38 (M) · modas S y L (90 cada una).
-  const TALLAS = ['XS', 'S', 'M', 'L', 'XL'], NUMS = [34, 36, 38, 40, 42];
+  // La tienda del ep. 3: 300 pares en un mes. Media 40,1 · mediana 40 · modas 39 y 41 (90 cada una).
+  const TALLAS = ['38', '39', '40', '41', '42'], NUMS = [38, 39, 40, 41, 42];
   const INICIO = [40, 90, 25, 90, 55];
   const UNA_JOROBA = [20, 60, 110, 60, 20];
   const EMPATE = [80, 40, 80, 40, 80];
@@ -139,7 +139,7 @@
     if (!total) return { total: 0 };
     const max = Math.max(...v), modas = v.map((x, i) => (x === max ? i : -1)).filter((i) => i >= 0);
     const suma = v.reduce((s, x, i) => s + x * NUMS[i], 0), media = suma / total;
-    // Mediana: la prenda del medio (o las dos del medio) al ponerlas en fila de menor a mayor talla.
+    // Mediana: el par del medio (o los dos del medio) al ponerlos en fila de menor a mayor talla.
     const en = (k) => { let acc = 0; for (let i = 0; i < v.length; i++) { acc += v[i]; if (k <= acc) return i; } return v.length - 1; };
     const a = total % 2 ? en((total + 1) / 2) : en(total / 2), b = total % 2 ? a : en(total / 2 + 1);
     const mediana = (NUMS[a] + NUMS[b]) / 2;
@@ -159,7 +159,7 @@
   let geo = null;
   function medir() {
     const ancho = $('grafico').clientWidth, alto = ancho < 520 ? 300 : 360;
-    const m = { izq: 40, der: 12, arr: 40, aba: 62 };
+    const m = { izq: 40, der: 12, arr: 40, aba: 46 };
     geo = { ancho, alto, m, pw: ancho - m.izq - m.der, ph: alto - m.arr - m.aba };
   }
   const y = (x) => geo.m.arr + geo.ph * (1 - Math.min(x, TOPE) / TOPE);
@@ -174,12 +174,12 @@
       s += `<line x1="${m.izq}" x2="${ancho - m.der}" y1="${y(t)}" y2="${y(t)}" stroke="${t ? C.linea : C.tinta}" stroke-width="${t ? 1 : 3}"/>`;
       s += `<text x="${m.izq - 8}" y="${y(t) + 4}" text-anchor="end" font-size="12" fill="${C.gris}">${t}</text>`;
     }
-    s += `<text x="${m.izq - 8}" y="${m.arr - 22}" text-anchor="end" font-size="11" fill="${C.gris}">prendas</text>`;
+    s += `<text x="${m.izq - 8}" y="${m.arr - 22}" text-anchor="end" font-size="11" fill="${C.gris}">pares</text>`;
 
     TALLAS.forEach((t, i) => {
       const x = cx(i) - bw / 2, top = y(v[i]), h = base - top, esModa = e.total && e.modas.includes(i);
       const activa = arrastrando && arrastrando.dedo && arrastrando.i === i;
-      s += `<g class="barra" data-i="${i}" tabindex="0" role="slider" aria-label="Ventas de la talla ${t}" aria-valuemin="0" aria-valuemax="${TOPE}" aria-valuenow="${v[i]}" aria-valuetext="${v[i]} prendas">`;
+      s += `<g class="barra" data-i="${i}" tabindex="0" role="slider" aria-label="Ventas de la talla ${t}" aria-valuemin="0" aria-valuemax="${TOPE}" aria-valuenow="${v[i]}" aria-valuetext="${v[i]} pares">`;
       s += `<rect class="hit" data-i="${i}" x="${cx(i) - hueco / 2}" y="${m.arr - 10}" width="${hueco}" height="${ph + 10}" fill="transparent"/>`;
       if (h > 0) {
         const rr = Math.min(10, h);
@@ -188,7 +188,6 @@
       cifras += `<text x="${cx(i)}" y="${top - 8}" text-anchor="middle" font-size="14" font-weight="800" fill="${C.tinta}" stroke="${C.blanco}" stroke-width="3" paint-order="stroke" pointer-events="none">${v[i]}</text>`;
       if (esModa) cifras += `<path d="M${cx(i) - 13} ${top - 38} l4 -13 l9 8 l9 -8 l4 13 z" fill="${C.amarillo}" stroke="${C.tinta}" stroke-width="2.5" stroke-linejoin="round" pointer-events="none"/>`;
       s += `<text x="${cx(i)}" y="${base + 24}" text-anchor="middle" font-size="18" font-weight="800" fill="${C.tinta}" pointer-events="none">${t}</text>`;
-      s += `<text x="${cx(i)}" y="${base + 44}" text-anchor="middle" font-size="13" fill="${C.gris}" pointer-events="none">${NUMS[i]}</text>`;
       s += `</g>`;
     });
 
@@ -224,7 +223,7 @@
   function textos(e) {
     if (!e.total) {
       ['v-moda', 'v-media', 'v-mediana'].forEach((id) => { $(id).textContent = '—'; });
-      $('v-total').textContent = '0 prendas';
+      $('v-total').textContent = '0 pares';
       ['c-moda', 'c-media', 'c-mediana'].forEach((id) => { $(id).textContent = 'No se ha vendido nada: sube alguna barra.'; });
       $('v-comentario').textContent = 'Sin ventas no hay nada que resumir. Sube alguna barra.';
       return;
@@ -232,18 +231,18 @@
     const nombre = (i) => TALLAS[i];
     $('e-moda').textContent = e.modas.length > 1 ? 'Modas' : 'Moda';
     $('v-moda').textContent = lista(e.modas.map(nombre));
-    $('v-media').textContent = num(e.media, 1) + ' → ' + nombre(tallaCerca(e.media));
-    $('v-mediana').textContent = num(e.mediana, e.mediana % 1 ? 1 : 0) + (e.a === e.b ? ' → ' + nombre(e.a) : ' → entre ' + nombre(e.a) + ' y ' + nombre(e.b));
-    $('v-total').textContent = `${e.total} prendas`;
+    $('v-media').textContent = num(e.media, 1);
+    $('v-mediana').textContent = num(e.mediana, e.mediana % 1 ? 1 : 0);
+    $('v-total').textContent = `${e.total} pares`;
 
     $('c-moda').textContent = e.modas.length > 1
       ? `Hay un empate: ${lista(e.modas.map((i) => `${nombre(i)} (${v[i]})`))} venden lo mismo. Son ${e.modas.length} modas.`
-      : `La que más vende es la ${nombre(e.modas[0])}: ${v[e.modas[0]]} de ${e.total} prendas.`;
+      : `La que más vende es la talla ${nombre(e.modas[0])}: ${v[e.modas[0]]} de ${e.total} pares.`;
     $('c-media').textContent = `(${v.map((x, i) => `${x} × ${NUMS[i]}`).join(' + ')}) ÷ ${e.total} = ${num(e.suma, 0)} ÷ ${e.total} = ${num(e.media, 1)}`;
-    const k = e.total % 2 ? `la prenda ${(e.total + 1) / 2}.ª` : `las prendas ${e.total / 2}.ª y ${e.total / 2 + 1}.ª`;
+    const k = e.total % 2 ? `el par ${(e.total + 1) / 2}.º` : `los pares ${e.total / 2}.º y ${e.total / 2 + 1}.º`;
     $('c-mediana').textContent = e.a === e.b
-      ? `Hay ${e.total} prendas: ${k} es de la talla ${nombre(e.a)} (${NUMS[e.a]}). Mediana: ${NUMS[e.a]}.`
-      : `Hay ${e.total} prendas: ${k} son de tallas distintas, ${nombre(e.a)} (${NUMS[e.a]}) y ${nombre(e.b)} (${NUMS[e.b]}). Se hace su media: ${num(e.mediana, 1)}.`;
+      ? `Hay ${e.total} pares: ${k} ${e.total % 2 ? 'es' : 'son'} de la talla ${nombre(e.a)}. Mediana: ${NUMS[e.a]}.`
+      : `Hay ${e.total} pares: ${k} son de tallas distintas, la ${nombre(e.a)} y la ${nombre(e.b)}. Se hace su media: ${num(e.mediana, 1)}.`;
 
     $('v-comentario').textContent = comentario(e);
   }
@@ -251,11 +250,11 @@
   function comentario(e) {
     const t = tallaCerca(e.media), parte = v[t] / e.total;
     const pct = num(parte * 100, 1) + ' %';
-    if (e.modas.length > 1 && e.jorobas.length >= 2) return `Hay ${e.modas.length} modas y ${e.jorobas.length} jorobas. La talla más cercana a la media (${TALLAS[t]}) vende ${v[t]} de ${e.total} (${pct}): el centro cae en el valle.`;
-    if (e.modas.length > 1) return `Empate en lo más alto: ${lista(e.modas.map((i) => TALLAS[i]))} venden lo mismo (${e.max}). Con empate no hay una sola moda.`;
-    if (e.jorobas.length >= 2) return `Una sola moda (${TALLAS[e.modas[0]]}), pero el gráfico tiene ${e.jorobas.length} jorobas: aun sin empate, dos picos son una pista de que mezclas dos grupos. La talla de la media (${TALLAS[t]}) vende ${pct} de las prendas.`;
-    if (e.modas[0] === t) return `Una sola joroba: la moda (${TALLAS[e.modas[0]]}) y la talla de la media coinciden, y vende ${pct} de las prendas. Aquí el centro sí cae donde está la gente. Ahora separa en dos grupos: baja la barra del medio.`;
-    return `La moda es la ${TALLAS[e.modas[0]]} y la media cae en la ${TALLAS[t]}. Con la forma tan descentrada, cada medida cuenta una cosa distinta. Mira el gráfico antes de fiarte de un solo número.`;
+    if (e.modas.length > 1 && e.jorobas.length >= 2) return `Hay ${e.modas.length} modas y ${e.jorobas.length} jorobas. La talla más cercana a la media (${TALLAS[t]}) vende ${v[t]} de ${e.total} pares (${pct}): el centro cae en el valle.`;
+    if (e.modas.length > 1) return `Empate en lo más alto: las tallas ${lista(e.modas.map((i) => TALLAS[i]))} venden lo mismo (${e.max} pares). Con empate no hay una sola moda.`;
+    if (e.jorobas.length >= 2) return `Una sola moda (la talla ${TALLAS[e.modas[0]]}), pero el gráfico tiene ${e.jorobas.length} jorobas: aun sin empate, dos picos son una pista de que mezclas dos grupos. La talla más cercana a la media (${TALLAS[t]}) vende ${pct} de los pares.`;
+    if (e.modas[0] === t) return `Una sola joroba: la moda (talla ${TALLAS[e.modas[0]]}) y la talla de la media coinciden, y vende ${pct} de los pares. Aquí el centro sí cae donde está la gente. Ahora separa en dos grupos: baja la barra del medio.`;
+    return `La moda es la talla ${TALLAS[e.modas[0]]} y la media cae cerca de la ${TALLAS[t]}. Con la forma tan descentrada, cada medida cuenta una cosa distinta. Mira el gráfico antes de fiarte de un solo número.`;
   }
 
   // ---------- interacción ----------
