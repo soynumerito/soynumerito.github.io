@@ -160,7 +160,7 @@
   function medir() {
     const ancho = $('grafico').clientWidth;
     const alto = ancho < 520 ? 300 : 360;
-    const m = { izq: 44, der: 8, arr: 34, aba: 46 };
+    const m = { izq: 44, der: 8, arr: 52, aba: 46 };
     geo = { ancho, alto, m, pw: ancho - m.izq - m.der, ph: alto - m.arr - m.aba };
   }
   const y = (v) => geo.m.arr + geo.ph * (1 - Math.min(v, TOPE) / TOPE);
@@ -178,7 +178,7 @@
       s += `<line x1="${m.izq}" x2="${ancho - m.der}" y1="${y(v)}" y2="${y(v)}" stroke="${v ? C.linea : C.tinta}" stroke-width="${v ? 1 : 3}"/>`;
       s += `<text x="${m.izq - 8}" y="${y(v) + 4}" text-anchor="end" font-size="12" fill="${C.gris}">${v ? v / 1000 + 'k' : '0'}</text>`;
     }
-    s += `<text x="${m.izq - 8}" y="${m.arr - 18}" text-anchor="end" font-size="11" fill="${C.gris}">€/mes</text>`;
+    s += `<text x="${m.izq - 8}" y="${m.arr - 8}" text-anchor="end" font-size="11" fill="${C.gris}">€/mes</text>`;
 
     lista.forEach((p, i) => {
       const cx = m.izq + hueco * (i + 0.5), x = cx - bw / 2, top = p.messi ? m.arr + 6 : y(p.v), h = base - top;
@@ -194,7 +194,7 @@
         // corte en zigzag: la barra real mediría cientos de veces más
         const zy = m.arr + 34;
         s += `<path d="M${x - 4} ${zy} l${bw / 4 + 1} -7 l${bw / 4 + 1} 7 l${bw / 4 + 1} -7 l${bw / 4 + 1} 7 v7 l${-(bw / 4 + 1)} -7 l${-(bw / 4 + 1)} 7 l${-(bw / 4 + 1)} -7 l${-(bw / 4 + 1)} 7 z" fill="${C.blanco}" stroke="none"/>`;
-        s += `<text x="${Math.min(cx, ancho - m.der - 2)}" y="${m.arr - 8}" text-anchor="end" font-size="13" font-weight="800" fill="${C.coral}">5.000.000 € ↑</text>`;
+        s += `<text x="${Math.min(cx, ancho - m.der - 2)}" y="${m.arr - 28}" text-anchor="end" font-size="13" font-weight="800" fill="${C.coral}">5.000.000 € ↑</text>`;
       } else if (activa) {
         const t = eur(p.v), tw = t.length * 8 + 16, tx = Math.max(m.izq, Math.min(ancho - m.der - tw, cx - tw / 2));
         cifras += `<rect x="${tx}" y="${top - 34}" width="${tw}" height="24" rx="12" fill="${C.tinta}"/><text x="${tx + tw / 2}" y="${top - 17}" text-anchor="middle" font-size="13" font-weight="800" fill="${C.blanco}">${t}</text>`;
@@ -215,8 +215,8 @@
       if (v > TOPE) {
         const txt = '↑ media ' + eur(v);
         return `<line x1="${m.izq}" x2="${ancho - m.der}" y1="${m.arr}" y2="${m.arr}" stroke="${color}" stroke-width="4" stroke-dasharray="10 6"/>` +
-          `<rect x="${m.izq}" y="${m.arr - 28}" width="${txt.length * 7.4 + 18}" height="22" rx="11" fill="${color}" stroke="${C.tinta}" stroke-width="2"/>` +
-          `<text x="${m.izq + 9}" y="${m.arr - 12}" font-size="13" font-weight="800" fill="${C.tinta}">${txt}</text>`;
+          `<rect x="${m.izq}" y="${m.arr - 44}" width="${txt.length * 7.4 + 18}" height="22" rx="11" fill="${color}" stroke="${C.tinta}" stroke-width="2"/>` +
+          `<text x="${m.izq + 9}" y="${m.arr - 28}" font-size="13" font-weight="800" fill="${C.tinta}">${txt}</text>`;
       }
       const ly = y(v);
       return `<line x1="${m.izq}" x2="${ancho - m.der}" y1="${ly}" y2="${ly}" stroke="${C.tinta}" stroke-width="7" stroke-linecap="round" pointer-events="none"${discontinua ? ' stroke-dasharray="14 8"' : ''}/>` +
