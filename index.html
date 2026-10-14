@@ -3,78 +3,124 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Soy Numerito · Simuladores</title>
-<meta name="description" content="Simuladores gratis de Soy Numerito para jugar con los ejemplos de los vídeos. Estadística que se entiende.">
+<title>Soy Numerito · Estadística que se entiende</title>
+<meta name="description" content="Cada semana, un concepto de estadística explicado con ejemplos reales y animaciones, y un simulador gratis para jugar con los números.">
+<meta property="og:title" content="Soy Numerito · Estadística que se entiende">
+<meta property="og:description" content="Cada semana, un concepto de estadística explicado con ejemplos reales y animaciones, y un simulador gratis para jugar con los números.">
+<meta property="og:url" content="https://soynumerito.com/">
+<meta property="og:image" content="https://soynumerito.com/mini_ep1.jpg">
 <link rel="stylesheet" href="estilo.css">
-<style>
-  .portada { display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: end; }
-  .portada svg { width: clamp(90px, 18vw, 150px); height: auto; }
-  .simuladores { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 22px; margin-top: 8px; }
-  .sim { display: grid; gap: 10px; background: var(--blanco); border: var(--borde); border-radius: 20px; box-shadow: var(--sombra);
-    padding: 18px; text-decoration: none; transition: transform .1s, box-shadow .1s; min-width: 0; }
-  .sim:hover { color: var(--tinta); transform: translate(-2px, -2px); box-shadow: 8px 8px 0 var(--tinta); }
-  .sim .ep { font-size: 13px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--gris); }
-  .sim h2 { margin: 0; }
-  .sim p { margin: 0; }
-  .sim .ir { font-weight: 800; color: var(--azul); }
-  .redes { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
-  .redes a { text-decoration: none; }
-</style>
 </head>
 <body>
-<div class="pagina">
-  <header class="cabecera">
-    <span class="logo">
-      <svg viewBox="0 0 220 300" aria-hidden="true"><path d="M70 40 Q118 4 140 18 Q156 28 156 60 L156 228 L190 228 Q206 228 206 246 L206 262 Q206 280 188 280 L46 280 Q28 280 28 262 L28 246 Q28 228 46 228 L82 228 L82 96 Q66 104 52 100 Q34 94 36 76 Q38 58 70 40 Z" fill="#FFD23F" stroke="#141414" stroke-width="14" stroke-linejoin="round"/></svg>
-      soy numerito
-    </span>
-    <span class="lema">Estadística que se entiende</span>
-  </header>
-
-  <div class="portada">
-    <div>
-      <h1>Simuladores</h1>
-      <p class="entradilla">Los ejemplos de los vídeos, para que juegues con ellos. Cambia los números y mira qué pasa.</p>
+<a class="saltar" href="#contenido">Saltar al contenido</a>
+<header class="sitio-cabecera">
+  <div class="ancho">
+    <a class="logo" href="./"><svg viewBox="0 0 220 300" aria-hidden="true"><path d="M70 40 Q118 4 140 18 Q156 28 156 60 L156 228 L190 228 Q206 228 206 246 L206 262 Q206 280 188 280 L46 280 Q28 280 28 262 L28 246 Q28 228 46 228 L82 228 L82 96 Q66 104 52 100 Q34 94 36 76 Q38 58 70 40 Z" fill="#FFD23F" stroke="#141414" stroke-width="14" stroke-linejoin="round"/></svg>soy numerito</a>
+    <nav class="menu" aria-label="Principal">
+      <a href="./#episodios">Episodios</a>
+      <a href="./#simuladores">Simuladores</a>
+      <a class="boton coral" href="./#apoyar">Invítame a un café</a>
+    </nav>
+  </div>
+</header>
+<main id="contenido">
+<section class="ancho hero">
+  <div class="hero-texto">
+    <span class="saludo"><svg viewBox="0 0 220 300" aria-hidden="true"><path d="M70 40 Q118 4 140 18 Q156 28 156 60 L156 228 L190 228 Q206 228 206 246 L206 262 Q206 280 188 280 L46 280 Q28 280 28 262 L28 246 Q28 228 46 228 L82 228 L82 96 Q66 104 52 100 Q34 94 36 76 Q38 58 70 40 Z" fill="#FFD23F" stroke="#141414" stroke-width="9" stroke-linejoin="round"/><path d="M86 136 Q102 120 118 136" fill="none" stroke="#141414" stroke-width="8" stroke-linecap="round"/><ellipse cx="140" cy="132" rx="15" ry="19" fill="#fff" stroke="#141414" stroke-width="5"/><circle cx="144" cy="136" r="8" fill="#141414"/><ellipse cx="94" cy="166" rx="9" ry="6" fill="#FF8A8A"/><ellipse cx="150" cy="166" rx="9" ry="6" fill="#FF8A8A"/><path d="M106 162 Q124 184 142 160" fill="none" stroke="#141414" stroke-width="6" stroke-linecap="round"/></svg>Hola, soy Numerito.</span>
+    <h1>Estadística que se <span class="subrayado">entiende</span></h1>
+    <p>Cada semana te explico un concepto con ejemplos reales y animaciones, y te dejo un simulador para jugar con los números. Desde cero, sin fórmulas que asusten.</p>
+    <div class="botones">
+      <a class="boton negro grande" href="ep1">Empieza por el episodio 1</a>
+      <a class="boton grande" href="https://www.youtube.com/@soynumerito">Suscríbete en YouTube</a>
     </div>
-    <svg viewBox="0 0 220 300" aria-hidden="true">
-      <path d="M70 40 Q118 4 140 18 Q156 28 156 60 L156 228 L190 228 Q206 228 206 246 L206 262 Q206 280 188 280 L46 280 Q28 280 28 262 L28 246 Q28 228 46 228 L82 228 L82 96 Q66 104 52 100 Q34 94 36 76 Q38 58 70 40 Z" fill="#FFD23F" stroke="#141414" stroke-width="7" stroke-linejoin="round"/>
-      <path d="M86 136 Q102 120 118 136" fill="none" stroke="#141414" stroke-width="7" stroke-linecap="round"/>
-      <ellipse cx="140" cy="132" rx="15" ry="19" fill="#fff" stroke="#141414" stroke-width="5"/><circle cx="144" cy="136" r="8" fill="#141414"/>
-      <ellipse cx="94" cy="166" rx="9" ry="6" fill="#FF8A8A"/><ellipse cx="150" cy="166" rx="9" ry="6" fill="#FF8A8A"/>
-      <path d="M106 162 Q124 184 142 160" fill="none" stroke="#141414" stroke-width="5" stroke-linecap="round"/>
-    </svg>
   </div>
-
-  <div class="simuladores">
-    <a class="sim" href="bar">
-      <span class="ep">Episodio 1 · Media vs mediana</span>
-      <h2>El bar de Messi</h2>
-      <p>Mete a Messi en un bar y mira cómo se dispara la media mientras la mediana casi no se mueve.</p>
-      <span class="ir">Abrir el simulador →</span>
-    </a>
-    <a class="sim" href="pais">
-      <span class="ep">Episodio 2 · Salario medio y mediano</span>
-      <h2>Fabrica tu país</h2>
-      <p>Sube solo los sueldos de arriba o solo los de abajo de un pueblo inventado y mira qué pasa con el titular «el salario medio sube».</p>
-      <span class="ir">Abrir el simulador →</span>
-    </a>
-    <a class="sim" href="tallas">
-      <span class="ep">Episodio 3 · La moda</span>
-      <h2>¿Existe la talla normal?</h2>
-      <p>Sube y baja las ventas de cada talla de zapatilla de una tienda y mira aparecer y desaparecer las modas, y dónde cae la media.</p>
-      <span class="ir">Abrir el simulador →</span>
-    </a>
+  <div class="hero-tarjeta">
+    <article class="tarjeta">
+      <a class="mini" href="ep1" aria-label="Ver el episodio 1"><img src="mini_ep1.jpg" alt="" loading="lazy"></a>
+      <div class="tarjeta-cuerpo">
+        <span><span class="etiqueta">Nuevo · Episodio 1</span> <span class="antetitulo">Se estrena el 12 de noviembre</span></span>
+        <span class="tarjeta-titulo">Si Messi entra en un bar, ¿todos se hacen millonarios?</span>
+        <div class="enlaces"><a href="ep1">Ver el episodio</a><a href="bar">Jugar con el simulador →</a></div>
+      </div>
+    </article>
   </div>
+</section>
 
-  <div class="redes">
-    <a class="boton" href="https://www.youtube.com/@soynumerito">YouTube</a>
-    <a class="boton" href="https://www.tiktok.com/@soynumerito">TikTok</a>
-    <a class="boton" href="https://www.instagram.com/soynumerito">Instagram</a>
+<section id="simuladores" class="franja blanca">
+  <div class="ancho seccion">
+    <div class="seccion-cabeza"><div><h2>Simuladores</h2><p>Los ejemplos de los vídeos, para que juegues con ellos. Gratis y sin registrarte.</p></div></div>
+    <div class="rejilla">
+      <a class="tarjeta sim-tarjeta" href="bar">
+        <span class="mini-grafico" aria-hidden="true"><span style="height:30%;background:#3A5BFF"></span><span style="height:26%;background:#3A5BFF"></span><span style="height:34%;background:#3A5BFF"></span><span style="height:28%;background:#3A5BFF"></span><span style="height:100%;background:#FF5A36"></span></span>
+        <span class="antetitulo">Ep. 1 · Media vs mediana</span>
+        <span class="tarjeta-titulo">El bar de Messi</span>
+        <span>Mete a Messi en el bar y mira cómo se dispara la media mientras la mediana casi no se mueve.</span>
+      </a>
+      <a class="tarjeta sim-tarjeta" href="pais">
+        <span class="mini-grafico" aria-hidden="true"><span style="height:20%;background:#22C27A"></span><span style="height:45%;background:#22C27A"></span><span style="height:70%;background:#22C27A"></span><span style="height:50%;background:#22C27A"></span><span style="height:30%;background:#22C27A"></span><span style="height:15%;background:#22C27A"></span><span style="height:8%;background:#22C27A"></span></span>
+        <span class="antetitulo">Ep. 2 · Salario medio y mediano</span>
+        <span class="tarjeta-titulo">Fabrica tu país</span>
+        <span>Sube solo los sueldos de arriba o solo los de abajo y mira qué pasa con el titular «el salario medio sube».</span>
+      </a>
+      <a class="tarjeta sim-tarjeta" href="tallas">
+        <span class="mini-grafico" aria-hidden="true"><span style="height:40%;background:#FFD23F"></span><span style="height:90%;background:#FFD23F"></span><span style="height:25%;background:#FFD23F"></span><span style="height:90%;background:#FFD23F"></span><span style="height:55%;background:#FFD23F"></span></span>
+        <span class="antetitulo">Ep. 3 · La moda</span>
+        <span class="tarjeta-titulo">¿Existe la talla normal?</span>
+        <span>Sube y baja las ventas de cada talla de zapatilla y mira aparecer y desaparecer las modas.</span>
+      </a>
+    </div>
   </div>
+</section>
 
-  <footer class="pie">
-    <span>Esta web no usa cookies ni guarda nada de lo que hagas.</span>
-  </footer>
-</div>
+<section id="episodios" class="ancho seccion">
+  <div class="seccion-cabeza"><h2>Todos los episodios</h2><span class="antetitulo">Temporada 1 · Describir datos</span></div>
+  <div class="rejilla">
+      <article class="tarjeta">
+        <a class="mini" href="ep1" tabindex="-1" aria-hidden="true"><img src="mini_ep1.jpg" alt="" loading="lazy"></a>
+        <div class="tarjeta-cuerpo">
+          <span class="antetitulo">Episodio 1 · se estrena el 12 de noviembre</span>
+          <span class="tarjeta-titulo">Media vs mediana: ¿si Messi entra en un bar, todos se hacen millonarios?</span>
+          <div class="enlaces"><a href="ep1">Ver episodio</a><a href="bar">Simulador</a></div>
+        </div>
+      </article>
+      <article class="tarjeta">
+        <a class="mini" href="ep2" tabindex="-1" aria-hidden="true"><span class="hueco" style="background:#22C27A">Salario medio o mediano: ¿cuál te dice lo que cobra la gente?</span></a>
+        <div class="tarjeta-cuerpo">
+          <span class="antetitulo">Episodio 2 · se estrena el 12 de noviembre</span>
+          <span class="tarjeta-titulo">Salario medio o mediano: ¿cuál te dice lo que cobra la gente?</span>
+          <div class="enlaces"><a href="ep2">Ver episodio</a><a href="pais">Simulador</a></div>
+        </div>
+      </article>
+      <article class="tarjeta">
+        <a class="mini" href="ep3" tabindex="-1" aria-hidden="true"><span class="hueco" style="background:#FFD23F">¿Existe la talla normal?</span></a>
+        <div class="tarjeta-cuerpo">
+          <span class="antetitulo">Episodio 3 · se estrena el 12 de noviembre</span>
+          <span class="tarjeta-titulo">Moda: ¿existe la talla normal? Qué es la moda en estadística</span>
+          <div class="enlaces"><a href="ep3">Ver episodio</a><a href="tallas">Simulador</a></div>
+        </div>
+      </article>
+  </div>
+</section>
+</main>
+<section id="apoyar" class="franja amarilla">
+  <div class="ancho apoyar">
+    <svg viewBox="0 0 220 300" aria-hidden="true"><path d="M70 40 Q118 4 140 18 Q156 28 156 60 L156 228 L190 228 Q206 228 206 246 L206 262 Q206 280 188 280 L46 280 Q28 280 28 262 L28 246 Q28 228 46 228 L82 228 L82 96 Q66 104 52 100 Q34 94 36 76 Q38 58 70 40 Z" fill="#FFFFFF" stroke="#141414" stroke-width="7" stroke-linejoin="round"/><path d="M86 136 Q102 120 118 136" fill="none" stroke="#141414" stroke-width="8" stroke-linecap="round"/><ellipse cx="140" cy="132" rx="15" ry="19" fill="#fff" stroke="#141414" stroke-width="5"/><circle cx="144" cy="136" r="8" fill="#141414"/><ellipse cx="94" cy="166" rx="9" ry="6" fill="#FF8A8A"/><ellipse cx="150" cy="166" rx="9" ry="6" fill="#FF8A8A"/><path d="M106 162 Q124 184 142 160" fill="none" stroke="#141414" stroke-width="6" stroke-linecap="round"/></svg>
+    <div>
+      <h2>¿Te ha servido? Invita a Numerito a un café</h2>
+      <p>Los vídeos y los simuladores son gratis y lo seguirán siendo. Si quieres ayudar a que salga uno nuevo cada semana, puedes hacerlo aquí.</p>
+    </div>
+    <span class="boton coral apagado grande">Ko‑fi, muy pronto</span>
+  </div>
+</section>
+<footer class="sitio-pie">
+  <div class="ancho">
+    <div class="redes">
+      <a class="boton" href="https://www.youtube.com/@soynumerito">YouTube</a>
+      <a class="boton" href="https://www.tiktok.com/@soynumerito">TikTok</a>
+      <a class="boton" href="https://www.instagram.com/soynumerito">Instagram</a>
+    </div>
+    <small>Estadística que se entiende. Esta web no usa cookies; los vídeos de YouTube solo se cargan si pulsas play.</small>
+  </div>
+</footer>
 </body>
 </html>

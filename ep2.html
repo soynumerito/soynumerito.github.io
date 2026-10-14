@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Salario medio o mediano: ¿cuál te dice lo que cobra la gente? · Soy Numerito</title>
+<meta name="description" content="Episodio 2: Por qué más de la mitad cobra menos que el salario medio, con los datos del INE.">
+<meta property="og:title" content="Salario medio o mediano: ¿cuál te dice lo que cobra la gente? · Soy Numerito">
+<meta property="og:description" content="Episodio 2: Por qué más de la mitad cobra menos que el salario medio, con los datos del INE.">
+<meta property="og:url" content="https://soynumerito.com/ep2">
+<link rel="stylesheet" href="estilo.css">
+<style>
+  .ventana { background: var(--blanco); border: var(--borde); border-radius: 20px; box-shadow: var(--sombra); overflow: hidden; }
+  .ventana-barra { background: var(--tinta); color: var(--papel); display: flex; align-items: center; gap: 8px; padding: 10px 16px; font-size: 15px; }
+  .ventana-barra i { width: 12px; height: 12px; border-radius: 50%; display: block; }
+  .ventana-barra span { margin-left: 8px; }
+  .ventana-cuerpo { padding: 18px 16px 16px; display: grid; gap: 14px; }
+
+  .cifras { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .chip { border: 3px solid var(--tinta); border-radius: 999px; padding: 4px 14px; font-weight: 800; font-size: 20px;
+    font-variant-numeric: tabular-nums; display: inline-flex; gap: 8px; align-items: baseline; }
+  .chip small { font-weight: 500; font-size: 15px; }
+  .chip.media { background: var(--amarillo); }
+  .chip.mediana { background: var(--verde); }
+  .bajo-media { color: var(--gris); font-size: 15px; }
+  .bajo-media b { color: var(--tinta); }
+
+  .grafico svg { display: block; width: 100%; overflow: visible; }
+  .grafico text { font-family: var(--letra); }
+
+  .controles { display: grid; gap: 12px; }
+  .fila { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .etiqueta { font-weight: 800; font-size: 15px; }
+  .deslizador { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .deslizador input[type=range] { flex: 1 1 220px; min-width: 160px; accent-color: var(--azul); height: 28px; }
+  .deslizador output { font-weight: 800; font-variant-numeric: tabular-nums; min-width: 4.5em; }
+  .pista { color: var(--gris); font-size: 14px; margin: 0; }
+
+  /* Periódico del pueblo */
+  .periodico { background: var(--blanco); border: var(--borde); border-radius: 16px; box-shadow: 4px 4px 0 var(--tinta); padding: 14px 16px; margin-top: 4px; }
+  .periodico .cab { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: 13px; font-weight: 800;
+    letter-spacing: .06em; text-transform: uppercase; color: var(--gris); border-bottom: 2px solid var(--tinta); padding-bottom: 6px; margin-bottom: 10px; }
+  .periodico .titular { font-size: clamp(22px, 4.5vw, 32px); line-height: 1.1; font-weight: 800; margin: 0 0 8px; text-wrap: balance; }
+  .periodico .pie-titular { margin: 0; color: var(--gris); font-size: 15px; }
+  .periodico .pie-titular b { color: var(--tinta); }
+
+  .comentario { display: flex; gap: 14px; align-items: flex-end; margin: 26px 0 0; }
+  .comentario svg { width: 64px; flex: none; }
+  .burbuja { position: relative; background: var(--blanco); border: var(--borde); border-radius: 18px; padding: 12px 16px;
+    box-shadow: 4px 4px 0 var(--tinta); font-size: 17px; min-width: 0; margin: 0; }
+  .burbuja::before { content: ''; position: absolute; left: -14px; bottom: 16px; border: 7px solid transparent; border-right: 10px solid var(--tinta); }
+
+  .calculo { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; margin-top: 30px; }
+  .calculo section { border-top: 4px solid var(--tinta); padding-top: 12px; min-width: 0; }
+  .calculo .marca { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--tinta); border-radius: 50%; vertical-align: -1px; margin-right: 6px; }
+  .calculo p { margin: 0 0 8px; }
+  .cuenta { font-variant-numeric: tabular-nums; background: var(--blanco); border: 2px solid var(--tinta); border-radius: 10px;
+    padding: 8px 12px; font-size: 15px; overflow-wrap: anywhere; }
+  @media (max-width: 520px) { .controles .boton { font-size: 14px; padding: 6px 12px; } }
+  .estrecho { max-width: 1028px; }
+</style>
+</head>
+<body>
+<a class="saltar" href="#contenido">Saltar al contenido</a>
+<header class="sitio-cabecera">
+  <div class="ancho">
+    <a class="logo" href="./"><svg viewBox="0 0 220 300" aria-hidden="true"><path d="M70 40 Q118 4 140 18 Q156 28 156 60 L156 228 L190 228 Q206 228 206 246 L206 262 Q206 280 188 280 L46 280 Q28 280 28 262 L28 246 Q28 228 46 228 L82 228 L82 96 Q66 104 52 100 Q34 94 36 76 Q38 58 70 40 Z" fill="#FFD23F" stroke="#141414" stroke-width="14" stroke-linejoin="round"/></svg>soy numerito</a>
+    <nav class="menu" aria-label="Principal">
+      <a href="./#episodios">Episodios</a>
+      <a href="./#simuladores">Simuladores</a>
+      <a class="boton coral" href="./#apoyar">Invítame a un café</a>
+    </nav>
+  </div>
+</header>
+<main id="contenido" class="ancho estrecho episodio">
+  <p class="migas"><a href="./#episodios">Episodios</a> / Temporada 1 / Episodio 2</p>
+  <h1>Salario medio o mediano: ¿cuál te dice lo que cobra la gente?</h1>
+  <div class="video"><div class="mini"><span class="hueco" style="background:#22C27A">Salario medio o mediano: ¿cuál te dice lo que cobra la gente?</span></div></div>
+  <p class="nota-video">El vídeo se estrena en YouTube el 12 de noviembre. Mientras, ya puedes jugar con el simulador.</p>
+  
+
+  <section style="margin-top:36px;display:grid;gap:16px">
+    <h2 class="titulo-seccion">El episodio en 3 ideas</h2>
+    <div class="ideas"><div class="idea"><span class="num" style="background:#FFD23F">1</span><b>La media está por encima</b><span>En España, el salario medio está unos cinco mil euros por encima del mediano, porque los sueldos tienen cola larga.</span></div><div class="idea"><span class="num" style="background:#22C27A">2</span><b>No es un fallo</b><span>Más de la mitad cobra menos que el salario medio. No es un error: es la forma de los datos.</span></div><div class="idea"><span class="num" style="background:#FF5A36">3</span><b>Mira también la mediana</b><span>Cuando leas que el salario medio sube, mira también qué hace la mediana.</span></div></div>
+  </section>
+
+  <section class="ahora-tu" aria-labelledby="t-sim">
+    <span class="antetitulo">Ahora tú</span>
+    <h2 id="t-sim">Juega con «Fabrica tu país»</h2>
+    <p class="entradilla">Un pueblo inventado de once vecinos. Elige a quién le subes el sueldo y mira qué pasa con la media, la mediana y el titular del periódico.</p>
+  <div class="ventana">
+    <div class="ventana-barra" aria-hidden="true"><i style="background:var(--coral)"></i><i style="background:var(--amarillo)"></i><i style="background:var(--verde)"></i><span>Simulador · El pueblo</span></div>
+    <div class="ventana-cuerpo">
+      <div class="cifras" aria-live="polite">
+        <span class="chip media"><small>Media</small><span id="v-media"></span></span>
+        <span class="chip mediana"><small>Mediana</small><span id="v-mediana"></span></span>
+        <span class="bajo-media" id="v-bajo"></span>
+      </div>
+
+      <div class="grafico" id="grafico">
+        <svg id="svg" role="img" aria-label="Sueldos anuales de los vecinos del pueblo"></svg>
+      </div>
+
+      <div class="controles">
+        <div class="fila" role="group" aria-label="A quién le subes el sueldo">
+          <span class="etiqueta">¿A quién le subes el sueldo?</span>
+          <button class="boton" type="button" data-quien="arriba" aria-pressed="true">A los 3 de arriba</button>
+          <button class="boton" type="button" data-quien="abajo" aria-pressed="false">A los 3 de abajo</button>
+          <button class="boton" type="button" data-quien="todos" aria-pressed="false">A todos por igual</button>
+        </div>
+        <div class="deslizador">
+          <label class="etiqueta" for="subida">Subida</label>
+          <input type="range" id="subida" min="0" max="30" step="1" value="0">
+          <output id="v-subida" for="subida">+0 %</output>
+        </div>
+        <div class="fila">
+          <button class="boton" id="b-empleos" type="button" aria-pressed="false">Llegan 2 empleos de 14.000 €</button>
+          <button class="boton" id="b-reset" type="button">Empezar de nuevo</button>
+        </div>
+        <p class="pista">Los sueldos son anuales brutos. Barra amarilla discontinua: la media. Línea verde: la mediana. La cara verde marca al vecino del medio. El contorno punteado es el sueldo de partida.</p>
+      </div>
+
+      <div class="periodico">
+        <div class="cab"><span>El periódico del pueblo</span><span>titular inventado</span></div>
+        <p class="titular" id="v-titular"></p>
+        <p class="pie-titular" id="v-pie"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="comentario">
+    <svg viewBox="0 0 220 300" aria-hidden="true">
+      <path d="M70 40 Q118 4 140 18 Q156 28 156 60 L156 228 L190 228 Q206 228 206 246 L206 262 Q206 280 188 280 L46 280 Q28 280 28 262 L28 246 Q28 228 46 228 L82 228 L82 96 Q66 104 52 100 Q34 94 36 76 Q38 58 70 40 Z" fill="#FFD23F" stroke="#141414" stroke-width="8" stroke-linejoin="round"/>
+      <ellipse cx="102" cy="132" rx="15" ry="19" fill="#fff" stroke="#141414" stroke-width="5"/><circle cx="106" cy="136" r="8" fill="#141414"/>
+      <ellipse cx="140" cy="132" rx="15" ry="19" fill="#fff" stroke="#141414" stroke-width="5"/><circle cx="144" cy="136" r="8" fill="#141414"/>
+      <ellipse cx="94" cy="166" rx="9" ry="6" fill="#FF8A8A"/><ellipse cx="150" cy="166" rx="9" ry="6" fill="#FF8A8A"/>
+      <path d="M110 164 Q122 180 134 164" fill="none" stroke="#141414" stroke-width="5" stroke-linecap="round"/>
+    </svg>
+    <p class="burbuja" id="v-comentario" aria-live="polite"></p>
+  </div>
+
+  <div class="calculo">
+    <section>
+      <h2><span class="marca" style="background:var(--amarillo)"></span>Cómo sale la media</h2>
+      <p>Juntas todos los sueldos en un bote y lo repartes a partes iguales.</p>
+      <div class="cuenta" id="c-media"></div>
+    </section>
+    <section>
+      <h2><span class="marca" style="background:var(--verde)"></span>Cómo sale la mediana</h2>
+      <p>Ordenas los sueldos de menor a mayor y miras el del medio.</p>
+      <div class="cuenta" id="c-mediana"></div>
+    </section>
+  </div>
+
+  
+    <p class="pie" style="border-top:0;margin-top:20px;padding-top:0"><span>El pueblo, los vecinos y los titulares son inventados. Los sueldos son cifras redondas para que las cuentas se sigan bien.</span><span><a href="pais">Abrir el simulador solo, a pantalla completa →</a></span></p>
+  </section>
+
+  <div class="siguiente">
+    <a class="tarjeta" href="ep3">
+      <span class="mini"><span class="hueco" style="background:#FFD23F">Ep. 3</span></span>
+      <span style="display:grid;gap:4px;min-width:0"><span class="antetitulo">Siguiente episodio →</span><span class="tarjeta-titulo">Moda: ¿existe la talla normal? Qué es la moda en estadística</span></span>
+    </a>
+    <div class="caja-cafe"><b>¿Te ha servido este episodio?</b><span class="boton coral apagado ">Ko‑fi, muy pronto</span></div>
+  </div>
+</main>
+<div style="height:48px"></div>
+<section id="apoyar" class="franja amarilla">
+  <div class="ancho apoyar">
+    <svg viewBox="0 0 220 300" aria-hidden="true"><path d="M70 40 Q118 4 140 18 Q156 28 156 60 L156 228 L190 228 Q206 228 206 246 L206 262 Q206 280 188 280 L46 280 Q28 280 28 262 L28 246 Q28 228 46 228 L82 228 L82 96 Q66 104 52 100 Q34 94 36 76 Q38 58 70 40 Z" fill="#FFFFFF" stroke="#141414" stroke-width="7" stroke-linejoin="round"/><path d="M86 136 Q102 120 118 136" fill="none" stroke="#141414" stroke-width="8" stroke-linecap="round"/><ellipse cx="140" cy="132" rx="15" ry="19" fill="#fff" stroke="#141414" stroke-width="5"/><circle cx="144" cy="136" r="8" fill="#141414"/><ellipse cx="94" cy="166" rx="9" ry="6" fill="#FF8A8A"/><ellipse cx="150" cy="166" rx="9" ry="6" fill="#FF8A8A"/><path d="M106 162 Q124 184 142 160" fill="none" stroke="#141414" stroke-width="6" stroke-linecap="round"/></svg>
+    <div>
+      <h2>¿Te ha servido? Invita a Numerito a un café</h2>
+      <p>Los vídeos y los simuladores son gratis y lo seguirán siendo. Si quieres ayudar a que salga uno nuevo cada semana, puedes hacerlo aquí.</p>
+    </div>
+    <span class="boton coral apagado grande">Ko‑fi, muy pronto</span>
+  </div>
+</section>
+<footer class="sitio-pie">
+  <div class="ancho">
+    <div class="redes">
+      <a class="boton" href="https://www.youtube.com/@soynumerito">YouTube</a>
+      <a class="boton" href="https://www.tiktok.com/@soynumerito">TikTok</a>
+      <a class="boton" href="https://www.instagram.com/soynumerito">Instagram</a>
+    </div>
+    <small>Estadística que se entiende. Esta web no usa cookies; los vídeos de YouTube solo se cargan si pulsas play.</small>
+  </div>
+</footer>
+<script>
+(() => {
+  // El pueblo del ep. 2: once vecinos, en euros al año. Media 28.000 €, mediana 22.000 €, 8 de 11 por debajo de la media.
+  const BASE = [15000, 16000, 17000, 18000, 20000, 22000, 25000, 27000, 32000, 40000, 76000];
+  const EMPLEOS = [14000, 14000];
+  const GRUPO = 3, TOPE = 100000;
+  const C = { tinta: '#141414', azul: '#3A5BFF', coral: '#FF5A36', amarillo: '#FFD23F', verde: '#22C27A', blanco: '#FFFFFF', linea: '#D9CFBB', gris: '#6E6658' };
+
+  let quien = 'arriba', pct = 0, empleos = false;
+  const $ = (id) => document.getElementById(id);
+  const svg = $('svg');
+  const num = (x, d = 0) => x.toLocaleString('de-DE', { minimumFractionDigits: d, maximumFractionDigits: d });
+  const eur = (x) => num(Math.round(x)) + ' €';
+  const pc = (x) => num(Math.abs(x), 1) + ' %';
+
+  // Sueldos tras la subida. Cada vecino lleva su sueldo de partida (v0) para dibujar el contorno punteado.
+  function pueblo(conSubida) {
+    const f = conSubida ? 1 + pct / 100 : 1;
+    const lista = BASE.map((v0, i) => {
+      const sube = quien === 'todos' || (quien === 'arriba' && i >= BASE.length - GRUPO) || (quien === 'abajo' && i < GRUPO);
+      return { id: i, v0, v: sube ? Math.round(v0 * f / 50) * 50 : v0, fabrica: i === BASE.length - 1 };
+    });
+    if (conSubida && empleos) EMPLEOS.forEach((v, k) => lista.push({ id: 'n' + k, v0: v, v, nuevo: true }));
+    return lista;
+  }
+
+  function stats(lista) {
+    const n = lista.length, orden = [...lista].sort((a, b) => a.v - b.v);
+    const suma = lista.reduce((s, p) => s + p.v, 0), media = suma / n;
+    const medio = n % 2 ? [orden[(n - 1) / 2]] : [orden[n / 2 - 1], orden[n / 2]];
+    const mediana = medio.reduce((s, p) => s + p.v, 0) / medio.length;
+    return { n, suma, media, mediana, medio, bajo: lista.filter((p) => p.v < media).length };
+  }
+
+  // ---------- gráfico ----------
+  let ancho = 0;
+  function dibujar() {
+    ancho = $('grafico').clientWidth;
+    const alto = ancho < 520 ? 300 : 360, m = { izq: 46, der: 8, arr: 34, aba: 44 };
+    const pw = ancho - m.izq - m.der, ph = alto - m.arr - m.aba, base = m.arr + ph;
+    const y = (v) => m.arr + ph * (1 - Math.min(v, TOPE) / TOPE);
+    const lista = pueblo(true).sort((a, b) => a.v - b.v || (a.nuevo ? -1 : 1));
+    const e = stats(lista), e0 = stats(pueblo(false));
+    const idsMedio = new Set(e.medio.map((p) => p.id));
+    const hueco = pw / lista.length, bw = Math.min(54, hueco * 0.66), r = Math.min(11, hueco * 0.3);
+    let s = '', cifras = '';
+
+    for (let v = 0; v <= TOPE; v += 20000) {
+      s += `<line x1="${m.izq}" x2="${ancho - m.der}" y1="${y(v)}" y2="${y(v)}" stroke="${v ? C.linea : C.tinta}" stroke-width="${v ? 1 : 3}"/>`;
+      s += `<text x="${m.izq - 8}" y="${y(v) + 4}" text-anchor="end" font-size="12" fill="${C.gris}">${v ? v / 1000 + 'k' : '0'}</text>`;
+    }
+    s += `<text x="${m.izq - 8}" y="${m.arr - 18}" text-anchor="end" font-size="11" fill="${C.gris}">€/año</text>`;
+
+    lista.forEach((p, i) => {
+      const cx = m.izq + hueco * (i + 0.5), x = cx - bw / 2, top = y(p.v), h = base - top, medio = idsMedio.has(p.id);
+      const rr = Math.min(10, bw / 2, h);
+      s += `<path d="M${x} ${base} V${top + rr} Q${x} ${top} ${x + rr} ${top} H${x + bw - rr} Q${x + bw} ${top} ${x + bw} ${top + rr} V${base}" fill="${p.nuevo ? C.coral : p.fabrica ? C.tinta : C.azul}" stroke="${C.tinta}" stroke-width="3"/>`;
+      if (p.v !== p.v0 && !p.nuevo) {
+        const t0 = y(p.v0);
+        s += `<rect x="${x}" y="${t0}" width="${bw}" height="${base - t0}" rx="4" fill="none" stroke="${C.tinta}" stroke-width="2" stroke-dasharray="5 4"/>`;
+      }
+      if (hueco > 26) cifras += `<text x="${cx}" y="${top - 7}" text-anchor="middle" font-size="${hueco > 44 ? 12 : 10}" font-weight="800" fill="${C.tinta}" stroke="${C.blanco}" stroke-width="3" paint-order="stroke">${num(p.v / 1000, p.v % 1000 ? 1 : 0)}k</text>`;
+      const fy = base + r + 8;
+      s += `<circle cx="${cx}" cy="${fy}" r="${r}" fill="${medio ? C.verde : C.blanco}" stroke="${C.tinta}" stroke-width="2.5"/>`;
+      s += `<circle cx="${cx - r * 0.35}" cy="${fy - r * 0.15}" r="${Math.max(1.2, r * 0.13)}" fill="${C.tinta}"/><circle cx="${cx + r * 0.35}" cy="${fy - r * 0.15}" r="${Math.max(1.2, r * 0.13)}" fill="${C.tinta}"/>`;
+      s += `<path d="M${cx - r * 0.4} ${fy + r * 0.25} Q${cx} ${fy + r * 0.6} ${cx + r * 0.4} ${fy + r * 0.25}" fill="none" stroke="${C.tinta}" stroke-width="1.8" stroke-linecap="round"/>`;
+      if (p.fabrica) s += `<text x="${cx}" y="${base + r * 2 + 22}" text-anchor="middle" font-size="11" font-weight="800" fill="${C.tinta}">fábrica</text>`;
+      if (p.nuevo) s += `<text x="${cx}" y="${base + r * 2 + 22}" text-anchor="middle" font-size="11" font-weight="800" fill="${C.coral}">nuevo</text>`;
+    });
+
+    const linea = (v, color, disc) => {
+      const ly = y(v), d = disc ? ' stroke-dasharray="14 8"' : '';
+      return `<line x1="${m.izq}" x2="${ancho - m.der}" y1="${ly}" y2="${ly}" stroke="${C.tinta}" stroke-width="7" stroke-linecap="round"${d}/>` +
+        `<line x1="${m.izq}" x2="${ancho - m.der}" y1="${ly}" y2="${ly}" stroke="${color}" stroke-width="4" stroke-linecap="round"${d}/>`;
+    };
+    s += linea(e.mediana, C.verde, false) + linea(e.media, C.amarillo, true) + cifras;
+
+    svg.setAttribute('viewBox', `0 0 ${ancho} ${alto}`);
+    svg.setAttribute('height', alto);
+    svg.innerHTML = s;
+    textos(e, e0, lista);
+  }
+
+  // ---------- textos ----------
+  function textos(e, e0, lista) {
+    $('v-media').textContent = eur(e.media);
+    $('v-mediana').textContent = eur(e.mediana);
+    $('v-bajo').innerHTML = `<b>${e.bajo} de ${e.n}</b> cobran menos que la media`;
+    $('v-subida').textContent = '+' + pct + ' %';
+    document.querySelectorAll('[data-quien]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.quien === quien));
+    $('b-empleos').setAttribute('aria-pressed', empleos);
+    $('b-empleos').textContent = empleos ? 'Quitar los 2 empleos' : 'Llegan 2 empleos de 14.000 €';
+
+    const dm = (e.media / e0.media - 1) * 100, dd = (e.mediana / e0.mediana - 1) * 100;
+    const cambio = (d) => (Math.abs(d) < 0.05 ? 'sin cambios' : (d > 0 ? 'sube un ' : 'baja un ') + pc(d));
+    const sinCambios = pct === 0 && !empleos;
+
+    $('v-titular').textContent = sinCambios ? 'El salario medio del pueblo: 28.000 €' : `El salario medio ${Math.abs(dm) < 0.05 ? 'no cambia' : (dm > 0 ? 'sube un ' : 'baja un ') + pc(dm)}`;
+    $('v-pie').innerHTML = sinCambios
+      ? 'Mueve el deslizador y mira cómo cambia el titular. Mientras tanto, la mediana: <b>22.000 €</b>.'
+      : `Y la mediana, el sueldo del vecino del medio: <b>${cambio(dd)}</b> (${eur(e0.mediana)} → ${eur(e.mediana)}). Cobran menos que la media: ${e.bajo} de ${e.n}.`;
+
+    $('c-media').textContent = `(${lista.map((p) => num(p.v / 1000, p.v % 1000 ? 1 : 0)).join(' + ')}) mil ÷ ${e.n} = ${eur(e.suma)} ÷ ${e.n} = ${eur(e.media)}`;
+    const pos = e.n % 2 ? `el ${(e.n + 1) / 2}.º` : `el ${e.n / 2}.º y el ${e.n / 2 + 1}.º`;
+    $('c-mediana').textContent = e.n % 2
+      ? `Hay ${e.n} vecinos (impar): el del medio es ${pos}, que cobra ${eur(e.mediana)}.`
+      : `Hay ${e.n} vecinos (par): en el medio hay dos, ${pos}. Se hace la media de sus sueldos: (${e.medio.map((p) => num(p.v)).join(' + ')}) ÷ 2 = ${eur(e.mediana)}.`;
+
+    $('v-comentario').textContent = comentario(e, dm, dd, sinCambios);
+  }
+
+  function comentario(e, dm, dd, sinCambios) {
+    if (sinCambios) return 'En este pueblo la media (28.000 €) queda por encima de la mediana (22.000 €) y 8 de 11 vecinos cobran menos que la media. Se parece a la foto de España. Prueba a subirle el sueldo a los 3 de arriba.';
+    if (empleos && pct === 0) return `Han llegado dos empleos de 14.000 €. Nadie cobra menos que antes, pero la media baja a ${eur(e.media)} y la mediana a ${eur(e.mediana)}, porque cambia quién queda en el centro.`;
+    if (Math.abs(dm) < 0.05) return 'Con esta subida la media no se mueve. Prueba a subir el deslizador.';
+    if (quien === 'arriba' && Math.abs(dd) < 0.05) return `La media sube un ${pc(dm)} y la mediana no se mueve: la subida se ha quedado arriba, y el vecino del medio no nota nada. Por eso, cuando leas «el salario medio sube», mira también la mediana.`;
+    if (quien === 'abajo' && Math.abs(dd) < 0.05) return `Subir los 3 sueldos más bajos mueve la media un ${pc(dm)} y la mediana nada: el vecino del medio sigue donde estaba. Cambia lo que cobran esos tres, y se nota en cuántos quedan por debajo de la media.`;
+    if (quien === 'todos') return `Si todos suben lo mismo, la media y la mediana suben lo mismo (${pc(dm)}). Es el único caso de los tres en que el titular cuenta lo que le pasa a casi todo el mundo.`;
+    return `La media ${dm > 0 ? 'sube' : 'baja'} un ${pc(dm)} y la mediana ${dd > 0 ? 'sube' : 'baja'} un ${pc(dd)}. Compara las dos cifras: te dicen cosas distintas de quién se ha beneficiado.`;
+  }
+
+  // ---------- controles ----------
+  document.querySelectorAll('[data-quien]').forEach((b) => { b.onclick = () => { quien = b.dataset.quien; dibujar(); }; });
+  $('subida').oninput = (ev) => { pct = +ev.target.value; dibujar(); };
+  $('b-empleos').onclick = () => { empleos = !empleos; dibujar(); };
+  $('b-reset').onclick = () => { quien = 'arriba'; pct = 0; empleos = false; $('subida').value = 0; dibujar(); };
+
+  new ResizeObserver(dibujar).observe($('grafico'));
+  dibujar();
+})();
+</script>
+<script>
+// El vídeo de YouTube no se carga hasta que alguien pulsa play (así no hay cookies antes).
+(() => {
+  const caja = document.querySelector('[data-video]');
+  if (!caja) return;
+  const poner = (seg) => {
+    const f = document.createElement('iframe');
+    f.src = 'https://www.youtube-nocookie.com/embed/' + caja.dataset.video + '?autoplay=1&rel=0' + (seg ? '&start=' + seg : '');
+    f.title = caja.getAttribute('aria-label');
+    f.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+    f.allowFullscreen = true;
+    const sitio = document.createElement('div');
+    sitio.className = 'mini';
+    sitio.appendChild(f);
+    (document.querySelector('.video .mini') || caja).replaceWith(sitio);
+  };
+  caja.addEventListener('click', () => poner(0));
+  document.querySelectorAll('[data-seg]').forEach((b) => b.addEventListener('click', () => {
+    poner(+b.dataset.seg);
+    document.querySelector('.video').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }));
+})();
+</script>
+</body>
+</html>

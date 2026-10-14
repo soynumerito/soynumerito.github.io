@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>¿Existe la talla normal? · Soy Numerito</title>
+<meta name="description" content="Episodio 3: La moda, contada con las ventas de zapatillas de la tienda de un club deportivo.">
+<meta property="og:title" content="¿Existe la talla normal? · Soy Numerito">
+<meta property="og:description" content="Episodio 3: La moda, contada con las ventas de zapatillas de la tienda de un club deportivo.">
+<meta property="og:url" content="https://soynumerito.com/ep3">
+<link rel="stylesheet" href="estilo.css">
+<style>
+  .ventana { background: var(--blanco); border: var(--borde); border-radius: 20px; box-shadow: var(--sombra); overflow: hidden; }
+  .ventana-barra { background: var(--tinta); color: var(--papel); display: flex; align-items: center; gap: 8px; padding: 10px 16px; font-size: 15px; }
+  .ventana-barra i { width: 12px; height: 12px; border-radius: 50%; display: block; }
+  .ventana-barra span { margin-left: 8px; }
+  .ventana-cuerpo { padding: 18px 16px 16px; display: grid; gap: 14px; }
+
+  .cifras { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .chip { border: 3px solid var(--tinta); border-radius: 999px; padding: 4px 14px; font-weight: 800; font-size: 20px;
+    font-variant-numeric: tabular-nums; display: inline-flex; gap: 8px; align-items: baseline; }
+  .chip small { font-weight: 500; font-size: 15px; }
+  .chip.moda { background: var(--coral); color: var(--blanco); }
+  .chip.media { background: var(--amarillo); }
+  .chip.mediana { background: var(--verde); }
+  .total { color: var(--gris); font-size: 15px; }
+
+  .grafico { position: relative; touch-action: none; user-select: none; -webkit-user-select: none; }
+  .grafico svg { display: block; width: 100%; overflow: visible; }
+  .grafico text { font-family: var(--letra); }
+  .hit { cursor: ns-resize; }
+  .barra:focus { outline: none; }
+  .barra:focus-visible .cuerpo { stroke: var(--azul); stroke-width: 5; }
+  .pista { color: var(--gris); font-size: 14px; margin: 0; }
+
+  .controles { display: flex; flex-wrap: wrap; gap: 10px; }
+  @media (max-width: 520px) { .controles .boton { font-size: 14px; padding: 6px 12px; } }
+
+  .comentario { display: flex; gap: 14px; align-items: flex-end; margin: 26px 0 0; }
+  .comentario svg { width: 64px; flex: none; }
+  .burbuja { position: relative; background: var(--blanco); border: var(--borde); border-radius: 18px; padding: 12px 16px;
+    box-shadow: 4px 4px 0 var(--tinta); font-size: 17px; min-width: 0; margin: 0; }
+  .burbuja::before { content: ''; position: absolute; left: -14px; bottom: 16px; border: 7px solid transparent; border-right: 10px solid var(--tinta); }
+
+  .calculo { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; margin-top: 30px; }
+  .calculo section { border-top: 4px solid var(--tinta); padding-top: 12px; min-width: 0; }
+  .calculo .marca { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--tinta); border-radius: 50%; vertical-align: -1px; margin-right: 6px; }
+  .calculo p { margin: 0 0 8px; }
+  .cuenta { font-variant-numeric: tabular-nums; background: var(--blanco); border: 2px solid var(--tinta); border-radius: 10px;
+    padding: 8px 12px; font-size: 15px; overflow-wrap: anywhere; }
+  .estrecho { max-width: 1028px; }
+</style>
+</head>
+<body>
+<a class="saltar" href="#contenido">Saltar al contenido</a>
+<header class="sitio-cabecera">
+  <div class="ancho">
+    <a class="logo" href="./"><svg viewBox="0 0 220 300" aria-hidden="true"><path d="M70 40 Q118 4 140 18 Q156 28 156 60 L156 228 L190 228 Q206 228 206 246 L206 262 Q206 280 188 280 L46 280 Q28 280 28 262 L28 246 Q28 228 46 228 L82 228 L82 96 Q66 104 52 100 Q34 94 36 76 Q38 58 70 40 Z" fill="#FFD23F" stroke="#141414" stroke-width="14" stroke-linejoin="round"/></svg>soy numerito</a>
+    <nav class="menu" aria-label="Principal">
+      <a href="./#episodios">Episodios</a>
+      <a href="./#simuladores">Simuladores</a>
+      <a class="boton coral" href="./#apoyar">Invítame a un café</a>
+    </nav>
+  </div>
+</header>
+<main id="contenido" class="ancho estrecho episodio">
+  <p class="migas"><a href="./#episodios">Episodios</a> / Temporada 1 / Episodio 3</p>
+  <h1>Moda: ¿existe la talla normal? Qué es la moda en estadística</h1>
+  <div class="video"><div class="mini"><span class="hueco" style="background:#FFD23F">¿Existe la talla normal?</span></div></div>
+  <p class="nota-video">El vídeo se estrena en YouTube el 12 de noviembre. Mientras, ya puedes jugar con el simulador.</p>
+  
+
+  <section style="margin-top:36px;display:grid;gap:16px">
+    <h2 class="titulo-seccion">El episodio en 3 ideas</h2>
+    <div class="ideas"><div class="idea"><span class="num" style="background:#FFD23F">1</span><b>El valor que más se repite</b><span>La moda se encuentra contando, sin sumar nada.</span></div><div class="idea"><span class="num" style="background:#22C27A">2</span><b>Funciona con categorías</b><span>De las tres, es la única que vale con categorías sin orden, como colores o marcas.</span></div><div class="idea"><span class="num" style="background:#FF5A36">3</span><b>Lo más frecuente no es la mayoría</b><span>Si el gráfico tiene dos jorobas, el centro puede caer donde casi no hay nadie. Mira siempre la forma de tus datos.</span></div></div>
+  </section>
+
+  <section class="ahora-tu" aria-labelledby="t-sim">
+    <span class="antetitulo">Ahora tú</span>
+    <h2 id="t-sim">Juega con «¿Existe la talla normal?»</h2>
+    <p class="entradilla">La tienda de zapatillas de un club deportivo inventado. Sube y baja las ventas de cada talla y mira dónde caen la moda, la media y la mediana.</p>
+  <div class="ventana">
+    <div class="ventana-barra" aria-hidden="true"><i style="background:var(--coral)"></i><i style="background:var(--amarillo)"></i><i style="background:var(--verde)"></i><span>Simulador · La tienda de zapatillas</span></div>
+    <div class="ventana-cuerpo">
+      <div class="cifras" aria-live="polite">
+        <span class="chip moda"><small id="e-moda">Moda</small><span id="v-moda"></span></span>
+        <span class="chip media"><small>Media</small><span id="v-media"></span></span>
+        <span class="chip mediana"><small>Mediana</small><span id="v-mediana"></span></span>
+        <span class="total" id="v-total"></span>
+      </div>
+      <div class="grafico" id="grafico">
+        <svg id="svg" role="group" aria-label="Pares de zapatillas vendidos por talla"></svg>
+      </div>
+      <p class="pista">Arrastra una barra arriba o abajo (en el móvil, la barra que mueves se pone amarilla). Con el teclado: tabulador para elegir talla y flechas para cambiar sus ventas. Corona: la moda. Línea amarilla discontinua: la media. Línea verde: la mediana. La media y la mediana se calculan con el número de cada talla (38 a 42).</p>
+      <div class="controles">
+        <button class="boton" id="b-reset" type="button">La tienda del vídeo</button>
+        <button class="boton" id="b-una" type="button">Una sola joroba</button>
+        <button class="boton" id="b-empate" type="button">Tres modas empatadas</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="comentario">
+    <svg viewBox="0 0 220 300" aria-hidden="true">
+      <path d="M70 40 Q118 4 140 18 Q156 28 156 60 L156 228 L190 228 Q206 228 206 246 L206 262 Q206 280 188 280 L46 280 Q28 280 28 262 L28 246 Q28 228 46 228 L82 228 L82 96 Q66 104 52 100 Q34 94 36 76 Q38 58 70 40 Z" fill="#FFD23F" stroke="#141414" stroke-width="8" stroke-linejoin="round"/>
+      <ellipse cx="102" cy="132" rx="15" ry="19" fill="#fff" stroke="#141414" stroke-width="5"/><circle cx="106" cy="136" r="8" fill="#141414"/>
+      <ellipse cx="140" cy="132" rx="15" ry="19" fill="#fff" stroke="#141414" stroke-width="5"/><circle cx="144" cy="136" r="8" fill="#141414"/>
+      <ellipse cx="94" cy="166" rx="9" ry="6" fill="#FF8A8A"/><ellipse cx="150" cy="166" rx="9" ry="6" fill="#FF8A8A"/>
+      <path d="M110 164 Q122 180 134 164" fill="none" stroke="#141414" stroke-width="5" stroke-linecap="round"/>
+    </svg>
+    <p class="burbuja" id="v-comentario" aria-live="polite"></p>
+  </div>
+
+  <div class="calculo">
+    <section>
+      <h2><span class="marca" style="background:var(--coral)"></span>Cómo sale la moda</h2>
+      <p>No se suma nada: se cuenta y te quedas con la talla que más se repite.</p>
+      <div class="cuenta" id="c-moda"></div>
+    </section>
+    <section>
+      <h2><span class="marca" style="background:var(--amarillo)"></span>Cómo sale la media</h2>
+      <p>Cada talla vale su número, y cada par vendido cuenta una vez.</p>
+      <div class="cuenta" id="c-media"></div>
+    </section>
+    <section>
+      <h2><span class="marca" style="background:var(--verde)"></span>Cómo sale la mediana</h2>
+      <p>Pones todos los pares en fila, del número más pequeño al más grande, y miras el del medio.</p>
+      <div class="cuenta" id="c-mediana"></div>
+    </section>
+  </div>
+
+  
+    <p class="pie" style="border-top:0;margin-top:20px;padding-top:0"><span>El club, la tienda y las ventas son inventados, con números redondos para que las cuentas se sigan bien.</span><span><a href="tallas">Abrir el simulador solo, a pantalla completa →</a></span></p>
+  </section>
+
+  <div class="siguiente">
+    <a class="tarjeta" href="./#episodios">
+      <span style="display:grid;gap:4px;min-width:0;padding:6px"><span class="antetitulo">Siguiente episodio</span><span class="tarjeta-titulo">Llega uno nuevo cada semana. Mira todos los episodios →</span></span>
+    </a>
+    <div class="caja-cafe"><b>¿Te ha servido este episodio?</b><span class="boton coral apagado ">Ko‑fi, muy pronto</span></div>
+  </div>
+</main>
+<div style="height:48px"></div>
+<section id="apoyar" class="franja amarilla">
+  <div class="ancho apoyar">
+    <svg viewBox="0 0 220 300" aria-hidden="true"><path d="M70 40 Q118 4 140 18 Q156 28 156 60 L156 228 L190 228 Q206 228 206 246 L206 262 Q206 280 188 280 L46 280 Q28 280 28 262 L28 246 Q28 228 46 228 L82 228 L82 96 Q66 104 52 100 Q34 94 36 76 Q38 58 70 40 Z" fill="#FFFFFF" stroke="#141414" stroke-width="7" stroke-linejoin="round"/><path d="M86 136 Q102 120 118 136" fill="none" stroke="#141414" stroke-width="8" stroke-linecap="round"/><ellipse cx="140" cy="132" rx="15" ry="19" fill="#fff" stroke="#141414" stroke-width="5"/><circle cx="144" cy="136" r="8" fill="#141414"/><ellipse cx="94" cy="166" rx="9" ry="6" fill="#FF8A8A"/><ellipse cx="150" cy="166" rx="9" ry="6" fill="#FF8A8A"/><path d="M106 162 Q124 184 142 160" fill="none" stroke="#141414" stroke-width="6" stroke-linecap="round"/></svg>
+    <div>
+      <h2>¿Te ha servido? Invita a Numerito a un café</h2>
+      <p>Los vídeos y los simuladores son gratis y lo seguirán siendo. Si quieres ayudar a que salga uno nuevo cada semana, puedes hacerlo aquí.</p>
+    </div>
+    <span class="boton coral apagado grande">Ko‑fi, muy pronto</span>
+  </div>
+</section>
+<footer class="sitio-pie">
+  <div class="ancho">
+    <div class="redes">
+      <a class="boton" href="https://www.youtube.com/@soynumerito">YouTube</a>
+      <a class="boton" href="https://www.tiktok.com/@soynumerito">TikTok</a>
+      <a class="boton" href="https://www.instagram.com/soynumerito">Instagram</a>
+    </div>
+    <small>Estadística que se entiende. Esta web no usa cookies; los vídeos de YouTube solo se cargan si pulsas play.</small>
+  </div>
+</footer>
+<script>
+(() => {
+  // La tienda del ep. 3: 300 pares en un mes. Media 40,1 · mediana 40 · modas 39 y 41 (90 cada una).
+  const TALLAS = ['38', '39', '40', '41', '42'], NUMS = [38, 39, 40, 41, 42];
+  const INICIO = [40, 90, 25, 90, 55];
+  const UNA_JOROBA = [20, 60, 110, 60, 20];
+  const EMPATE = [80, 40, 80, 40, 80];
+  const TOPE = 150, PASO = 5;
+  const C = { tinta: '#141414', azul: '#3A5BFF', coral: '#FF5A36', amarillo: '#FFD23F', verde: '#22C27A', blanco: '#FFFFFF', linea: '#D9CFBB', gris: '#6E6658' };
+
+  let v = [...INICIO], arrastrando = null, foco = null;
+  const $ = (id) => document.getElementById(id);
+  const svg = $('svg');
+  const num = (x, d = 1) => x.toLocaleString('de-DE', { minimumFractionDigits: d, maximumFractionDigits: d });
+  const lista = (xs) => xs.length < 2 ? xs.join('') : xs.slice(0, -1).join(', ') + ' y ' + xs[xs.length - 1];
+  const tallaCerca = (x) => NUMS.reduce((b, n, i) => (Math.abs(n - x) < Math.abs(NUMS[b] - x) ? i : b), 0);
+
+  function stats() {
+    const total = v.reduce((s, x) => s + x, 0);
+    if (!total) return { total: 0 };
+    const max = Math.max(...v), modas = v.map((x, i) => (x === max ? i : -1)).filter((i) => i >= 0);
+    const suma = v.reduce((s, x, i) => s + x * NUMS[i], 0), media = suma / total;
+    // Mediana: el par del medio (o los dos del medio) al ponerlos en fila de menor a mayor talla.
+    const en = (k) => { let acc = 0; for (let i = 0; i < v.length; i++) { acc += v[i]; if (k <= acc) return i; } return v.length - 1; };
+    const a = total % 2 ? en((total + 1) / 2) : en(total / 2), b = total % 2 ? a : en(total / 2 + 1);
+    const mediana = (NUMS[a] + NUMS[b]) / 2;
+    // Jorobas: tallas más altas que sus vecinas, con un valle claro entre ellas.
+    const picos = [];
+    v.forEach((x, i) => { if (x > 0 && (i === 0 || x > v[i - 1]) && (i === v.length - 1 || x >= v[i + 1])) picos.push(i); });
+    let jorobas = picos.length ? [picos[0]] : [];
+    for (let k = 1; k < picos.length; k++) {
+      const valle = Math.min(...v.slice(picos[k - 1], picos[k] + 1));
+      if (valle <= 0.75 * Math.min(v[picos[k - 1]], v[picos[k]])) jorobas.push(picos[k]);
+      else if (v[picos[k]] > v[jorobas[jorobas.length - 1]]) jorobas[jorobas.length - 1] = picos[k];
+    }
+    return { total, max, modas, suma, media, mediana, a, b, jorobas };
+  }
+
+  // ---------- gráfico ----------
+  let geo = null;
+  function medir() {
+    const ancho = $('grafico').clientWidth, alto = ancho < 520 ? 300 : 360;
+    const m = { izq: 40, der: 12, arr: 40, aba: 46 };
+    geo = { ancho, alto, m, pw: ancho - m.izq - m.der, ph: alto - m.arr - m.aba };
+  }
+  const y = (x) => geo.m.arr + geo.ph * (1 - Math.min(x, TOPE) / TOPE);
+
+  function dibujar() {
+    const { ancho, alto, m, pw, ph } = geo, e = stats(), base = m.arr + ph;
+    const hueco = pw / TALLAS.length, bw = Math.min(90, hueco * 0.62);
+    const cx = (i) => m.izq + hueco * (i + 0.5);
+    let s = '', cifras = '';
+
+    for (let t = 0; t <= TOPE; t += 50) {
+      s += `<line x1="${m.izq}" x2="${ancho - m.der}" y1="${y(t)}" y2="${y(t)}" stroke="${t ? C.linea : C.tinta}" stroke-width="${t ? 1 : 3}"/>`;
+      s += `<text x="${m.izq - 8}" y="${y(t) + 4}" text-anchor="end" font-size="12" fill="${C.gris}">${t}</text>`;
+    }
+    s += `<text x="${m.izq - 8}" y="${m.arr - 22}" text-anchor="end" font-size="11" fill="${C.gris}">pares</text>`;
+
+    TALLAS.forEach((t, i) => {
+      const x = cx(i) - bw / 2, top = y(v[i]), h = base - top, esModa = e.total && e.modas.includes(i);
+      const activa = arrastrando && arrastrando.dedo && arrastrando.i === i;
+      s += `<g class="barra" data-i="${i}" tabindex="0" role="slider" aria-label="Ventas de la talla ${t}" aria-valuemin="0" aria-valuemax="${TOPE}" aria-valuenow="${v[i]}" aria-valuetext="${v[i]} pares">`;
+      s += `<rect class="hit" data-i="${i}" x="${cx(i) - hueco / 2}" y="${m.arr - 10}" width="${hueco}" height="${ph + 10}" fill="transparent"/>`;
+      if (h > 0) {
+        const rr = Math.min(10, h);
+        s += `<path class="cuerpo" d="M${x} ${base} V${top + rr} Q${x} ${top} ${x + rr} ${top} H${x + bw - rr} Q${x + bw} ${top} ${x + bw} ${top + rr} V${base}" fill="${activa ? C.amarillo : esModa ? C.coral : C.azul}" stroke="${C.tinta}" stroke-width="${activa ? 4 : 3}" pointer-events="none"/>`;
+      }
+      cifras += `<text x="${cx(i)}" y="${top - 8}" text-anchor="middle" font-size="14" font-weight="800" fill="${C.tinta}" stroke="${C.blanco}" stroke-width="3" paint-order="stroke" pointer-events="none">${v[i]}</text>`;
+      if (esModa) cifras += `<path d="M${cx(i) - 13} ${top - 38} l4 -13 l9 8 l9 -8 l4 13 z" fill="${C.amarillo}" stroke="${C.tinta}" stroke-width="2.5" stroke-linejoin="round" pointer-events="none"/>`;
+      s += `<text x="${cx(i)}" y="${base + 24}" text-anchor="middle" font-size="18" font-weight="800" fill="${C.tinta}" pointer-events="none">${t}</text>`;
+      s += `</g>`;
+    });
+
+    if (e.total) {
+      // La media y la mediana viven sobre el eje de tallas: se colocan en horizontal según su número.
+      const px = (n) => cx(0) + ((n - NUMS[0]) / (NUMS[NUMS.length - 1] - NUMS[0])) * (cx(TALLAS.length - 1) - cx(0));
+      // lado: 0 centrada sobre la línea; -1 termina en la línea; 1 empieza en la línea (para que dos etiquetas no se pisen).
+      const marca = (n, color, disc, etiqueta, lado) => {
+        const mx = px(n), d = disc ? ' stroke-dasharray="10 6"' : '';
+        const tw = etiqueta.length * 7.2 + 16, ty = m.arr - 26;
+        const ini = lado < 0 ? mx - tw + 4 : lado > 0 ? mx - 4 : mx - tw / 2, tx = Math.max(m.izq, Math.min(ancho - m.der - tw, ini));
+        return `<line x1="${mx}" x2="${mx}" y1="${m.arr}" y2="${base}" stroke="${C.tinta}" stroke-width="7" stroke-linecap="round"${d} pointer-events="none"/>` +
+          `<line x1="${mx}" x2="${mx}" y1="${m.arr}" y2="${base}" stroke="${color}" stroke-width="4" stroke-linecap="round"${d} pointer-events="none"/>` +
+          `<rect x="${tx}" y="${ty}" width="${tw}" height="22" rx="11" fill="${color}" stroke="${C.tinta}" stroke-width="2" pointer-events="none"/>` +
+          `<text x="${tx + tw / 2}" y="${ty + 15.5}" text-anchor="middle" font-size="12.5" font-weight="800" fill="${C.tinta}" pointer-events="none">${etiqueta}</text>`;
+      };
+      // Si media y mediana casi coinciden, la etiqueta de la mediana cae a la izquierda y la de la media a la derecha.
+      const juntas = Math.abs(px(e.media) - px(e.mediana)) < 70;
+      const izq = px(e.mediana) <= px(e.media);
+      s += marca(e.mediana, C.verde, false, 'mediana ' + num(e.mediana, e.mediana % 1 ? 1 : 0), juntas ? (izq ? -1 : 1) : 0);
+      s += marca(e.media, C.amarillo, true, 'media ' + num(e.media, 1), juntas ? (izq ? 1 : -1) : 0);
+    }
+    s += cifras;
+
+    svg.setAttribute('viewBox', `0 0 ${ancho} ${alto}`);
+    svg.setAttribute('height', alto);
+    svg.innerHTML = s;
+    if (foco != null) { const g = svg.querySelector(`.barra[data-i="${foco}"]`); if (g) g.focus({ preventScroll: true }); }
+    textos(e);
+  }
+
+  // ---------- textos ----------
+  function textos(e) {
+    if (!e.total) {
+      ['v-moda', 'v-media', 'v-mediana'].forEach((id) => { $(id).textContent = '—'; });
+      $('v-total').textContent = '0 pares';
+      ['c-moda', 'c-media', 'c-mediana'].forEach((id) => { $(id).textContent = 'No se ha vendido nada: sube alguna barra.'; });
+      $('v-comentario').textContent = 'Sin ventas no hay nada que resumir. Sube alguna barra.';
+      return;
+    }
+    const nombre = (i) => TALLAS[i];
+    $('e-moda').textContent = e.modas.length > 1 ? 'Modas' : 'Moda';
+    $('v-moda').textContent = lista(e.modas.map(nombre));
+    $('v-media').textContent = num(e.media, 1);
+    $('v-mediana').textContent = num(e.mediana, e.mediana % 1 ? 1 : 0);
+    $('v-total').textContent = `${e.total} pares`;
+
+    $('c-moda').textContent = e.modas.length > 1
+      ? `Hay un empate: ${lista(e.modas.map((i) => `${nombre(i)} (${v[i]})`))} venden lo mismo. Son ${e.modas.length} modas.`
+      : `La que más vende es la talla ${nombre(e.modas[0])}: ${v[e.modas[0]]} de ${e.total} pares.`;
+    $('c-media').textContent = `(${v.map((x, i) => `${x} × ${NUMS[i]}`).join(' + ')}) ÷ ${e.total} = ${num(e.suma, 0)} ÷ ${e.total} = ${num(e.media, 1)}`;
+    const k = e.total % 2 ? `el par ${(e.total + 1) / 2}.º` : `los pares ${e.total / 2}.º y ${e.total / 2 + 1}.º`;
+    $('c-mediana').textContent = e.a === e.b
+      ? `Hay ${e.total} pares: ${k} ${e.total % 2 ? 'es' : 'son'} de la talla ${nombre(e.a)}. Mediana: ${NUMS[e.a]}.`
+      : `Hay ${e.total} pares: ${k} son de tallas distintas, la ${nombre(e.a)} y la ${nombre(e.b)}. Se hace su media: ${num(e.mediana, 1)}.`;
+
+    $('v-comentario').textContent = comentario(e);
+  }
+
+  function comentario(e) {
+    const t = tallaCerca(e.media), parte = v[t] / e.total;
+    const pct = num(parte * 100, 1) + ' %';
+    if (e.modas.length > 1 && e.jorobas.length >= 2) return `Hay ${e.modas.length} modas y ${e.jorobas.length} jorobas. La talla más cercana a la media (${TALLAS[t]}) vende ${v[t]} de ${e.total} pares (${pct}): el centro cae en el valle.`;
+    if (e.modas.length > 1) return `Empate en lo más alto: las tallas ${lista(e.modas.map((i) => TALLAS[i]))} venden lo mismo (${e.max} pares). Con empate no hay una sola moda.`;
+    if (e.jorobas.length >= 2) return `Una sola moda (la talla ${TALLAS[e.modas[0]]}), pero el gráfico tiene ${e.jorobas.length} jorobas: aun sin empate, dos picos son una pista de que mezclas dos grupos. La talla más cercana a la media (${TALLAS[t]}) vende ${pct} de los pares.`;
+    if (e.modas[0] === t) return `Una sola joroba: la moda (talla ${TALLAS[e.modas[0]]}) y la talla de la media coinciden, y vende ${pct} de los pares. Aquí el centro sí cae donde está la gente. Ahora separa en dos grupos: baja la barra del medio.`;
+    return `La moda es la talla ${TALLAS[e.modas[0]]} y la media cae cerca de la ${TALLAS[t]}. Con la forma tan descentrada, cada medida cuenta una cosa distinta. Mira el gráfico antes de fiarte de un solo número.`;
+  }
+
+  // ---------- interacción ----------
+  const valorEn = (clientY) => {
+    const caja = svg.getBoundingClientRect();
+    const py = (clientY - caja.top) * (geo.alto / caja.height);
+    const x = (1 - (py - geo.m.arr) / geo.ph) * TOPE;
+    return Math.max(0, Math.min(TOPE, Math.round(x / PASO) * PASO));
+  };
+  const poner = (i, x) => { if (v[i] !== x) { v[i] = x; dibujar(); } };
+
+  // Ratón: la barra salta a donde haces clic. Dedo: solo cuenta el arrastre, y la barra elegida se marca.
+  svg.addEventListener('pointerdown', (ev) => {
+    const hit = ev.target.closest('.hit');
+    if (!hit) return;
+    ev.preventDefault();
+    const i = +hit.dataset.i;
+    arrastrando = { i, y0: ev.clientY, v0: v[i], dedo: ev.pointerType !== 'mouse' };
+    foco = i;
+    svg.setPointerCapture(ev.pointerId);
+    if (arrastrando.dedo) dibujar(); else poner(i, valorEn(ev.clientY));
+  });
+  svg.addEventListener('pointermove', (ev) => {
+    if (!arrastrando) return;
+    if (!arrastrando.dedo) return poner(arrastrando.i, valorEn(ev.clientY));
+    const caja = svg.getBoundingClientRect();
+    const d = ((arrastrando.y0 - ev.clientY) * (geo.alto / caja.height) / geo.ph) * TOPE;
+    poner(arrastrando.i, Math.max(0, Math.min(TOPE, Math.round((arrastrando.v0 + d) / PASO) * PASO)));
+  });
+  const soltar = () => { const habia = arrastrando; arrastrando = null; if (habia && habia.dedo) dibujar(); };
+  svg.addEventListener('pointerup', soltar);
+  svg.addEventListener('pointercancel', soltar);
+
+  svg.addEventListener('focusin', (ev) => { const g = ev.target.closest('.barra'); if (g) foco = +g.dataset.i; });
+  svg.addEventListener('focusout', (ev) => { if (!svg.contains(ev.relatedTarget)) foco = null; });
+  svg.addEventListener('keydown', (ev) => {
+    const g = ev.target.closest('.barra');
+    if (!g) return;
+    const i = +g.dataset.i;
+    const pasos = { ArrowUp: PASO, ArrowRight: PASO, ArrowDown: -PASO, ArrowLeft: -PASO, PageUp: 25, PageDown: -25 };
+    let x = null;
+    if (ev.key in pasos) x = v[i] + pasos[ev.key];
+    if (ev.key === 'Home') x = 0;
+    if (ev.key === 'End') x = TOPE;
+    if (x == null) return;
+    ev.preventDefault();
+    poner(i, Math.max(0, Math.min(TOPE, x)));
+  });
+
+  const cargar = (datos) => { v = [...datos]; foco = null; dibujar(); };
+  $('b-reset').onclick = () => cargar(INICIO);
+  $('b-una').onclick = () => cargar(UNA_JOROBA);
+  $('b-empate').onclick = () => cargar(EMPATE);
+
+  new ResizeObserver(() => { medir(); dibujar(); }).observe($('grafico'));
+  medir(); dibujar();
+})();
+</script>
+<script>
+// El vídeo de YouTube no se carga hasta que alguien pulsa play (así no hay cookies antes).
+(() => {
+  const caja = document.querySelector('[data-video]');
+  if (!caja) return;
+  const poner = (seg) => {
+    const f = document.createElement('iframe');
+    f.src = 'https://www.youtube-nocookie.com/embed/' + caja.dataset.video + '?autoplay=1&rel=0' + (seg ? '&start=' + seg : '');
+    f.title = caja.getAttribute('aria-label');
+    f.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+    f.allowFullscreen = true;
+    const sitio = document.createElement('div');
+    sitio.className = 'mini';
+    sitio.appendChild(f);
+    (document.querySelector('.video .mini') || caja).replaceWith(sitio);
+  };
+  caja.addEventListener('click', () => poner(0));
+  document.querySelectorAll('[data-seg]').forEach((b) => b.addEventListener('click', () => {
+    poner(+b.dataset.seg);
+    document.querySelector('.video').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }));
+})();
+</script>
+</body>
+</html>
