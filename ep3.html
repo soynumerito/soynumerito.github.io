@@ -8,6 +8,7 @@
 <meta property="og:title" content="¿Existe la talla normal? · Soy Numerito">
 <meta property="og:description" content="Episodio 3: La moda, contada con las ventas de zapatillas de la tienda de un club deportivo.">
 <meta property="og:url" content="https://soynumerito.com/ep3">
+<meta property="og:image" content="https://soynumerito.com/mini_ep3.jpg">
 <link rel="stylesheet" href="estilo.css">
 <style>
   .ventana { background: var(--blanco); border: var(--borde); border-radius: 20px; box-shadow: var(--sombra); overflow: hidden; }
@@ -63,12 +64,12 @@
     </nav>
   </div>
 </header>
-<main id="contenido" class="ancho estrecho episodio">
+<main id="contenido" class="ancho estrecho episodio" data-publica="2026-10-22T18:10:00+02:00">
   <p class="migas"><a href="./#episodios">Episodios</a> / Temporada 1 / Episodio 3</p>
   <h1>Moda: ¿existe la talla normal? Qué es la moda en estadística</h1>
-  <div class="video"><div class="mini"><span class="hueco" style="background:#FFD23F">¿Existe la talla normal?</span></div></div>
-  <p class="nota-video">El vídeo se estrena en YouTube el 12 de noviembre. Mientras, ya puedes jugar con el simulador.</p>
-  
+  <div class="video"><div data-antes><div class="mini"><img src="mini_ep3.jpg" alt="" loading="lazy"></div></div><div data-despues hidden><button class="mini" type="button" data-video="gCvnboPLXqY" aria-label="Reproducir el vídeo: Moda: ¿existe la talla normal? Qué es la moda en estadística"><img src="mini_ep3.jpg" alt="" loading="lazy"><span class="play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 4 L20 12 L6 20 Z" fill="#FFFFFF" stroke="#141414" stroke-width="2" stroke-linejoin="round"/></svg></span></button></div></div>
+  <p class="nota-video"><span data-antes>El vídeo se estrena en YouTube el 22 de octubre. Mientras, ya puedes jugar con el simulador.</span><span data-despues hidden>El vídeo es de YouTube y solo se carga cuando pulsas play.</span></p>
+  <div data-despues hidden><ul class="capitulos" aria-label="Capítulos"><li><button type="button" data-seg="0"><b>0:00</b>¿Existe la talla normal?</button></li><li><button type="button" data-seg="26"><b>0:26</b>Lo que vas a ver hoy</button></li><li><button type="button" data-seg="42"><b>0:42</b>Las ventas de la tienda</button></li><li><button type="button" data-seg="96"><b>1:36</b>Qué es la moda</button></li><li><button type="button" data-seg="125"><b>2:05</b>Dos modas: distribución bimodal</button></li><li><button type="button" data-seg="186"><b>3:06</b>¿Te acuerdas del bar? La media cae en el valle</button></li><li><button type="button" data-seg="256"><b>4:16</b>Cuándo la moda es la única que vale</button></li><li><button type="button" data-seg="314"><b>5:14</b>Lo más frecuente no es la mayoría</button></li><li><button type="button" data-seg="367"><b>6:07</b>Resumen en 3 puntos</button></li><li><button type="button" data-seg="397"><b>6:37</b>Lo próximo: la media ponderada</button></li><li><button type="button" data-seg="423"><b>7:03</b>Cierre</button></li></ul></div>
 
   <section style="margin-top:36px;display:grid;gap:16px">
     <h2 class="titulo-seccion">El episodio en 3 ideas</h2>
@@ -355,6 +356,18 @@
 
   new ResizeObserver(() => { medir(); dibujar(); }).observe($('grafico'));
   medir(); dibujar();
+})();
+</script>
+<script>
+// Cada episodio se muestra a su hora: antes, «se estrena el…»; después, el vídeo. Así se puede subir todo antes.
+(() => {
+  const ahora = Date.now();
+  document.querySelectorAll('[data-publica]').forEach((raiz) => {
+    if (ahora < Date.parse(raiz.dataset.publica)) return;
+    raiz.querySelectorAll('[data-antes]').forEach((x) => x.remove());
+    raiz.querySelectorAll('[data-despues]').forEach((x) => { x.hidden = false; });
+  });
+  document.querySelectorAll('[data-hasta]').forEach((x) => { if (ahora >= Date.parse(x.dataset.hasta)) x.remove(); });
 })();
 </script>
 <script>

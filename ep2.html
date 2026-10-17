@@ -8,6 +8,7 @@
 <meta property="og:title" content="Salario medio o mediano: ¿cuál te dice lo que cobra la gente? · Soy Numerito">
 <meta property="og:description" content="Episodio 2: Por qué más de la mitad cobra menos que el salario medio, con los datos del INE.">
 <meta property="og:url" content="https://soynumerito.com/ep2">
+<meta property="og:image" content="https://soynumerito.com/mini_ep2.jpg">
 <link rel="stylesheet" href="estilo.css">
 <style>
   .ventana { background: var(--blanco); border: var(--borde); border-radius: 20px; box-shadow: var(--sombra); overflow: hidden; }
@@ -72,12 +73,12 @@
     </nav>
   </div>
 </header>
-<main id="contenido" class="ancho estrecho episodio">
+<main id="contenido" class="ancho estrecho episodio" data-publica="2026-10-22T18:05:00+02:00">
   <p class="migas"><a href="./#episodios">Episodios</a> / Temporada 1 / Episodio 2</p>
   <h1>Salario medio o mediano: ¿cuál te dice lo que cobra la gente?</h1>
-  <div class="video"><div class="mini"><span class="hueco" style="background:#22C27A">Salario medio o mediano: ¿cuál te dice lo que cobra la gente?</span></div></div>
-  <p class="nota-video">El vídeo se estrena en YouTube el 12 de noviembre. Mientras, ya puedes jugar con el simulador.</p>
-  
+  <div class="video"><div data-antes><div class="mini"><img src="mini_ep2.jpg" alt="" loading="lazy"></div></div><div data-despues hidden><button class="mini" type="button" data-video="VQWofY3D3LU" aria-label="Reproducir el vídeo: Salario medio o mediano: ¿cuál te dice lo que cobra la gente?"><img src="mini_ep2.jpg" alt="" loading="lazy"><span class="play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 4 L20 12 L6 20 Z" fill="#FFFFFF" stroke="#141414" stroke-width="2" stroke-linejoin="round"/></svg></span></button></div></div>
+  <p class="nota-video"><span data-antes>El vídeo se estrena en YouTube el 22 de octubre. Mientras, ya puedes jugar con el simulador.</span><span data-despues hidden>El vídeo es de YouTube y solo se carga cuando pulsas play.</span></p>
+  <div data-despues hidden><ul class="capitulos" aria-label="Capítulos"><li><button type="button" data-seg="0"><b>0:00</b>¿Por qué no llego al salario medio?</button></li><li><button type="button" data-seg="34"><b>0:34</b>Repaso rápido: media y mediana</button></li><li><button type="button" data-seg="53"><b>0:53</b>Los sueldos reales de España (INE)</button></li><li><button type="button" data-seg="140"><b>2:20</b>Un pueblo de once vecinos</button></li><li><button type="button" data-seg="183"><b>3:03</b>Error común: &quot;el salario medio sube&quot;</button></li><li><button type="button" data-seg="263"><b>4:23</b>Dos titulares, mismo dato</button></li><li><button type="button" data-seg="294"><b>4:54</b>España frente a Europa (Eurostat)</button></li><li><button type="button" data-seg="394"><b>6:34</b>Resumen en 3 puntos</button></li><li><button type="button" data-seg="417"><b>6:57</b>Cierre y siguiente vídeo</button></li></ul></div>
 
   <section style="margin-top:36px;display:grid;gap:16px">
     <h2 class="titulo-seccion">El episodio en 3 ideas</h2>
@@ -158,7 +159,7 @@
 
   <div class="siguiente">
     <a class="tarjeta" href="ep3">
-      <span class="mini"><span class="hueco" style="background:#FFD23F">Ep. 3</span></span>
+      <span class="mini"><img src="mini_ep3.jpg" alt="" loading="lazy"></span>
       <span style="display:grid;gap:4px;min-width:0"><span class="antetitulo">Siguiente episodio →</span><span class="tarjeta-titulo">Moda: ¿existe la talla normal? Qué es la moda en estadística</span></span>
     </a>
     <div class="caja-cafe"><b>¿Te ha servido este episodio?</b><a class="boton coral " href="https://ko-fi.com/soynumerito">Invita a Numerito a un café</a></div>
@@ -314,6 +315,18 @@
 
   new ResizeObserver(dibujar).observe($('grafico'));
   dibujar();
+})();
+</script>
+<script>
+// Cada episodio se muestra a su hora: antes, «se estrena el…»; después, el vídeo. Así se puede subir todo antes.
+(() => {
+  const ahora = Date.now();
+  document.querySelectorAll('[data-publica]').forEach((raiz) => {
+    if (ahora < Date.parse(raiz.dataset.publica)) return;
+    raiz.querySelectorAll('[data-antes]').forEach((x) => x.remove());
+    raiz.querySelectorAll('[data-despues]').forEach((x) => { x.hidden = false; });
+  });
+  document.querySelectorAll('[data-hasta]').forEach((x) => { if (ahora >= Date.parse(x.dataset.hasta)) x.remove(); });
 })();
 </script>
 <script>

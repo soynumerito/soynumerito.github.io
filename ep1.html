@@ -73,12 +73,12 @@
     </nav>
   </div>
 </header>
-<main id="contenido" class="ancho estrecho episodio">
+<main id="contenido" class="ancho estrecho episodio" data-publica="2026-10-22T18:00:00+02:00">
   <p class="migas"><a href="./#episodios">Episodios</a> / Temporada 1 / Episodio 1</p>
   <h1>Media vs mediana: ¿si Messi entra en un bar, todos se hacen millonarios?</h1>
-  <div class="video"><div class="mini"><img src="mini_ep1.jpg" alt="" loading="lazy"></div></div>
-  <p class="nota-video">El vídeo se estrena en YouTube el 12 de noviembre. Mientras, ya puedes jugar con el simulador.</p>
-  
+  <div class="video"><div data-antes><div class="mini"><img src="mini_ep1.jpg" alt="" loading="lazy"></div></div><div data-despues hidden><button class="mini" type="button" data-video="tpXcWVpXvrc" aria-label="Reproducir el vídeo: Media vs mediana: ¿si Messi entra en un bar, todos se hacen millonarios?"><img src="mini_ep1.jpg" alt="" loading="lazy"><span class="play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 4 L20 12 L6 20 Z" fill="#FFFFFF" stroke="#141414" stroke-width="2" stroke-linejoin="round"/></svg></span></button></div></div>
+  <p class="nota-video"><span data-antes>El vídeo se estrena en YouTube el 22 de octubre. Mientras, ya puedes jugar con el simulador.</span><span data-despues hidden>El vídeo es de YouTube y solo se carga cuando pulsas play.</span></p>
+  <div data-despues hidden><ul class="capitulos" aria-label="Capítulos"><li><button type="button" data-seg="0"><b>0:00</b>Messi entra en un bar</button></li><li><button type="button" data-seg="45"><b>0:45</b>Qué es la media</button></li><li><button type="button" data-seg="101"><b>1:41</b>Por qué un valor extremo arrastra la media</button></li><li><button type="button" data-seg="158"><b>2:38</b>Qué es la mediana</button></li><li><button type="button" data-seg="222"><b>3:42</b>Cuándo usar media y cuándo mediana</button></li><li><button type="button" data-seg="360"><b>6:00</b>¿Y en España y Europa?</button></li><li><button type="button" data-seg="378"><b>6:18</b>Cierre y simulador</button></li></ul></div>
 
   <section style="margin-top:36px;display:grid;gap:16px">
     <h2 class="titulo-seccion">El episodio en 3 ideas</h2>
@@ -145,7 +145,7 @@
 
   <div class="siguiente">
     <a class="tarjeta" href="ep2">
-      <span class="mini"><span class="hueco" style="background:#22C27A">Ep. 2</span></span>
+      <span class="mini"><img src="mini_ep2.jpg" alt="" loading="lazy"></span>
       <span style="display:grid;gap:4px;min-width:0"><span class="antetitulo">Siguiente episodio →</span><span class="tarjeta-titulo">Salario medio o mediano: ¿cuál te dice lo que cobra la gente?</span></span>
     </a>
     <div class="caja-cafe"><b>¿Te ha servido este episodio?</b><a class="boton coral " href="https://ko-fi.com/soynumerito">Invita a Numerito a un café</a></div>
@@ -373,6 +373,18 @@
 
   new ResizeObserver(() => { medir(); dibujar(); }).observe($('grafico'));
   medir(); dibujar();
+})();
+</script>
+<script>
+// Cada episodio se muestra a su hora: antes, «se estrena el…»; después, el vídeo. Así se puede subir todo antes.
+(() => {
+  const ahora = Date.now();
+  document.querySelectorAll('[data-publica]').forEach((raiz) => {
+    if (ahora < Date.parse(raiz.dataset.publica)) return;
+    raiz.querySelectorAll('[data-antes]').forEach((x) => x.remove());
+    raiz.querySelectorAll('[data-despues]').forEach((x) => { x.hidden = false; });
+  });
+  document.querySelectorAll('[data-hasta]').forEach((x) => { if (ahora >= Date.parse(x.dataset.hasta)) x.remove(); });
 })();
 </script>
 <script>

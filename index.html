@@ -8,7 +8,7 @@
 <meta property="og:title" content="Soy Numerito · Estadística que se entiende">
 <meta property="og:description" content="Cada semana, un concepto de estadística explicado con ejemplos reales y animaciones, y un simulador gratis para jugar con los números.">
 <meta property="og:url" content="https://soynumerito.com/">
-<meta property="og:image" content="https://soynumerito.com/mini_ep1.jpg">
+<meta property="og:image" content="https://soynumerito.com/mini_trailer.jpg">
 <link rel="stylesheet" href="estilo.css">
 </head>
 <body>
@@ -36,11 +36,11 @@
   </div>
   <div class="hero-tarjeta">
     <article class="tarjeta">
-      <a class="mini" href="ep1" aria-label="Ver el episodio 1"><img src="mini_ep1.jpg" alt="" loading="lazy"></a>
+      <a class="mini" href="https://www.youtube.com/@soynumerito" aria-label="Ir al canal de YouTube"><img src="mini_trailer.jpg" alt="" loading="lazy"><span class="aviso">Muy pronto en YouTube</span></a>
       <div class="tarjeta-cuerpo">
-        <span><span class="etiqueta">Nuevo · Episodio 1</span> <span class="antetitulo">Se estrena el 12 de noviembre</span></span>
-        <span class="tarjeta-titulo">Si Messi entra en un bar, ¿todos se hacen millonarios?</span>
-        <div class="enlaces"><a href="ep1">Ver el episodio</a><a href="bar">Jugar con el simulador →</a></div>
+        <span><span class="etiqueta">Tráiler</span> <span class="antetitulo">43 s</span></span>
+        <span class="tarjeta-titulo">Qué es Soy Numerito, en 43 segundos</span>
+        <div class="enlaces"><a href="#episodios">Ver los episodios</a><a href="#simuladores">Jugar con los simuladores →</a></div>
       </div>
     </article>
   </div>
@@ -78,23 +78,23 @@
       <article class="tarjeta">
         <a class="mini" href="ep1" tabindex="-1" aria-hidden="true"><img src="mini_ep1.jpg" alt="" loading="lazy"></a>
         <div class="tarjeta-cuerpo">
-          <span class="antetitulo">Episodio 1 · se estrena el 12 de noviembre</span>
+          <span class="antetitulo">Episodio 1<span data-hasta="2026-10-22T18:00:00+02:00"> · se estrena el 22 de octubre</span></span>
           <span class="tarjeta-titulo">Media vs mediana: ¿si Messi entra en un bar, todos se hacen millonarios?</span>
           <div class="enlaces"><a href="ep1">Ver episodio</a><a href="bar">Simulador</a></div>
         </div>
       </article>
       <article class="tarjeta">
-        <a class="mini" href="ep2" tabindex="-1" aria-hidden="true"><span class="hueco" style="background:#22C27A">Salario medio o mediano: ¿cuál te dice lo que cobra la gente?</span></a>
+        <a class="mini" href="ep2" tabindex="-1" aria-hidden="true"><img src="mini_ep2.jpg" alt="" loading="lazy"></a>
         <div class="tarjeta-cuerpo">
-          <span class="antetitulo">Episodio 2 · se estrena el 12 de noviembre</span>
+          <span class="antetitulo">Episodio 2<span data-hasta="2026-10-22T18:05:00+02:00"> · se estrena el 22 de octubre</span></span>
           <span class="tarjeta-titulo">Salario medio o mediano: ¿cuál te dice lo que cobra la gente?</span>
           <div class="enlaces"><a href="ep2">Ver episodio</a><a href="pais">Simulador</a></div>
         </div>
       </article>
       <article class="tarjeta">
-        <a class="mini" href="ep3" tabindex="-1" aria-hidden="true"><span class="hueco" style="background:#FFD23F">¿Existe la talla normal?</span></a>
+        <a class="mini" href="ep3" tabindex="-1" aria-hidden="true"><img src="mini_ep3.jpg" alt="" loading="lazy"></a>
         <div class="tarjeta-cuerpo">
-          <span class="antetitulo">Episodio 3 · se estrena el 12 de noviembre</span>
+          <span class="antetitulo">Episodio 3<span data-hasta="2026-10-22T18:10:00+02:00"> · se estrena el 22 de octubre</span></span>
           <span class="tarjeta-titulo">Moda: ¿existe la talla normal? Qué es la moda en estadística</span>
           <div class="enlaces"><a href="ep3">Ver episodio</a><a href="tallas">Simulador</a></div>
         </div>
@@ -122,5 +122,40 @@
     <small>Estadística que se entiende. Esta web no usa cookies; los vídeos de YouTube solo se cargan si pulsas play.</small>
   </div>
 </footer>
+<script>
+// Cada episodio se muestra a su hora: antes, «se estrena el…»; después, el vídeo. Así se puede subir todo antes.
+(() => {
+  const ahora = Date.now();
+  document.querySelectorAll('[data-publica]').forEach((raiz) => {
+    if (ahora < Date.parse(raiz.dataset.publica)) return;
+    raiz.querySelectorAll('[data-antes]').forEach((x) => x.remove());
+    raiz.querySelectorAll('[data-despues]').forEach((x) => { x.hidden = false; });
+  });
+  document.querySelectorAll('[data-hasta]').forEach((x) => { if (ahora >= Date.parse(x.dataset.hasta)) x.remove(); });
+})();
+</script>
+<script>
+// El vídeo de YouTube no se carga hasta que alguien pulsa play (así no hay cookies antes).
+(() => {
+  const caja = document.querySelector('[data-video]');
+  if (!caja) return;
+  const poner = (seg) => {
+    const f = document.createElement('iframe');
+    f.src = 'https://www.youtube-nocookie.com/embed/' + caja.dataset.video + '?autoplay=1&rel=0' + (seg ? '&start=' + seg : '');
+    f.title = caja.getAttribute('aria-label');
+    f.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+    f.allowFullscreen = true;
+    const sitio = document.createElement('div');
+    sitio.className = 'mini';
+    sitio.appendChild(f);
+    (document.querySelector('.video .mini') || caja).replaceWith(sitio);
+  };
+  caja.addEventListener('click', () => poner(0));
+  document.querySelectorAll('[data-seg]').forEach((b) => b.addEventListener('click', () => {
+    poner(+b.dataset.seg);
+    document.querySelector('.video').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }));
+})();
+</script>
 </body>
 </html>

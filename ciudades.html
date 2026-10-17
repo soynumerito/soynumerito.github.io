@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Una ciudad, 12 meses · Soy Numerito</title>
+<meta name="description" content="Simulador gratis: una ciudad inventada con 12 meses. Arrastra cada mes arriba o abajo, mira qué les pasa a la media y al rango y supera tres retos.">
+<link rel="stylesheet" href="estilo.css">
+<style>
+  .ventana { background: var(--blanco); border: var(--borde); border-radius: 20px; box-shadow: var(--sombra); overflow: hidden; }
+  .ventana-barra { background: var(--tinta); color: var(--papel); display: flex; align-items: center; gap: 8px; padding: 10px 16px; font-size: 15px; }
+  .ventana-barra i { width: 12px; height: 12px; border-radius: 50%; display: block; }
+  .ventana-barra span { margin-left: 8px; }
+  .ventana-cuerpo { padding: 18px 16px 16px; display: grid; gap: 14px; }
+
+  /* Marcador: Media y Rango, siempre a la vista y grandes */
+  .marcador { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .cifra { border: var(--borde); border-radius: 16px; padding: 8px 14px 10px; box-shadow: 4px 4px 0 var(--tinta); min-width: 0; }
+  .cifra.media { background: var(--amarillo); }
+  .cifra.rango { background: var(--blanco); }
+  .cifra small { display: block; font-size: 15px; font-weight: 700; line-height: 1.2; }
+  .cifra b { display: block; font-size: clamp(34px, 9vw, 52px); font-weight: 800; line-height: 1.05; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .cifra b span { font-size: .5em; font-weight: 700; margin-left: 2px; }
+
+  .grafico { position: relative; touch-action: none; user-select: none; -webkit-user-select: none; }
+  .grafico svg { display: block; width: 100%; overflow: visible; }
+  .grafico text { font-family: var(--letra); }
+  .hit { cursor: ns-resize; }
+  .barra:focus { outline: none; }
+  .barra:focus-visible .cuerpo { stroke: var(--azul); stroke-width: 4; }
+  .barra:focus-visible .marco { stroke: var(--azul); stroke-width: 2.5; }
+  .pista { color: var(--gris); font-size: 14px; margin: 0; }
+
+  .controles { display: flex; flex-wrap: wrap; gap: 10px; }
+  @media (max-width: 520px) {
+    .ventana-cuerpo { padding: 14px 10px 14px; }
+    .controles .boton { font-size: 14px; padding: 6px 12px; }
+  }
+
+  /* Retos */
+  .retos { margin-top: 30px; display: grid; gap: 14px; }
+  .retos > h2 { margin: 0; font-size: 26px; }
+  .lista-retos { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr)); gap: 14px; }
+  .reto { background: var(--blanco); border: var(--borde); border-radius: 18px; padding: 14px 16px; display: grid; grid-template-columns: 40px 1fr; gap: 4px 12px; align-content: start; min-width: 0; }
+  .reto.hecho { background: #E3F7EC; }
+  .casilla { grid-row: span 3; width: 40px; height: 40px; border: 4px solid var(--tinta); border-radius: 10px; background: var(--blanco);
+    display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 800; line-height: 1; color: var(--blanco); }
+  .reto.hecho .casilla { background: var(--verde); }
+  .reto b { font-size: 18px; line-height: 1.25; }
+  .reto .ayuda { font-size: 15px; color: var(--gris); margin: 0; }
+  .reto .ahora { font-size: 14px; margin: 0; font-variant-numeric: tabular-nums; }
+  .reto .ahora .si { color: #138A52; font-weight: 800; }
+  .reto .ahora .no { color: var(--gris); }
+  .leccion { background: var(--verde); border: var(--borde); border-radius: 18px; box-shadow: var(--sombra); padding: 14px 18px; margin: 0; font-size: 18px; font-weight: 700; }
+  .leccion[hidden] { display: none; }
+
+  .comentario { display: flex; gap: 14px; align-items: flex-end; margin: 26px 0 0; }
+  .comentario svg { width: 64px; flex: none; }
+  .burbuja { position: relative; background: var(--blanco); border: var(--borde); border-radius: 18px; padding: 12px 16px;
+    box-shadow: 4px 4px 0 var(--tinta); font-size: 17px; min-width: 0; margin: 0; }
+  .burbuja::before { content: ''; position: absolute; left: -14px; bottom: 16px; border: 7px solid transparent; border-right: 10px solid var(--tinta); }
+
+  .calculo { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 18px; margin-top: 30px; }
+  .calculo section { border-top: 4px solid var(--tinta); padding-top: 12px; min-width: 0; display: grid; gap: 8px; align-content: start; }
+  .calculo .marca { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--tinta); border-radius: 50%; vertical-align: -1px; margin-right: 6px; }
+  .calculo p { margin: 0; }
+  .cuenta { font-variant-numeric: tabular-nums; background: var(--blanco); border: 2px solid var(--tinta); border-radius: 10px;
+    padding: 8px 12px; font-size: 15px; overflow-wrap: anywhere; }
+  .nota { color: var(--gris); font-size: 15px; }
+</style>
+</head>
+<body>
+<div class="pagina">
+  <header class="cabecera">
+    <a class="logo" href="./">
+      <svg viewBox="0 0 220 300" aria-hidden="true"><path d="M70 40 Q118 4 140 18 Q156 28 156 60 L156 228 L190 228 Q206 228 206 246 L206 262 Q206 280 188 280 L46 280 Q28 280 28 262 L28 246 Q28 228 46 228 L82 228 L82 96 Q66 104 52 100 Q34 94 36 76 Q38 58 70 40 Z" fill="#FFD23F" stroke="#141414" stroke-width="14" stroke-linejoin="round"/></svg>
+      soy numerito
+    </a>
+    <span class="lema">Estadística que se entiende</span>
+  </header>
+
+  <h1>Una ciudad, 12 meses</h1>
+  <p class="entradilla">Una ciudad inventada con 12 meses. Arrastra cada mes arriba o abajo y mira qué les pasa a la media y al rango.</p>
+
+  <div class="ventana">
+    <div class="ventana-barra" aria-hidden="true"><i style="background:var(--coral)"></i><i style="background:var(--amarillo)"></i><i style="background:var(--verde)"></i><span>Simulador · Una ciudad, 12 meses</span></div>
+    <div class="ventana-cuerpo">
+      <div class="marcador" aria-live="polite">
+        <div class="cifra media"><small>Media</small><b><output id="v-media"></output><span>°C</span></b></div>
+        <div class="cifra rango"><small>Rango</small><b><output id="v-rango"></output><span>°C</span></b></div>
+      </div>
+      <div class="grafico" id="grafico">
+        <svg id="svg" role="group" aria-label="Temperatura media de cada mes, de 0 a 40 grados"></svg>
+      </div>
+      <p class="pista">Arrastra una barra arriba o abajo con el dedo o el ratón (en el móvil, la barra que mueves se pone amarilla). Con el teclado: tabulador para elegir mes y flechas arriba y abajo para cambiar su temperatura. Línea amarilla: la media. Flecha de la derecha: el rango, del mes más frío al más cálido.</p>
+      <div class="controles">
+        <button class="boton" id="b-calma" type="button">Volver a Villacalma</button>
+        <button class="boton" id="b-vaiven" type="button">Villavaivén</button>
+        <button class="boton" id="b-veinte" type="button">Todo a 20</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="comentario">
+    <svg viewBox="0 0 220 300" aria-hidden="true">
+      <path d="M70 40 Q118 4 140 18 Q156 28 156 60 L156 228 L190 228 Q206 228 206 246 L206 262 Q206 280 188 280 L46 280 Q28 280 28 262 L28 246 Q28 228 46 228 L82 228 L82 96 Q66 104 52 100 Q34 94 36 76 Q38 58 70 40 Z" fill="#FFD23F" stroke="#141414" stroke-width="8" stroke-linejoin="round"/>
+      <ellipse cx="102" cy="132" rx="15" ry="19" fill="#fff" stroke="#141414" stroke-width="5"/><circle cx="106" cy="136" r="8" fill="#141414"/>
+      <ellipse cx="140" cy="132" rx="15" ry="19" fill="#fff" stroke="#141414" stroke-width="5"/><circle cx="144" cy="136" r="8" fill="#141414"/>
+      <ellipse cx="94" cy="166" rx="9" ry="6" fill="#FF8A8A"/><ellipse cx="150" cy="166" rx="9" ry="6" fill="#FF8A8A"/>
+      <path d="M110 164 Q122 180 134 164" fill="none" stroke="#141414" stroke-width="5" stroke-linecap="round"/>
+    </svg>
+    <p class="burbuja" id="v-comentario" aria-live="polite"></p>
+  </div>
+
+  <section class="retos" aria-labelledby="t-retos">
+    <h2 id="t-retos">Tres retos</h2>
+    <ol class="lista-retos" id="retos"></ol>
+    <p class="leccion" id="leccion" hidden>¡Tres de tres! La lección: la media no ve la dispersión, y el rango solo mira los dos extremos.</p>
+  </section>
+
+  <div class="calculo">
+    <section>
+      <h2><span class="marca" style="background:var(--amarillo)"></span>Cómo sale la media</h2>
+      <p>Sumas la temperatura de los 12 meses y divides entre 12.</p>
+      <div class="cuenta" id="c-media"></div>
+    </section>
+    <section>
+      <h2><span class="marca" style="background:var(--blanco)"></span>Cómo sale el rango</h2>
+      <p>El mes más cálido menos el más frío. Solo usa esos dos números.</p>
+      <div class="cuenta" id="c-rango"></div>
+      <p class="nota">Como cada barra es la temperatura media de un mes, este rango tiene nombre propio: <b>amplitud térmica anual</b>.</p>
+    </section>
+  </div>
+
+  <footer class="pie">
+    <span>Lo explicamos en el vídeo «Dispersión» del canal <a href="https://www.youtube.com/@soynumerito">Soy Numerito en YouTube</a>.</span>
+    <span>Villacalma, Villavaivén, Villarrara y sus temperaturas son inventadas, con el clima exagerado a propósito. Cada número es la temperatura media de un mes, no la de un día.</span>
+    <span>Esta página no usa cookies ni guarda nada de lo que hagas.</span>
+  </footer>
+</div>
+
+<script>
+(() => {
+  // Datos del ep. 5 (temperatura media de cada mes, °C). Las dos suman 240: media 20.
+  // Villacalma: rango 24 − 16 = 8 · Villavaivén: rango 34 − 6 = 28 · Villarrara: 10 meses a 20, uno a 6 y otro a 34.
+  const CALMA = [16, 16, 18, 19, 20, 22, 24, 24, 23, 21, 19, 18];
+  const VAIVEN = [6, 9, 14, 18, 23, 30, 34, 34, 28, 21, 14, 9];
+  const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+  const CORTO = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+  const TOPE = 40, PASO = 1;
+  const C = { tinta: '#141414', azul: '#3A5BFF', coral: '#FF5A36', amarillo: '#FFD23F', verde: '#22C27A', blanco: '#FFFFFF', linea: '#D9CFBB', gris: '#6E6658' };
+
+  // Los tres retos. «cumple» mira solo el estado actual; «hecho» se queda marcado aunque luego muevas las barras.
+  const RETOS = [
+    { titulo: 'Media de 20 y rango de 28 (como Villavaivén)',
+      ayuda: 'Separa los meses de 20: unos arriba y otros abajo, compensando.',
+      partes: (e) => [['media 20', e.suma === 240], ['rango 28', e.rango === 28]] },
+    { titulo: 'Rango de 28 con 10 meses clavados en 20 (como Villarrara)',
+      ayuda: 'Pulsa «Todo a 20» y mueve solo dos meses. La media tiene que seguir en 20.',
+      partes: (e) => [['rango 28', e.rango === 28], ['10 meses en 20', e.en20 === 10], ['media 20', e.suma === 240]] },
+    { titulo: 'Media de 20 sin ningún mes en 20',
+      ayuda: 'Si subes un mes, baja otro lo mismo: la suma tiene que seguir en 240.',
+      partes: (e) => [['media 20', e.suma === 240], ['ningún mes en 20', e.en20 === 0]] },
+  ];
+
+  // movido: último mes que has movido tú (null justo después de pulsar un botón: los retos solo cuentan si mueves algo).
+  // logro: retos recién conseguidos, que Numerito celebra mientras no vuelvas a mover nada.
+  let v = [...CALMA], arrastrando = null, foco = null, movido = null, logro = null, redibujando = false;
+  const hecho = RETOS.map(() => false);
+  const $ = (id) => document.getElementById(id);
+  const svg = $('svg');
+  // Coma decimal española. Un decimal; si el número es entero, sin «,0».
+  const num = (x) => { const r = Math.round(x * 10) / 10; return r.toLocaleString('de-DE', { minimumFractionDigits: Number.isInteger(r) ? 0 : 1, maximumFractionDigits: 1 }); };
+
+  function stats() {
+    const suma = v.reduce((s, x) => s + x, 0), max = Math.max(...v), min = Math.min(...v);
+    return { suma, media: suma / 12, max, min, rango: max - min, en20: v.filter((x) => x === 20).length };
+  }
+
+  // ---------- gráfico ----------
+  let geo = null;
+  function medir() {
+    const ancho = $('grafico').clientWidth, estrecho = ancho < 480;
+    const m = { izq: 30, der: estrecho ? 54 : 70, arr: 34, aba: 28 };
+    const alto = estrecho ? 310 : 380;
+    geo = { ancho, alto, m, estrecho, pw: ancho - m.izq - m.der, ph: alto - m.arr - m.aba };
+  }
+  const y = (t) => geo.m.arr + geo.ph * (1 - t / TOPE);
+
+  function dibujar() {
+    const { ancho, alto, m, pw, ph, estrecho } = geo, e = stats(), base = m.arr + ph;
+    const hueco = pw / 12, bw = Math.max(8, hueco * 0.66), fs = estrecho ? 10.5 : 12.5;
+    const cx = (i) => m.izq + hueco * (i + 0.5);
+    const halo = `stroke="${C.blanco}" stroke-width="3.5" paint-order="stroke" stroke-linejoin="round"`;
+    let s = '', cifras = '';
+
+    for (let t = 0; t <= TOPE; t += 10) {
+      s += `<line x1="${m.izq}" x2="${m.izq + pw}" y1="${y(t)}" y2="${y(t)}" stroke="${t ? C.linea : C.tinta}" stroke-width="${t ? 1.5 : 3}" pointer-events="none"/>`;
+      s += `<text x="${m.izq - 6}" y="${y(t) + 4}" text-anchor="end" font-size="${fs}" fill="${C.gris}" pointer-events="none">${t}°</text>`;
+    }
+
+    v.forEach((t, i) => {
+      const x = cx(i) - bw / 2, top = y(t), h = base - top;
+      const activa = arrastrando && arrastrando.dedo && arrastrando.i === i, extremo = e.rango > 0 && (t === e.max || t === e.min);
+      const nombre = `${MESES[i]}: ${t} grados${extremo ? (t === e.max ? ', el más cálido' : ', el más frío') : ''}`;
+      s += `<g class="barra" data-i="${i}" tabindex="0" role="slider" aria-orientation="vertical" aria-label="${MESES[i]}" aria-valuemin="0" aria-valuemax="${TOPE}" aria-valuenow="${t}" aria-valuetext="${nombre}">`;
+      s += `<rect class="hit marco" data-i="${i}" x="${cx(i) - hueco / 2 + 1}" y="${m.arr - 16}" width="${hueco - 2}" height="${ph + 16 + m.aba}" rx="6" fill="transparent" stroke="none"/>`;
+      if (h > 0) {
+        const rr = Math.min(5, h);
+        s += `<path class="cuerpo" d="M${x} ${base} V${top + rr} Q${x} ${top} ${x + rr} ${top} H${x + bw - rr} Q${x + bw} ${top} ${x + bw} ${top + rr} V${base}" fill="${activa ? C.amarillo : C.azul}" stroke="${C.tinta}" stroke-width="${activa || extremo ? 3.5 : 2}" pointer-events="none"/>`;
+      }
+      cifras += `<text x="${cx(i)}" y="${top - 6}" text-anchor="middle" font-size="${fs}" font-weight="800" fill="${C.tinta}" ${halo} pointer-events="none">${t}</text>`;
+      s += `<text x="${cx(i)}" y="${base + 18}" text-anchor="middle" font-size="${fs}" fill="${C.gris}" pointer-events="none">${estrecho ? CORTO[i][0].toUpperCase() : CORTO[i]}</text>`;
+      s += `</g>`;
+    });
+
+    // Línea de la media: amarilla con borde de tinta, de lado a lado.
+    const ym = y(e.media);
+    s += `<line x1="${m.izq}" x2="${m.izq + pw}" y1="${ym}" y2="${ym}" stroke="${C.tinta}" stroke-width="7" pointer-events="none"/>`;
+    s += `<line x1="${m.izq}" x2="${m.izq + pw}" y1="${ym}" y2="${ym}" stroke="${C.amarillo}" stroke-width="3.5" pointer-events="none"/>`;
+    s += cifras;
+
+    // Flecha del rango, a la derecha: del mes más frío al más cálido. Su cifra va encima; la de la media, a su altura.
+    const fx = m.izq + pw + 12, ya = y(e.max), yb = y(e.min);
+    if (e.rango > 0) {
+      s += `<line x1="${fx}" x2="${fx}" y1="${ya + 2}" y2="${yb - 2}" stroke="${C.tinta}" stroke-width="3"/>`;
+      if (yb - ya > 14) {
+        s += `<path d="M${fx - 6} ${ya + 8} L${fx} ${ya} L${fx + 6} ${ya + 8}" fill="none" stroke="${C.tinta}" stroke-width="3" stroke-linejoin="round"/>`;
+        s += `<path d="M${fx - 6} ${yb - 8} L${fx} ${yb} L${fx + 6} ${yb - 8}" fill="none" stroke="${C.tinta}" stroke-width="3" stroke-linejoin="round"/>`;
+      }
+    }
+    s += `<line x1="${fx - 9}" x2="${fx + 9}" y1="${ya}" y2="${ya}" stroke="${C.tinta}" stroke-width="2.5"/><line x1="${fx - 9}" x2="${fx + 9}" y1="${yb}" y2="${yb}" stroke="${C.tinta}" stroke-width="2.5"/>`;
+    const pastilla = (cx0, cy, texto, fondo) => {
+      const w = texto.length * 8 + 14;
+      const x0 = Math.min(ancho - w - 1, cx0 - w / 2);
+      return `<rect x="${x0}" y="${cy - 10}" width="${w}" height="20" rx="10" fill="${fondo}" stroke="${C.tinta}" stroke-width="2"/>` +
+        `<text x="${x0 + w / 2}" y="${cy + 4.5}" text-anchor="middle" font-size="13" font-weight="800" fill="${C.tinta}">${texto}</text>`;
+    };
+    s += pastilla(fx, ya - 18, String(e.rango), C.blanco);
+    s += pastilla(fx + 8 + (num(e.media).length * 8 + 14) / 2, ym, num(e.media), C.amarillo);
+
+    svg.setAttribute('viewBox', `0 0 ${ancho} ${alto}`);
+    svg.setAttribute('height', alto);
+    // Al cambiar el dibujo, Chrome quita el foco de la barra (lanza «focusout»): se ignora y se le devuelve.
+    redibujando = true; svg.innerHTML = s; redibujando = false;
+    if (foco != null) { const g = svg.querySelector(`.barra[data-i="${foco}"]`); if (g) g.focus({ preventScroll: true }); }
+    textos(e);
+  }
+
+  // ---------- textos y retos ----------
+  function textos(e) {
+    $('v-media').textContent = num(e.media);
+    $('v-rango').textContent = e.rango;
+    const exacta = e.suma % 12 === 0;
+    $('c-media').textContent = `(${v.join(' + ')}) ÷ 12 = ${e.suma} ÷ 12 ${exacta ? '=' : '≈'} ${num(e.media)} °C`;
+    $('c-rango').textContent = `${e.max} − ${e.min} = ${e.rango} °C`;
+
+    const nuevos = [];
+    if (movido !== null) RETOS.forEach((r, k) => {
+      if (!hecho[k] && r.partes(e).every(([, b]) => b)) { hecho[k] = true; nuevos.push(k); }
+    });
+    if (nuevos.length) logro = { ks: nuevos, clave: v.join() };
+    else if (logro && logro.clave !== v.join()) logro = null;
+    $('retos').innerHTML = RETOS.map((r, k) => `
+      <li class="reto${hecho[k] ? ' hecho' : ''}" id="reto-${k + 1}" data-hecho="${hecho[k]}">
+        <span class="casilla" aria-hidden="true">${hecho[k] ? '✔' : ''}</span>
+        <b>${k + 1}. ${r.titulo}<span class="saltar">${hecho[k] ? ' (conseguido)' : ' (pendiente)'}</span></b>
+        <p class="ayuda">${r.ayuda}</p>
+        <p class="ahora">Ahora: ${r.partes(e).map(([t, b]) => `<span class="${b ? 'si' : 'no'}">${b ? '✓' : '✗'} ${t}</span>`).join(' · ')}</p>
+      </li>`).join('');
+    $('leccion').hidden = !hecho.every(Boolean);
+    $('v-comentario').textContent = comentario(e);
+  }
+
+  function comentario(e) {
+    const ks = logro ? logro.ks : [], nuevo = ks.length ? ks[ks.length - 1] : null;
+    if (ks.length && hecho.every(Boolean)) return '¡Tres de tres! La media no ve la dispersión, y el rango solo mira los dos extremos. Para describir un clima, mira la media y también cómo se reparten los meses.';
+    if (ks.length > 1) return `¡Retos ${ks.map((k) => k + 1).join(' y ')} conseguidos a la vez! Media 20, rango ${e.rango} y ${e.en20 ? `${e.en20} meses` : 'ningún mes'} en 20. Misma media que Villacalma, y un clima que no se le parece en nada.`;
+    if (nuevo === 0) return `¡Reto 1 conseguido! Media 20, igual que Villacalma, pero rango 28: los meses están mucho más separados. La media sola no lo ve.`;
+    if (nuevo === 1) return `¡Reto 2 conseguido! Diez meses a 20 y solo dos raros, a ${e.min} y a ${e.max}: rango 28, igual que Villavaivén, aunque casi todo el año es igual. El rango solo mira los dos extremos.`;
+    if (nuevo === 2) return `¡Reto 3 conseguido! Media 20 y ni un solo mes a 20. La media es un punto de equilibrio, no un mes que tenga que existir.`;
+    if (e.rango === 0 && e.max === 20) return `Todo a 20: media 20 y rango 0, ninguna dispersión. Ahora mueve solo dos meses, uno hacia abajo y otro hacia arriba, y prueba el reto 2.`;
+    if (e.rango === 0) return `Todos los meses a ${e.max} °C: rango 0, ninguna dispersión. La media es ${num(e.media)}, como cada mes. Ahora mueve un mes y mira qué cambia.`;
+    if (e.en20 === 10 && e.rango === 28 && e.suma !== 240) return `Rango 28 con 10 meses en 20, ¡casi! Pero la media se ha ido a ${num(e.media)}. Para que siga en 20, los dos meses sueltos tienen que alejarse lo mismo de 20: uno por abajo y otro por arriba.`;
+    if (movido !== null) {
+      const t = v[movido], mes = MESES[movido];
+      const lado = e.suma === 240 ? 'La media sigue en 20' : `La media está en ${num(e.media)}`;
+      if (e.rango > 0 && (t === e.max || t === e.min)) return `${mes[0].toUpperCase() + mes.slice(1)} es ahora el mes más ${t === e.max ? 'cálido' : 'frío'}: al moverlo, el rango cambia con él (ahora ${e.rango}). ${lado}: cada grado que mueves un mes la mueve 1/12 de grado.`;
+      return `${mes[0].toUpperCase() + mes.slice(1)} está entre los dos extremos: el rango ni se entera (sigue en ${e.rango}). ${lado}: cada grado que mueves un mes la mueve 1/12 de grado.`;
+    }
+    if (v.join() === CALMA.join()) return `Villacalma: media 20 y rango 8, un clima tranquilo. Arrastra un mes arriba o abajo y mira qué números se mueven. Abajo tienes tres retos.`;
+    if (v.join() === VAIVEN.join()) return `Villavaivén: media 20, como Villacalma, pero rango 28. Misma media, climas muy distintos: la media no ve la dispersión.${hecho[0] && hecho[2] ? '' : ' Ojo: los retos solo cuentan si los consigues tú arrastrando barras.'}`;
+    return `Media ${num(e.media)} y rango ${e.rango}. Arrastra un mes y mira qué número se mueve.`;
+  }
+
+  // ---------- interacción (igual que en «La talla normal») ----------
+  const valorEn = (clientY) => {
+    const caja = svg.getBoundingClientRect();
+    const py = (clientY - caja.top) * (geo.alto / caja.height);
+    const x = (1 - (py - geo.m.arr) / geo.ph) * TOPE;
+    return Math.max(0, Math.min(TOPE, Math.round(x / PASO) * PASO));
+  };
+  const poner = (i, x) => { if (v[i] !== x) { v[i] = x; movido = i; dibujar(); } };
+
+  // Ratón: la barra salta a donde haces clic. Dedo: solo cuenta el arrastre, y la barra elegida se marca.
+  svg.addEventListener('pointerdown', (ev) => {
+    const hit = ev.target.closest('.hit');
+    if (!hit) return;
+    ev.preventDefault();
+    const i = +hit.dataset.i;
+    arrastrando = { i, y0: ev.clientY, v0: v[i], dedo: ev.pointerType !== 'mouse' };
+    foco = i;
+    svg.setPointerCapture(ev.pointerId);
+    if (arrastrando.dedo) dibujar(); else poner(i, valorEn(ev.clientY));
+  });
+  svg.addEventListener('pointermove', (ev) => {
+    if (!arrastrando) return;
+    if (!arrastrando.dedo) return poner(arrastrando.i, valorEn(ev.clientY));
+    const caja = svg.getBoundingClientRect();
+    const d = ((arrastrando.y0 - ev.clientY) * (geo.alto / caja.height) / geo.ph) * TOPE;
+    poner(arrastrando.i, Math.max(0, Math.min(TOPE, Math.round((arrastrando.v0 + d) / PASO) * PASO)));
+  });
+  const soltar = () => { const habia = arrastrando; arrastrando = null; if (habia && habia.dedo) dibujar(); };
+  svg.addEventListener('pointerup', soltar);
+  svg.addEventListener('pointercancel', soltar);
+
+  svg.addEventListener('focusin', (ev) => { const g = ev.target.closest('.barra'); if (g) foco = +g.dataset.i; });
+  svg.addEventListener('focusout', (ev) => { if (!redibujando && !svg.contains(ev.relatedTarget)) foco = null; });
+  svg.addEventListener('keydown', (ev) => {
+    const g = ev.target.closest('.barra');
+    if (!g) return;
+    const i = +g.dataset.i;
+    const pasos = { ArrowUp: PASO, ArrowDown: -PASO, PageUp: 5, PageDown: -5 };
+    let x = null;
+    if (ev.key in pasos) x = v[i] + pasos[ev.key];
+    if (ev.key === 'Home') x = 0;
+    if (ev.key === 'End') x = TOPE;
+    if (x == null) return;
+    ev.preventDefault();
+    poner(i, Math.max(0, Math.min(TOPE, x)));
+  });
+
+  const cargar = (datos) => { v = [...datos]; foco = null; movido = null; dibujar(); };
+  $('b-calma').onclick = () => cargar(CALMA);
+  $('b-vaiven').onclick = () => cargar(VAIVEN);
+  $('b-veinte').onclick = () => cargar(Array(12).fill(20));
+
+  new ResizeObserver(() => { medir(); dibujar(); }).observe($('grafico'));
+  medir(); dibujar();
+})();
+</script>
+</body>
+</html>
