@@ -185,3 +185,8 @@ button.mini:hover .play { transform: translate(calc(-50% - 2px), calc(-50% - 2px
   .apoyar svg { width: 80px; }
   .play { width: 60px; height: 60px; }
 }
+
+/* Botón de vuelta en la cabecera de los simuladores sueltos */
+.volver { display: inline-block; background: var(--blanco); border: 3px solid var(--tinta); border-radius: 999px; padding: 6px 14px; font-weight: 800; font-size: 15px; text-decoration: none; box-shadow: 3px 3px 0 var(--tinta); }
+.volver:hover { background: var(--amarillo); }
+.volver-grupo { display: flex; gap: 10px; flex-wrap: wrap; }
