@@ -1,0 +1,671 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>¿El descuento es real? · Soy Numerito</title>
+<meta name="description" content="Simulador gratis del Especial Black Friday: decide cuántos días costó 90 € una freidora inventada, mira si su «−50 %» es real, supera tres retos y calcula el descuento real de tu producto frente a la mediana, la media y el más bajo de 30 días.">
+<link rel="stylesheet" href="estilo.css">
+<style>
+  .aviso-top { display: inline-block; background: var(--blanco); border: 3px solid var(--tinta); border-radius: 999px; padding: 4px 14px; font-weight: 800; font-size: 15px; margin: 0 0 22px; }
+
+  .ventana { background: var(--blanco); border: var(--borde); border-radius: 20px; box-shadow: var(--sombra); overflow: hidden; }
+  .ventana-barra { background: var(--tinta); color: var(--papel); display: flex; align-items: center; gap: 8px; padding: 10px 16px; font-size: 15px; }
+  .ventana-barra i { width: 12px; height: 12px; border-radius: 50%; display: block; flex: none; }
+  .ventana-barra span { margin-left: 8px; }
+  .ventana-cuerpo { padding: 18px 16px 16px; display: grid; gap: 16px; min-width: 0; }
+
+  .parte { margin-top: 8px; }
+  .parte-cabeza { margin: 0 0 14px; }
+  .parte-cabeza .antetitulo { color: var(--azul); }
+  .parte-cabeza h2 { font-size: clamp(26px, 4vw, 34px); line-height: 1.08; margin: 2px 0 6px; }
+  .parte-cabeza p { margin: 0; max-width: 62ch; }
+
+  /* El deslizador: «días a 90 €» */
+  .control { display: grid; gap: 8px; background: var(--papel); border: 3px solid var(--tinta); border-radius: 16px; padding: 12px 14px; }
+  .control label { font-weight: 800; font-size: 18px; }
+  .control-fila { display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: 10px; }
+  .control output { font-weight: 800; font-size: clamp(22px, 5vw, 28px); font-variant-numeric: tabular-nums; white-space: nowrap; min-width: 4.4em; text-align: right; }
+  .control .boton { padding: 4px 12px; font-size: 18px; line-height: 1.2; }
+  .control input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; min-width: 0; height: 36px; margin: 0; background: transparent; cursor: pointer; }
+  .control input[type=range]::-webkit-slider-runnable-track { height: 16px; border: 3px solid var(--tinta); border-radius: 8px;
+    background: linear-gradient(to right, var(--coral) var(--p, 50%), var(--linea) var(--p, 50%)); }
+  .control input[type=range]::-moz-range-track { height: 10px; border: 3px solid var(--tinta); border-radius: 8px; background: var(--linea); }
+  .control input[type=range]::-moz-range-progress { height: 10px; border: 3px solid var(--tinta); border-radius: 8px; background: var(--coral); }
+  .control input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 30px; height: 30px; margin-top: -10px; border-radius: 50%;
+    background: var(--blanco); border: 4px solid var(--tinta); box-shadow: 2px 2px 0 var(--tinta); }
+  .control input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: var(--blanco); border: 4px solid var(--tinta); box-shadow: 2px 2px 0 var(--tinta); }
+  .control input[type=range]:focus { outline: none; }
+  .control input[type=range]:focus-visible::-webkit-slider-thumb { background: var(--amarillo); outline: 3px solid var(--azul); outline-offset: 2px; }
+  .control input[type=range]:focus-visible::-moz-range-thumb { background: var(--amarillo); outline: 3px solid var(--azul); outline-offset: 2px; }
+  @media (max-width: 520px) {
+    .ventana-cuerpo { padding: 14px 10px 14px; }
+    .ventana-barra { font-size: 13px; }
+    .control { padding: 10px; }
+    .control label { font-size: 16px; }
+    .control-fila { grid-template-columns: auto 1fr auto; }
+    .control output { grid-column: 1 / -1; grid-row: 1; text-align: left; }
+  }
+
+  /* Las dos cifras: lo que dice el cartel y lo que es de verdad */
+  .duelo { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .caja { border: var(--borde); border-radius: 16px; box-shadow: 4px 4px 0 var(--tinta); padding: 8px 14px 10px; min-width: 0; display: grid; gap: 2px; align-content: start; background: var(--blanco); }
+  .caja small { font-size: 15px; font-weight: 800; }
+  .caja .grande { font-size: clamp(36px, 10vw, 56px); font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .caja .nota-caja { font-size: 15px; line-height: 1.3; }
+  .caja.cartel { background: var(--amarillo); }
+  .caja.real { background: var(--blanco); }
+  .caja.real.igual { background: var(--verde); }
+  .caja.real.trampa .grande { color: #C7341A; }
+  @media (max-width: 520px) {
+    .duelo { gap: 10px; }
+    .caja { padding: 6px 10px 8px; box-shadow: 3px 3px 0 var(--tinta); border-width: 3px; }
+    .caja small, .caja .nota-caja { font-size: 13px; }
+  }
+  .sello { margin: 0; border: 3px solid var(--tinta); border-radius: 999px; padding: 6px 14px; font-weight: 800; font-size: 16px; justify-self: start; background: var(--blanco); }
+  .sello.si { background: var(--verde); }
+  .sello.no { background: #FFE1D9; }
+
+  .grafico svg { display: block; width: 100%; overflow: visible; }
+  .grafico text { font-family: var(--letra); }
+  .pista { color: var(--gris); font-size: 14px; margin: 0; }
+  .controles { display: flex; flex-wrap: wrap; gap: 10px; }
+  @media (max-width: 520px) { .controles .boton { font-size: 14px; padding: 6px 12px; } }
+
+  .comentario { display: flex; gap: 14px; align-items: flex-end; margin: 26px 0 0; }
+  .comentario svg { width: 64px; flex: none; }
+  .burbuja { position: relative; background: var(--blanco); border: var(--borde); border-radius: 18px; padding: 12px 16px;
+    box-shadow: 4px 4px 0 var(--tinta); font-size: 17px; min-width: 0; margin: 0; }
+  .burbuja::before { content: ''; position: absolute; left: -14px; bottom: 16px; border: 7px solid transparent; border-right: 10px solid var(--tinta); }
+
+  /* Retos */
+  .retos { margin-top: 30px; display: grid; gap: 14px; }
+  .retos > h2 { margin: 0; font-size: 26px; }
+  .lista-retos { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr)); gap: 14px; }
+  .reto { background: var(--blanco); border: var(--borde); border-radius: 18px; padding: 14px 16px; display: grid; grid-template-columns: 40px 1fr; gap: 4px 12px; align-content: start; min-width: 0; }
+  .reto > * { min-width: 0; }
+  .reto.hecho { background: #E3F7EC; }
+  .casilla { grid-row: span 3; width: 40px; height: 40px; border: 4px solid var(--tinta); border-radius: 10px; background: var(--blanco);
+    display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 800; line-height: 1; color: var(--blanco); }
+  .reto.hecho .casilla { background: var(--verde); }
+  .reto b { font-size: 18px; line-height: 1.25; }
+  .reto .ayuda { font-size: 15px; color: var(--gris); margin: 0; }
+  .reto .porque { font-size: 15px; margin: 2px 0 0; font-weight: 700; }
+  .reto .porque:empty { display: none; }
+  .leccion { background: var(--verde); border: var(--borde); border-radius: 18px; box-shadow: var(--sombra); padding: 14px 18px; margin: 0; font-size: 18px; font-weight: 700; }
+  .leccion[hidden] { display: none; }
+
+  .cuentas { margin-top: 26px; border: 3px solid var(--tinta); border-radius: 16px; background: var(--blanco); padding: 10px 16px; }
+  .cuentas summary { font-weight: 800; font-size: 18px; cursor: pointer; }
+  .calculo { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 18px; margin: 14px 0 6px; }
+  .calculo section { border-top: 4px solid var(--tinta); padding-top: 12px; min-width: 0; display: grid; gap: 8px; align-content: start; }
+  .calculo h3 { font-size: 19px; margin: 0; }
+  .calculo p { margin: 0; }
+  .cuenta { font-variant-numeric: tabular-nums; background: var(--blanco); border: 2px solid var(--tinta); border-radius: 10px;
+    padding: 8px 12px; font-size: 15px; overflow-wrap: anywhere; }
+  .nota { color: var(--gris); font-size: 15px; }
+
+  /* Parte 2: tu producto, en dos pasos */
+  .separador { margin-top: 48px; padding-top: 28px; border-top: var(--borde); }
+  .paso { display: grid; gap: 10px; background: var(--papel); border: 3px solid var(--tinta); border-radius: 16px; padding: 12px 14px; min-width: 0; }
+  .paso h3 { margin: 0; font-size: 19px; line-height: 1.2; display: flex; align-items: center; gap: 10px; }
+  .paso h3 .num { flex: none; width: 32px; height: 32px; border: 3px solid var(--tinta); border-radius: 50%; background: var(--amarillo);
+    display: inline-flex; align-items: center; justify-content: center; font-size: 17px; }
+  .paso .ayuda { color: var(--gris); font-size: 15px; margin: 0; }
+  .precios-cartel { display: flex; flex-wrap: wrap; gap: 12px 18px; }
+  .precio-campo { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 17px; }
+  .precio-campo input[type="text"] { width: 6.5em; }
+  .precio-campo .eur { font-weight: 800; }
+  textarea, input[type="text"] { font: inherit; font-size: 17px; color: var(--tinta); background: var(--blanco); border: 3px solid var(--tinta); border-radius: 12px;
+    padding: 8px 12px; width: 100%; min-width: 0; font-variant-numeric: tabular-nums; }
+  textarea { min-height: 100px; resize: vertical; }
+  textarea:focus-visible, input:focus-visible { outline: 3px solid var(--azul); outline-offset: 2px; }
+  .mensajes { display: grid; gap: 8px; }
+  .mensajes:empty { display: none; }
+  .mensaje { margin: 0; border: 3px solid var(--tinta); border-radius: 12px; padding: 8px 12px; font-size: 15px; background: var(--blanco); }
+  .mensaje.ojo { background: #FFF3C4; }
+  .mensaje.error { background: #FFE1D9; }
+  .resultado { display: grid; gap: 14px; }
+  .resultado[hidden] { display: none; }
+  .resultado-titulo { margin: 4px 0 0; font-size: 22px; }
+  .caja.cartel.vacia .grande { color: var(--gris); }
+  .veredicto { margin: 0; font-size: 18px; font-weight: 700; border-left: 8px solid var(--tinta); padding: 4px 0 4px 12px; }
+  .detalles { border: 3px solid var(--tinta); border-radius: 14px; padding: 8px 14px; background: var(--blanco); }
+  .detalles summary { font-weight: 800; cursor: pointer; }
+  .detalles ul { margin: 10px 0 4px; padding-left: 20px; display: grid; gap: 6px; font-variant-numeric: tabular-nums; }
+  .mini-svg { display: block; width: 100%; overflow: visible; }
+  .mini-svg text { font-family: var(--letra); }
+</style>
+<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "d432578ac00f445d86047dc522d7f8a1"}'></script><!-- End Cloudflare Web Analytics -->
+</head>
+<body>
+<div class="pagina">
+  <header class="cabecera">
+    <a class="logo" href="./" title="Ir a la portada">
+      <svg viewBox="0 0 220 300" aria-hidden="true"><path d="M70 40 Q118 4 140 18 Q156 28 156 60 L156 228 L190 228 Q206 228 206 246 L206 262 Q206 280 188 280 L46 280 Q28 280 28 262 L28 246 Q28 228 46 228 L82 228 L82 96 Q66 104 52 100 Q34 94 36 76 Q38 58 70 40 Z" fill="#FFD23F" stroke="#141414" stroke-width="14" stroke-linejoin="round"/></svg>
+      soy numerito
+    </a>
+    <nav class="volver-grupo" aria-label="Volver"><a class="volver" href="./">Inicio</a><a class="volver" href="./#simuladores">← Todos los simuladores</a></nav>
+  </header>
+
+  <h1>¿Ese descuento es real?</h1>
+  <p class="entradilla">El Black Friday, una tienda pone su freidora a «antes 90 €, ahora 45 €»: un −50 %. Pero ¿cuántos días costó de verdad 90 €? Tú lo decides y ves si el −50 % es real. Luego, comprueba un producto tuyo.</p>
+  <p class="aviso-top">Producto y precios inventados. Esto no es asesoramiento legal.</p>
+
+  <!-- ============ PARTE 1: RETOS CON LA FREIDORA ============ -->
+  <section class="parte" aria-labelledby="t-parte1">
+    <div class="parte-cabeza">
+      <span class="antetitulo">Parte 1</span>
+      <h2 id="t-parte1">Juega con la freidora</h2>
+      <p>Mueve el deslizador para decidir cuántos días tuvo la tienda la freidora a 90 € antes del Black Friday. El resto de días costaba unos 50 €. Abajo tienes tres retos.</p>
+    </div>
+
+    <div class="ventana">
+      <div class="ventana-barra" aria-hidden="true"><i style="background:var(--coral)"></i><i style="background:var(--amarillo)"></i><i style="background:var(--verde)"></i><span>Simulador · La freidora inventada</span></div>
+      <div class="ventana-cuerpo">
+        <div class="control">
+          <label for="dias">Días a 90 € antes del Black Friday</label>
+          <div class="control-fila">
+            <button class="boton" id="b-menos" type="button" aria-label="Un día menos a 90 €">−</button>
+            <input type="range" id="dias" min="1" max="90" step="1">
+            <button class="boton" id="b-mas" type="button" aria-label="Un día más a 90 €">+</button>
+            <output id="v-dias" for="dias"></output>
+          </div>
+        </div>
+
+        <div class="duelo" aria-live="polite">
+          <div class="caja cartel">
+            <small>El cartel dice</small>
+            <span class="grande">−50 %</span>
+            <span class="nota-caja">antes 90 €, ahora 45 €</span>
+          </div>
+          <div class="caja real" id="caja-real">
+            <small>Descuento real</small>
+            <span class="grande" id="v-real"></span>
+            <span class="nota-caja" id="v-real-nota"></span>
+          </div>
+        </div>
+
+        <p class="sello" id="sello" aria-live="polite"></p>
+
+        <div class="grafico" id="grafico">
+          <svg id="svg" role="img"></svg>
+        </div>
+        <p class="pista">Cada punto es lo que costó la freidora un día, del día 1 al 90. Puntos coral: días a 90 €. Línea negra: la mediana, lo que costó un día normal. Zona amarilla: los 30 días antes del Black Friday.</p>
+        <div class="controles">
+          <button class="boton" id="b-video" type="button">Volver a la freidora del vídeo (7 días)</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="comentario">
+      <svg viewBox="0 0 220 300" aria-hidden="true">
+        <path d="M70 40 Q118 4 140 18 Q156 28 156 60 L156 228 L190 228 Q206 228 206 246 L206 262 Q206 280 188 280 L46 280 Q28 280 28 262 L28 246 Q28 228 46 228 L82 228 L82 96 Q66 104 52 100 Q34 94 36 76 Q38 58 70 40 Z" fill="#FFD23F" stroke="#141414" stroke-width="8" stroke-linejoin="round"/>
+        <ellipse cx="102" cy="132" rx="15" ry="19" fill="#fff" stroke="#141414" stroke-width="5"/><circle cx="106" cy="136" r="8" fill="#141414"/>
+        <ellipse cx="140" cy="132" rx="15" ry="19" fill="#fff" stroke="#141414" stroke-width="5"/><circle cx="144" cy="136" r="8" fill="#141414"/>
+        <ellipse cx="94" cy="166" rx="9" ry="6" fill="#FF8A8A"/><ellipse cx="150" cy="166" rx="9" ry="6" fill="#FF8A8A"/>
+        <path d="M110 164 Q122 180 134 164" fill="none" stroke="#141414" stroke-width="5" stroke-linecap="round"/>
+      </svg>
+      <p class="burbuja" id="v-comentario" aria-live="polite"></p>
+    </div>
+
+    <section class="retos" aria-labelledby="t-retos">
+      <h2 id="t-retos">Tres retos</h2>
+      <ol class="lista-retos" id="retos"></ol>
+      <p class="leccion" id="leccion" hidden>¡Tres de tres! La lección: un cartel puede ser legal y aun así esconder un descuento pequeño. Para saberlo, compara el precio de oferta con la mediana: lo que costó un día normal.</p>
+    </section>
+
+    <details class="cuentas">
+      <summary>Ver las cuentas</summary>
+      <div class="calculo">
+        <section>
+          <h3>Cómo sale la mediana</h3>
+          <p>Ordenas los 90 precios de menor a mayor. Como 90 es par, la mediana es la media de los dos del centro: los puestos 45 y 46.</p>
+          <div class="cuenta" id="c-mediana"></div>
+        </section>
+        <section>
+          <h3>Cómo sale el descuento real</h3>
+          <p>Lo que te ahorras frente a la mediana, dividido entre la mediana.</p>
+          <div class="cuenta" id="c-real"></div>
+        </section>
+        <section>
+          <h3>La regla de los 30 días</h3>
+          <p>En España, el precio «antes» de una rebaja tiene que ser el más bajo de los 30 días anteriores (Ley 7/1996, art. 20.1). Aquí, esos 30 días son los días 61 a 90.</p>
+          <div class="cuenta" id="c-regla"></div>
+        </section>
+      </div>
+    </details>
+  </section>
+
+  <!-- ============ PARTE 2: TU PRODUCTO ============ -->
+  <section class="parte separador" aria-labelledby="t-parte2">
+    <div class="parte-cabeza">
+      <span class="antetitulo">Parte 2</span>
+      <h2 id="t-parte2">Ahora, tu producto</h2>
+      <p>¿Has visto una oferta? Haz lo mismo que con la freidora: escribe lo que dice el cartel y pega lo que costó otros días. Te decimos si el descuento es real.</p>
+    </div>
+
+    <div class="ventana">
+      <div class="ventana-barra" aria-hidden="true"><i style="background:var(--coral)"></i><i style="background:var(--amarillo)"></i><i style="background:var(--verde)"></i><span>Calculadora · Tu producto</span></div>
+      <div class="ventana-cuerpo">
+        <div class="paso">
+          <h3><span class="num">1</span>¿Qué dice el cartel?</h3>
+          <div class="precios-cartel">
+            <label class="precio-campo">Antes <input type="text" id="t-antes" inputmode="decimal" autocomplete="off" placeholder="90"> <span class="eur">€</span></label>
+            <label class="precio-campo">Ahora <input type="text" id="t-oferta" inputmode="decimal" autocomplete="off" placeholder="45"> <span class="eur">€</span></label>
+          </div>
+          <p class="ayuda">«Antes» es el precio tachado. «Ahora» es lo que pagas con la oferta.</p>
+        </div>
+
+        <div class="paso">
+          <h3><span class="num">2</span>¿Cuánto costó otros días?</h3>
+          <textarea id="t-historico" rows="4" spellcheck="false" aria-label="Precios de otros días, en euros" placeholder="Por ejemplo: 50 52 49,99 50 55 50 …"></textarea>
+          <p class="ayuda">Pega los precios de los últimos días o meses, del más antiguo al más reciente, separados por espacios o uno por línea. Los encuentras en webs y extensiones del navegador que guardan el historial de precios.</p>
+        </div>
+
+        <div class="controles">
+          <button class="boton amarillo" id="b-ejemplo" type="button">Probar con la freidora</button>
+          <button class="boton" id="b-borrar" type="button">Borrar</button>
+        </div>
+
+        <div class="mensajes" id="mensajes" aria-live="polite"></div>
+
+        <div class="resultado" id="resultado" hidden aria-live="polite">
+          <h3 class="resultado-titulo">Resultado</h3>
+          <div class="duelo">
+            <div class="caja cartel" id="r-cartel">
+              <small>El cartel dice</small>
+              <span class="grande" id="r-cartel-pct"></span>
+              <span class="nota-caja" id="r-cartel-nota"></span>
+            </div>
+            <div class="caja real" id="r-real">
+              <small>Descuento real</small>
+              <span class="grande" id="r-real-pct"></span>
+              <span class="nota-caja" id="r-real-nota"></span>
+            </div>
+          </div>
+          <p class="veredicto" id="r-veredicto"></p>
+          <svg class="mini-svg" id="mini-svg" role="img"></svg>
+          <p class="pista">Cada punto es un precio que has pegado. Línea negra: un día normal (la mediana). Línea coral: el precio de la oferta.</p>
+          <details class="detalles">
+            <summary>Más detalles</summary>
+            <ul id="r-detalles"></ul>
+          </details>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="pie">
+    <span><b>Producto y precios inventados. Esto no es asesoramiento legal.</b> La freidora, la tienda y sus precios son un ejemplo para aprender a calcular.</span>
+    <span>Lo explicamos en el Especial Black Friday del canal <a href="https://www.youtube.com/@soynumerito">Soy Numerito en YouTube</a>. La regla: Ley 7/1996, de Ordenación del Comercio Minorista, art. 20.1 (<a href="https://www.boe.es/buscar/act.php?id=BOE-A-1996-1072#a20">texto en el BOE</a>), con excepciones como los productos que se venden por primera vez.</span>
+    <span>Esta página no usa cookies ni guarda nada de lo que hagas: los precios que pegas no salen de tu navegador.</span>
+    <span>© 2026 Soy Numerito. Todos los derechos reservados: no se permite copiar ni reutilizar este simulador, sus textos ni sus diseños sin permiso por escrito.</span>
+  </footer>
+</div>
+
+<script id="calculos">
+// ---- CÁLCULOS (sin nada de la página: las pruebas los cargan con node) ----
+const Calc = (() => {
+  // Histórico exacto del guion (Especial Black Friday, «Notas para revisar»).
+  const DIAS_55 = [3, 7, 10, 14, 17, 21, 28, 31, 35, 38, 42, 45, 49, 52, 56, 63, 67, 70, 74, 78];
+  const DIA_FLASH = 25, DIAS = 90, SUBIDA = 90, OFERTA = 45, ANTES = 90, INICIO_VIDEO = 84, VENTANA = 30;
+
+  const base = (d) => (d === DIA_FLASH ? 30 : DIAS_55.includes(d) ? 55 : 50);
+  // inicio = primer día a 90 € (1..90). Los días desde «inicio» hasta el 90 están a 90 €.
+  const freidora = (inicio) => Array.from({ length: DIAS }, (_, i) => (i + 1 >= inicio ? SUBIDA : base(i + 1)));
+
+  const suma = (a) => a.reduce((s, x) => s + x, 0);
+  const media = (a) => suma(a) / a.length;
+  const ordenar = (a) => [...a].sort((x, y) => x - y);
+  function mediana(a) {
+    const o = ordenar(a), n = o.length, m = Math.floor(n / 2);
+    return n % 2 ? o[m] : (o[m - 1] + o[m]) / 2;
+  }
+  const minUltimos = (a, n = VENTANA) => Math.min(...a.slice(-n));
+  // Descuento en %: positivo = más barato que la referencia.
+  const descuento = (oferta, ref) => ((ref - oferta) / ref) * 100;
+
+  function estado(inicio) {
+    const v = freidora(inicio), o = ordenar(v);
+    const med = mediana(v), min30 = minUltimos(v);
+    return {
+      inicio, v, dias90: DIAS + 1 - inicio,
+      suma: suma(v), media: media(v), mediana: med, min30,
+      p45: o[44], p46: o[45],
+      cumple: ANTES <= min30,               // art. 20.1: el «antes» no puede pasar del más bajo de los 30 días previos
+      real: descuento(OFERTA, med),
+      cartel: descuento(OFERTA, ANTES),
+      cuenta: { 30: v.filter((x) => x === 30).length, 50: v.filter((x) => x === 50).length, 55: v.filter((x) => x === 55).length, 90: v.filter((x) => x === 90).length },
+    };
+  }
+
+  // ---- Lectura del histórico pegado ----
+  // Una cifra suelta: 49,99 · 49.99 · 1.299 · 1.299,50 · 50 €
+  function numero(t) {
+    t = t.trim().replace(/^\+/, '');
+    if (/^\d+(,\d+)?$/.test(t)) return parseFloat(t.replace(',', '.'));
+    if (/^\d{1,3}(\.\d{3})+(,\d+)?$/.test(t)) return parseFloat(t.replace(/\./g, '').replace(',', '.'));
+    if (/^\d+\.\d{1,2}$/.test(t)) return parseFloat(t);
+    if (/^,\d+$/.test(t)) return parseFloat('0' + t.replace(',', '.'));
+    return NaN;
+  }
+  function leerPrecios(texto) {
+    const limpio = String(texto || '').replace(/€|\beur(os)?\b/gi, ' ');
+    let t = limpio.replace(/,(?=\s|$)/g, ' ');            // «coma y espacio» separa
+    let trozos = t.split(/[\s;|]+/).filter(Boolean), comasSeparan = false;
+    // Sin espacios y con varias comas («50,52,49»): las comas separan.
+    if (trozos.length === 1 && (trozos[0].match(/,/g) || []).length > 1) { trozos = trozos[0].split(',').filter(Boolean); comasSeparan = true; }
+    const precios = [], raros = [], noPositivos = [];
+    for (const tr of trozos) {
+      const x = numero(tr);
+      if (Number.isNaN(x)) raros.push(tr);
+      else if (x <= 0) noPositivos.push(tr);
+      else precios.push(x);
+    }
+    return { precios, raros, noPositivos, comasSeparan };
+  }
+
+  function analizar(precios, oferta) {
+    const n = precios.length;
+    if (!n) return null;
+    const r = { n, media: media(precios), mediana: mediana(precios), min30: minUltimos(precios), ventana: Math.min(VENTANA, n) };
+    if (oferta > 0) {
+      r.dMedia = descuento(oferta, r.media);
+      r.dMediana = descuento(oferta, r.mediana);
+      r.dMin30 = descuento(oferta, r.min30);
+    }
+    return r;
+  }
+
+  // ---- Formato español ----
+  const NB = ' ';
+  function eur(x) {
+    const r = Math.round(x * 100) / 100;
+    const entero = Math.abs(r - Math.round(r)) < 1e-9;
+    return r.toLocaleString('es-ES', { minimumFractionDigits: entero ? 0 : 2, maximumFractionDigits: entero ? 0 : 2, useGrouping: true }) + NB + '€';
+  }
+  function num1(x) {
+    const r = Math.round(x * 10) / 10;
+    return Math.abs(r).toLocaleString('es-ES', { minimumFractionDigits: Number.isInteger(r) ? 0 : 1, maximumFractionDigits: 1 });
+  }
+  // −10 % si es más barato; +5 % si es más caro.
+  function pct(d) {
+    const r = Math.round(d * 10) / 10;
+    if (r === 0) return '0' + NB + '%';
+    return (r > 0 ? '−' : '+') + num1(r) + NB + '%';
+  }
+
+  return { DIAS, SUBIDA, OFERTA, ANTES, INICIO_VIDEO, VENTANA, base, freidora, media, mediana, minUltimos, descuento, estado, numero, leerPrecios, analizar, eur, num1, pct };
+})();
+if (typeof module !== 'undefined') module.exports = Calc;
+</script>
+
+<script>
+(() => {
+  const { DIAS, OFERTA, ANTES, INICIO_VIDEO, estado, eur, pct, num1 } = Calc;
+  const C = { tinta: '#141414', azul: '#3A5BFF', coral: '#FF5A36', amarillo: '#FFD23F', verde: '#22C27A', blanco: '#FFFFFF', linea: '#D9CFBB', gris: '#6E6658', zona: '#FFF3C4' };
+  const TOPE = 100;
+  const $ = (id) => document.getElementById(id);
+  const svg = $('svg'), rango = $('dias');
+  const DIAS_VIDEO = DIAS + 1 - INICIO_VIDEO;               // 7 días a 90 €, como en el vídeo
+  const diasTxt = (n) => `${n} ${n === 1 ? 'día' : 'días'}`;
+
+  // Retos: una sola meta cada uno. Se marcan solos cuando el deslizador se queda quieto en un valor que lo cumple.
+  const RETOS = [
+    { titulo: 'Haz que el cartel cumpla la regla de los 30 días.',
+      ayuda: 'La regla: el «antes» (90 €) tiene que ser el precio más bajo de los 30 días antes del Black Friday.',
+      vale: (e) => e.cumple,
+      porque: (e) => `✔ Con 30 días o más a 90 €, en toda la zona amarilla la freidora cuesta 90 €. El «antes 90 €» ya es legal.` },
+    { titulo: 'Encuentra la trampa: que cumpla la regla, pero con un descuento real menor del 20 %.',
+      ayuda: 'Con la regla cumplida, mira la caja «Descuento real».',
+      vale: (e) => e.cumple && e.real < 20,
+      porque: (e) => `✔ Es legal y dice −50 %, pero un día normal la freidora costaba ${eur(e.mediana)}: el descuento real es ${pct(e.real)}. Cumplir la regla no hace que el descuento sea tan grande como parece.` },
+    { titulo: 'Haz que el −50 % sea verdad.',
+      ayuda: 'La mediana es el precio del centro de la fila ordenada. Tiene que caer en 90 €.',
+      vale: (e) => e.mediana === ANTES,
+      porque: (e) => `✔ Hacen falta más de 45 días a 90 €: más de la mitad de los 90. Entonces 90 € sí es lo que cuesta un día normal y el −50 % es real.` },
+  ];
+
+  let dias = DIAS_VIDEO, movido = false, logro = null, espera = null;
+  const hecho = RETOS.map(() => false), porque = RETOS.map(() => '');
+
+  // ---------- gráfico ----------
+  let geo = null;
+  function medir() {
+    const ancho = $('grafico').clientWidth, estrecho = ancho < 520;
+    const m = { izq: estrecho ? 30 : 38, der: estrecho ? 46 : 104, arr: 26, aba: 26 };
+    const alto = estrecho ? 220 : 300;
+    geo = { ancho, alto, m, estrecho, pw: ancho - m.izq - m.der, ph: alto - m.arr - m.aba };
+  }
+  const y = (p) => geo.m.arr + geo.ph * (1 - p / TOPE);
+  const borde = (d) => geo.m.izq + (geo.pw * (d - 1)) / DIAS;     // borde izquierdo del día d (d = 91: final)
+  const cx = (d) => geo.m.izq + (geo.pw * (d - 0.5)) / DIAS;
+
+  function pastilla(x, cy, texto, fondo, letra) {
+    const w = texto.length * 7.4 + 14;
+    return `<rect x="${x}" y="${cy - 10}" width="${w}" height="20" rx="10" fill="${fondo}" stroke="${C.tinta}" stroke-width="2"/>` +
+      `<text x="${x + w / 2}" y="${cy + 4.5}" text-anchor="middle" font-size="12.5" font-weight="800" fill="${letra}">${texto}</text>`;
+  }
+
+  function dibujar(e) {
+    const { ancho, alto, m, pw, ph, estrecho } = geo, base = m.arr + ph, fs = estrecho ? 10.5 : 12.5;
+    let s = '';
+    s += `<rect x="${borde(61)}" y="${m.arr}" width="${borde(91) - borde(61)}" height="${ph}" fill="${C.zona}"/>`;
+    s += `<text x="${(borde(61) + borde(91)) / 2}" y="${m.arr - 8}" text-anchor="middle" font-size="${fs}" font-weight="800" fill="${C.tinta}">${estrecho ? 'últimos 30' : 'últimos 30 días'}</text>`;
+    [0, 50, 90].forEach((p) => {
+      s += `<line x1="${m.izq}" x2="${m.izq + pw}" y1="${y(p)}" y2="${y(p)}" stroke="${p ? C.linea : C.tinta}" stroke-width="${p ? 1.2 : 3}"/>`;
+      s += `<text x="${m.izq - 5}" y="${y(p) + 4}" text-anchor="end" font-size="${fs}" fill="${C.gris}">${p} €</text>`;
+    });
+    [1, 30, 60, 90].forEach((d) => {
+      s += `<text x="${cx(d)}" y="${base + 18}" text-anchor="middle" font-size="${fs}" fill="${C.gris}">${d === 1 ? 'día 1' : d}</text>`;
+    });
+    const r = Math.max(2.2, Math.min(4.2, pw / DIAS / 2.1));
+    e.v.forEach((p, i) => {
+      s += `<circle cx="${cx(i + 1)}" cy="${y(p)}" r="${r}" fill="${p === ANTES ? C.coral : C.azul}" stroke="${C.tinta}" stroke-width="${r > 3 ? 1.4 : 0.9}"/>`;
+    });
+    const yd = y(e.mediana);
+    s += `<line x1="${m.izq}" x2="${m.izq + pw}" y1="${yd}" y2="${yd}" stroke="${C.tinta}" stroke-width="3.5"/>`;
+    s += pastilla(m.izq + pw + 4, yd, (estrecho ? '' : 'mediana ') + eur(e.mediana).replace(/ €$/, ' €'), C.tinta, C.blanco);
+    svg.setAttribute('viewBox', `0 0 ${ancho} ${alto}`);
+    svg.setAttribute('height', alto);
+    svg.setAttribute('aria-label', `Precio de la freidora cada día: ${diasTxt(e.dias90)} a 90 € al final; mediana ${eur(e.mediana)}`);
+    svg.innerHTML = s;
+  }
+
+  // ---------- textos ----------
+  function pintar() {
+    const e = estado(DIAS + 1 - dias);
+    rango.value = dias;
+    rango.style.setProperty('--p', `${((dias - 1) / (DIAS - 1)) * 100}%`);
+    rango.setAttribute('aria-valuetext', diasTxt(dias) + ' a 90 €');
+    $('v-dias').textContent = diasTxt(dias);
+    $('b-menos').disabled = dias <= 1;
+    $('b-mas').disabled = dias >= DIAS;
+
+    $('v-real').textContent = pct(e.real);
+    $('v-real-nota').textContent = `un día normal costaba ${eur(e.mediana)} (la mediana)`;
+    $('caja-real').className = 'caja real ' + (e.real >= 49.95 ? 'igual' : 'trampa');
+    $('sello').className = 'sello ' + (e.cumple ? 'si' : 'no');
+    $('sello').textContent = e.cumple
+      ? '✔ Cumple la regla de los 30 días'
+      : `✗ No cumple la regla de los 30 días: en esos días bajó a ${eur(e.min30)}`;
+
+    $('c-mediana').textContent = `Puesto 45: ${eur(e.p45)} · puesto 46: ${eur(e.p46)} → (${num1(e.p45)} + ${num1(e.p46)}) ÷ 2 = ${eur(e.mediana)}`;
+    $('c-real').textContent = `(${num1(e.mediana)} − ${num1(OFERTA)}) ÷ ${num1(e.mediana)} = ${pct(e.real)} · Frente al «antes» del cartel: ${pct(e.cartel)}`;
+    $('c-regla').textContent = e.cumple
+      ? `Más bajo de los días 61–90: ${eur(e.min30)}. El cartel dice «antes ${eur(ANTES)}»: cumple.`
+      : `Más bajo de los días 61–90: ${eur(e.min30)}. El cartel dice «antes ${eur(ANTES)}»: no cumple. Con «antes ${eur(e.min30)}» el cartel diría ${pct(Calc.descuento(OFERTA, e.min30))}.`;
+
+    if (geo) dibujar(e);
+    pintarRetos(e);
+  }
+
+  function pintarRetos(e) {
+    $('retos').innerHTML = RETOS.map((r, k) => `
+      <li class="reto${hecho[k] ? ' hecho' : ''}" id="reto-${k + 1}" data-hecho="${hecho[k]}">
+        <span class="casilla" aria-hidden="true">${hecho[k] ? '✔' : ''}</span>
+        <b>${k + 1}. ${r.titulo}<span class="saltar">${hecho[k] ? ' (conseguido)' : ' (pendiente)'}</span></b>
+        <p class="ayuda">${r.ayuda}</p>
+        <p class="porque">${porque[k]}</p>
+      </li>`).join('');
+    $('leccion').hidden = !hecho.every(Boolean);
+    $('v-comentario').textContent = comentario(e);
+  }
+
+  // Al pararse el deslizador, se marca el primer reto pendiente que se cumple (solo si lo has movido tú).
+  function revisarRetos() {
+    if (!movido) return;
+    const e = estado(DIAS + 1 - dias);
+    const k = RETOS.findIndex((r, i) => !hecho[i] && r.vale(e));
+    if (k < 0) return;
+    hecho[k] = true; porque[k] = RETOS[k].porque(e); logro = { k, en: dias };
+    pintarRetos(e);
+    if (RETOS.some((r, i) => !hecho[i] && r.vale(e))) espera = setTimeout(revisarRetos, 1600);
+  }
+
+  function comentario(e) {
+    if (logro && logro.en === dias) {
+      if (hecho.every(Boolean)) return '¡Tres de tres! Un cartel puede ser legal y esconder un descuento pequeño. Y si la freidora pasa más de la mitad de los días a 90 €, entonces 90 € sí es su precio de siempre.';
+      return RETOS[logro.k].porque(e).replace(/^✔ /, `¡Reto ${logro.k + 1} conseguido! `);
+    }
+    if (!movido) return `Esta es la freidora del vídeo: solo ${diasTxt(dias)} a 90 €. Un día normal costaba 50 €, así que el descuento real es −10 %, no −50 %. Mueve el deslizador y prueba los retos.`;
+    if (!e.cumple) return `Con ${diasTxt(dias)} a 90 €, en los 30 días antes del Black Friday bajó a ${eur(e.min30)}. No cumple la regla, y frente a un día normal el descuento real es ${pct(e.real)}.`;
+    if (e.mediana === ANTES) return `Más de la mitad de los días a 90 €: ahora 90 € es lo que cuesta un día normal y el −50 % es real.`;
+    if (e.mediana > 55) return `Justo la mitad de los días a 90 €: la mediana queda entre 55 € y 90 €. Con un día más, el −50 % ya es real.`;
+    return `Cumple la regla, pero la mayoría de los días costó ${eur(e.mediana)} o menos. Frente a un día normal, el descuento real es ${pct(e.real)}.`;
+  }
+
+  // ---------- interacción ----------
+  const poner = (n) => {
+    n = Math.max(1, Math.min(DIAS, n));
+    if (n === dias) return;
+    dias = n; movido = true;
+    if (logro && logro.en !== dias) logro = null;
+    clearTimeout(espera);
+    pintar();
+    espera = setTimeout(revisarRetos, 500);
+  };
+  rango.addEventListener('input', () => poner(+rango.value));
+  $('b-menos').onclick = () => poner(dias - 1);
+  $('b-mas').onclick = () => poner(dias + 1);
+  $('b-video').onclick = () => { clearTimeout(espera); dias = DIAS_VIDEO; movido = false; logro = null; pintar(); };
+
+  new ResizeObserver(() => { medir(); pintar(); }).observe($('grafico'));
+  medir(); pintar();
+
+  // ================= PARTE 2: TU PRODUCTO =================
+  const ta = $('t-historico'), of = $('t-oferta'), an = $('t-antes');
+  const esc = (t) => t.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const leerUno = (t) => Calc.numero(t.replace(/€|\beur(os)?\b/gi, ''));
+
+  function calcular() {
+    const msgs = [], add = (clase, t) => msgs.push(`<p class="mensaje ${clase}">${t}</p>`);
+    const fin = () => { $('mensajes').innerHTML = msgs.join(''); };
+    $('resultado').hidden = true;
+
+    const ofTexto = of.value.trim(), anTexto = an.value.trim(), texto = ta.value;
+    if (!ofTexto && !anTexto && !texto.trim()) return fin();
+
+    // Paso 1: el cartel
+    let oferta = NaN, antes = NaN;
+    if (ofTexto) { oferta = leerUno(ofTexto); if (!(oferta > 0)) add('error', `El precio «Ahora» («${esc(ofTexto)}») no se entiende. Escribe un número, como 45 o 44,99.`); }
+    if (anTexto) { antes = leerUno(anTexto); if (!(antes > 0)) add('error', `El precio «Antes» («${esc(anTexto)}») no se entiende. Escribe un número, como 90.`); }
+
+    // Paso 2: los precios de otros días
+    const { precios, raros, noPositivos, comasSeparan } = Calc.leerPrecios(texto);
+    if (raros.length) add('error', `En el paso 2 no entendemos ${raros.length === 1 ? 'esto' : 'estos trozos'}: ${raros.slice(0, 6).map((t) => `«${esc(t)}»`).join(', ')}${raros.length > 6 ? '…' : ''}. ${raros.length === 1 ? 'Lo dejamos' : 'Los dejamos'} fuera. Escribe solo números, como 49,99 o 50.`);
+    if (noPositivos.length) add('error', `Un precio tiene que ser mayor que 0: dejamos fuera ${noPositivos.slice(0, 6).map((t) => `«${esc(t)}»`).join(', ')}.`);
+    if (comasSeparan) add('ojo', 'Como no hay espacios, hemos leído cada coma como separador. Si alguna era decimal (49,99), separa los precios con espacios.');
+
+    const faltan = [];
+    if (!(oferta > 0) && !ofTexto) faltan.push('el precio «Ahora» del paso 1');
+    if (!precios.length) faltan.push('los precios de otros días en el paso 2');
+    if (faltan.length) { add('', `Para ver el resultado falta ${faltan.join(' y ')}.`); return fin(); }
+    if (!(oferta > 0)) return fin();
+
+    const n = precios.length;
+    if (n < 7) add('ojo', `Solo hay ${n} ${n === 1 ? 'precio' : 'precios'} en el paso 2: así el «día normal» dice poco. Lo ideal es un precio por día de los últimos dos o tres meses.`);
+
+    const r = Calc.analizar(precios, oferta);
+    const real = r.dMediana, hayAntes = antes > 0, cartel = hayAntes ? Calc.descuento(oferta, antes) : null;
+
+    // Las dos cajas, como en la freidora
+    $('r-cartel').className = 'caja cartel' + (hayAntes ? '' : ' vacia');
+    $('r-cartel-pct').textContent = hayAntes ? Calc.pct(cartel) : '—';
+    $('r-cartel-nota').textContent = hayAntes ? `antes ${Calc.eur(antes)}, ahora ${Calc.eur(oferta)}` : 'escribe el precio «Antes» para verlo';
+    const casiIgual = hayAntes && real >= cartel - 1;
+    $('r-real').className = 'caja real' + (real <= 0.05 || (hayAntes && !casiIgual) ? ' trampa' : casiIgual ? ' igual' : '');
+    $('r-real-pct').textContent = Calc.pct(real);
+    $('r-real-nota').textContent = `un día normal costaba ${Calc.eur(r.mediana)} (la mediana)`;
+
+    let v;
+    if (real < -0.05) v = `No es una oferta: un día normal costaba ${Calc.eur(r.mediana)}, y ahora pagas ${Calc.eur(oferta)}. Pagas más que de costumbre.`;
+    else if (real <= 0.05) v = `No es una oferta: ${Calc.eur(oferta)} es justo lo que costaba un día normal.`;
+    else if (!hayAntes) v = `Frente a un día normal (${Calc.eur(r.mediana)}) te ahorras ${Calc.eur(r.mediana - oferta)}: un descuento real de ${Calc.pct(real)}.`;
+    else if (casiIgual) v = `El descuento es real: un día normal costaba ${Calc.eur(r.mediana)}, así que te ahorras de verdad ${Calc.eur(r.mediana - oferta)}.`;
+    else v = `El cartel dice ${Calc.pct(cartel)}, pero un día normal costaba ${Calc.eur(r.mediana)}, no ${Calc.eur(antes)}. De verdad te ahorras ${Calc.eur(r.mediana - oferta)}: un ${Calc.pct(real)}.`;
+    $('r-veredicto').textContent = v;
+
+    const det = [
+      `Hemos leído ${n} ${n === 1 ? 'precio' : 'precios'}: ${precios.slice(0, 8).map(Calc.eur).join(' · ')}${n > 8 ? ' …' : ''}`,
+      `Día normal (mediana): ${Calc.eur(r.mediana)}. Ordenas los precios y te quedas con el del centro.`,
+      `Media: ${Calc.eur(r.media)} (descuento frente a ella: ${Calc.pct(r.dMedia)}). Unos pocos días muy caros o muy baratos la mueven mucho; por eso usamos la mediana.`,
+      `Más bajo de los últimos ${r.ventana} precios: ${Calc.eur(r.min30)}.` + (hayAntes
+        ? (antes <= r.min30 + 0.005 ? ' El «antes» del cartel no pasa de ahí: cumple la regla de los 30 días.' : ` El «antes» del cartel (${Calc.eur(antes)}) pasa de ahí: no cumpliría la regla de los 30 días.`)
+        : '') + ' (La regla de los 30 días solo se puede comprobar si tienes un precio por día.)',
+    ];
+    $('r-detalles').innerHTML = det.map((t) => `<li>${t}</li>`).join('');
+
+    $('resultado').hidden = false;
+    mini(precios, r, oferta);
+    fin();
+  }
+
+  function mini(p, r, oferta) {
+    const s2 = $('mini-svg');
+    const ancho = $('resultado').clientWidth || 300, estrecho = ancho < 520;
+    const alto = 170, m = { izq: 44, der: estrecho ? 84 : 150, arr: 14, aba: 22 };
+    const pw = ancho - m.izq - m.der, ph = alto - m.arr - m.aba, n = p.length;
+    let lo = Math.min(...p, oferta), hi = Math.max(...p, oferta);
+    if (hi === lo) { hi += 1; lo = Math.max(0, lo - 1); }
+    const pad = (hi - lo) * 0.15; lo = Math.max(0, lo - pad); hi += pad;
+    const yy = (v) => m.arr + ph * (1 - (v - lo) / (hi - lo));
+    const xx = (i) => m.izq + (pw * (i + 0.5)) / n;
+    const pastilla = (cy, texto, fondo, letra) => {
+      const w = texto.length * 7.2 + 14, x = m.izq + pw + 4;
+      return `<rect x="${x}" y="${cy - 10}" width="${w}" height="20" rx="10" fill="${fondo}" stroke="${C.tinta}" stroke-width="2"/>` +
+        `<text x="${x + w / 2}" y="${cy + 4.5}" text-anchor="middle" font-size="12" font-weight="800" fill="${letra}">${texto}</text>`;
+    };
+    let s = '';
+    s += `<line x1="${m.izq}" x2="${m.izq + pw}" y1="${m.arr + ph}" y2="${m.arr + ph}" stroke="${C.tinta}" stroke-width="2.5"/>`;
+    [...new Set([Math.min(...p), Math.max(...p)])].forEach((v) => {
+      s += `<text x="${m.izq - 5}" y="${yy(v) + 4}" text-anchor="end" font-size="11" fill="${C.gris}">${Calc.eur(v)}</text>`;
+    });
+    const rr = Math.max(1.8, Math.min(4, pw / n / 2.2));
+    p.forEach((v, i) => { s += `<circle cx="${xx(i)}" cy="${yy(v)}" r="${rr}" fill="${C.azul}" stroke="${C.tinta}" stroke-width="${rr > 3 ? 1.2 : 0.7}"/>`; });
+    const yMed = yy(r.mediana), yOf = yy(oferta);
+    s += `<line x1="${m.izq}" x2="${m.izq + pw}" y1="${yMed}" y2="${yMed}" stroke="${C.tinta}" stroke-width="3.5"/>`;
+    s += `<line x1="${m.izq}" x2="${m.izq + pw}" y1="${yOf}" y2="${yOf}" stroke="${C.coral}" stroke-width="3.5"/>`;
+    let pM = yMed, pO = yOf;
+    if (Math.abs(pM - pO) < 22) { const mid = (pM + pO) / 2, sg = r.mediana >= oferta ? -1 : 1; pM = mid + sg * 11; pO = mid - sg * 11; }
+    const corto = (x) => Calc.eur(x).replace(/ €$/, ' €');
+    s += pastilla(pM, (estrecho ? '' : 'día normal ') + corto(r.mediana), C.tinta, C.blanco);
+    s += pastilla(pO, (estrecho ? '' : 'oferta ') + corto(oferta), C.coral, C.blanco);
+    s += `<text x="${m.izq}" y="${alto - 4}" font-size="11" fill="${C.gris}">más antiguo</text><text x="${m.izq + pw}" y="${alto - 4}" text-anchor="end" font-size="11" fill="${C.gris}">más reciente</text>`;
+    s2.setAttribute('viewBox', `0 0 ${ancho} ${alto}`);
+    s2.setAttribute('height', alto);
+    s2.setAttribute('aria-label', `Gráfico de tus ${n} precios: día normal ${Calc.eur(r.mediana)}, oferta ${Calc.eur(oferta)}`);
+    s2.innerHTML = s;
+  }
+
+  [ta, of, an].forEach((el) => el.addEventListener('input', calcular));
+  $('b-ejemplo').onclick = () => { an.value = '90'; of.value = '45'; ta.value = Calc.freidora(INICIO_VIDEO).join(' '); calcular(); };
+  $('b-borrar').onclick = () => { an.value = ''; of.value = ''; ta.value = ''; calcular(); an.focus(); };
+  let anchoVisto = window.innerWidth;
+  window.addEventListener('resize', () => { if (window.innerWidth !== anchoVisto) { anchoVisto = window.innerWidth; if (!$('resultado').hidden) calcular(); } });
+  calcular();
+})();
+</script>
+</body>
+</html>

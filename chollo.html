@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>¿Chollo o no? · Soy Numerito</title>
+<meta name="description" content="Juego gratis del Especial Black Friday: seis ofertas inventadas, 15 segundos por producto. Mira lo que costó cada día de los últimos 90 días y decide si el descuento es real. Partida nueva cada día para compararte con tus amigos.">
+<meta property="og:title" content="¿Chollo o no? · Soy Numerito">
+<meta property="og:description" content="Seis ofertas, 15 segundos por producto. ¿Cuántas trampas detectas?">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://soynumerito.com/chollo">
+<link rel="stylesheet" href="estilo.css">
+<style>
+  .ventana { background: var(--blanco); border: var(--borde); border-radius: 20px; box-shadow: var(--sombra); overflow: hidden; }
+  .ventana-barra { background: var(--tinta); color: var(--papel); display: flex; align-items: center; gap: 8px; padding: 10px 16px; font-size: 15px; flex-wrap: wrap; }
+  .ventana-barra i { width: 12px; height: 12px; border-radius: 50%; display: block; flex: none; }
+  .ventana-barra span { margin-left: 8px; }
+  .ventana-barra .derecha { margin-left: auto; font-variant-numeric: tabular-nums; font-weight: 800; }
+  .ventana-cuerpo { padding: 18px 16px; display: grid; gap: 16px; min-width: 0; }
+  .regla { margin: 0; background: var(--papel); border: 3px solid var(--tinta); border-radius: 14px; padding: 10px 14px; font-size: 16px; }
+  [hidden] { display: none !important; }
+  .pila { display: grid; gap: 16px; }
+  .acciones { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .boton.verde { background: var(--verde); }
+
+  .comentario { display: flex; gap: 14px; align-items: flex-end; }
+  .comentario svg { width: 58px; flex: none; }
+  .burbuja { position: relative; background: var(--blanco); border: var(--borde); border-radius: 18px; padding: 12px 16px;
+    box-shadow: 4px 4px 0 var(--tinta); font-size: 17px; min-width: 0; margin: 0; flex: 1; }
+  .burbuja::before { content: ''; position: absolute; left: -14px; bottom: 16px; border: 7px solid transparent; border-right: 10px solid var(--tinta); }
+
+  .cartel { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+  .producto { font-size: 22px; font-weight: 800; }
+  .etiqueta-precio { background: var(--amarillo); border: 3px solid var(--tinta); border-radius: 12px; padding: 6px 14px; box-shadow: 4px 4px 0 var(--tinta);
+    display: flex; gap: 12px; align-items: baseline; transform: rotate(-2deg); font-variant-numeric: tabular-nums; }
+  .etiqueta-precio s { font-size: 18px; color: var(--gris); }
+  .etiqueta-precio strong { font-size: 30px; }
+  .pegatina { background: var(--coral); color: var(--blanco); border: 3px solid var(--tinta); border-radius: 999px; padding: 2px 10px; font-weight: 800; }
+  .reloj { height: 14px; border: 3px solid var(--tinta); border-radius: 8px; background: var(--linea); overflow: hidden; }
+  .reloj div { height: 100%; background: var(--coral); width: 100%; }
+  .grafico svg { display: block; width: 100%; height: auto; }
+  .grafico text { font-family: var(--letra); }
+  .chip { display: inline-flex; gap: 6px; align-items: baseline; border: 3px solid var(--tinta); border-radius: 999px; padding: 2px 12px; font-weight: 800; font-variant-numeric: tabular-nums; background: var(--blanco); }
+  .chip small { font-weight: 500; font-size: 14px; }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* Final de la partida: resultado para compartir */
+  .resultado { background: var(--amarillo); border: var(--borde); border-radius: 18px; box-shadow: 4px 4px 0 var(--tinta); padding: 14px 16px; display: grid; gap: 10px; justify-items: start; }
+  .resultado .marcador { font-size: clamp(30px, 7vw, 44px); font-weight: 800; line-height: 1; }
+  .resultado .cuadros { font-size: 30px; letter-spacing: 4px; line-height: 1; }
+  .resultado p { margin: 0; }
+  .copiado { font-weight: 800; }
+  .suscribete { background: var(--blanco); border: var(--borde); border-radius: 18px; padding: 14px 16px; display: grid; gap: 10px; justify-items: start; }
+  .suscribete b { font-size: 20px; line-height: 1.2; }
+  .suscribete p { margin: 0; }
+
+  .retos { display: grid; gap: 10px; margin: 28px 0 0; }
+  .retos h2 { margin: 0; }
+  .retos ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .retos li { display: flex; gap: 12px; align-items: center; background: var(--blanco); border: 3px solid var(--tinta); border-radius: 14px; padding: 8px 14px; font-weight: 700; }
+  .casilla { flex: none; width: 28px; height: 28px; border: 3px solid var(--tinta); border-radius: 8px; display: grid; place-items: center; font-weight: 800; background: var(--blanco); }
+  .retos li.hecho { background: var(--verde); }
+  .retos li.hecho .casilla { background: var(--tinta); color: var(--verde); }
+
+  @media (max-width: 520px) {
+    .ventana-cuerpo { padding: 14px 10px; }
+    .ventana-barra { font-size: 13px; }
+    .etiqueta-precio strong { font-size: 26px; }
+    .comentario svg { width: 44px; }
+  }
+</style>
+<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "d432578ac00f445d86047dc522d7f8a1"}'></script><!-- End Cloudflare Web Analytics -->
+</head>
+<body>
+<div class="pagina">
+  <header class="cabecera">
+    <a class="logo" href="./" title="Ir a la portada">
+      <svg viewBox="0 0 220 300" aria-hidden="true"><path d="M70 40 Q118 4 140 18 Q156 28 156 60 L156 228 L190 228 Q206 228 206 246 L206 262 Q206 280 188 280 L46 280 Q28 280 28 262 L28 246 Q28 228 46 228 L82 228 L82 96 Q66 104 52 100 Q34 94 36 76 Q38 58 70 40 Z" fill="#FFD23F" stroke="#141414" stroke-width="14" stroke-linejoin="round"/></svg>
+      soy numerito
+    </a>
+    <nav class="volver-grupo" aria-label="Volver"><a class="volver" href="./">Inicio</a><a class="volver" href="./#simuladores">← Todos los simuladores</a></nav>
+  </header>
+
+  <span class="etiqueta" style="margin-top:24px">Juego · Black Friday</span>
+  <h1>¿Chollo o no?</h1>
+  <p class="entradilla">Seis ofertas, 15 segundos por producto. Mira lo que costó cada día de los últimos 90 días y decide si el descuento es real. Cada día hay una partida nueva, la misma para todo el mundo: compárate con tus amigos.</p>
+
+  <section class="ventana" aria-label="Juego">
+    <div class="ventana-barra"><i style="background:var(--coral)"></i><i style="background:var(--amarillo)"></i><i style="background:var(--verde)"></i><span id="ch-ronda">Partida del día</span><span class="derecha" id="ch-marcador"></span></div>
+    <div class="ventana-cuerpo">
+      <p class="regla"><b>Regla del juego:</b> es <b>chollo</b> si el precio de oferta está al menos un <b>20 % por debajo de su precio habitual</b>, es decir, de la mediana de lo que costó en los últimos 90 días.</p>
+
+      <div id="ch-inicio" class="acciones"><button class="boton negro grande" type="button" id="ch-empezar">Empezar la partida del día</button></div>
+
+      <div id="ch-juego" class="pila" hidden>
+        <div class="cartel">
+          <span class="producto" id="ch-producto"></span>
+          <span class="etiqueta-precio"><s id="ch-antes"></s><strong id="ch-ahora"></strong><span class="pegatina" id="ch-pct"></span></span>
+        </div>
+        <div class="grafico" id="ch-grafico"></div>
+        <div class="reloj" aria-hidden="true"><div id="ch-reloj"></div></div>
+        <div class="acciones" id="ch-botones">
+          <button class="boton verde grande" type="button" data-resp="si">Chollo</button>
+          <button class="boton coral grande" type="button" data-resp="no">No es chollo</button>
+        </div>
+        <div class="chips" id="ch-chips" hidden></div>
+      </div>
+
+      <div class="comentario">
+        <svg viewBox="0 0 220 300" aria-hidden="true" class="mascota"></svg>
+        <p class="burbuja" id="ch-numerito" aria-live="polite">Hay chollos de verdad y ofertas con trampa. Fíjate en lo que costó el producto la mayoría de los días.</p>
+      </div>
+      <div class="acciones"><button class="boton negro" type="button" id="ch-siguiente" hidden>Siguiente producto</button></div>
+
+      <div id="ch-final" class="pila" hidden>
+        <div class="resultado">
+          <span class="antetitulo" id="ch-final-tipo">Partida del día</span>
+          <span class="marcador" id="ch-final-marcador"></span>
+          <span class="cuadros" id="ch-final-cuadros" aria-hidden="true"></span>
+          <p id="ch-final-texto"></p>
+          <div class="acciones"><button class="boton negro grande" type="button" id="ch-compartir">Compartir mi resultado</button><span class="copiado" id="ch-copiado" aria-live="polite"></span></div>
+        </div>
+        <div class="suscribete">
+          <b>Lo explicamos con calma en el Especial Black Friday</b>
+          <p>Por qué la mediana y no la media, qué dice la regla de los 30 días y cómo se la saltan algunas tiendas.</p>
+          <div class="acciones">
+            <a class="boton coral" href="https://www.youtube.com/@soynumerito?sub_confirmation=1">Suscribirme en YouTube</a>
+            <a class="boton" href="descuento">Calcula el descuento real de tu producto →</a>
+          </div>
+        </div>
+        <div class="acciones"><button class="boton" type="button" id="ch-otra">Jugar otra partida (productos al azar)</button></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="retos"><h2>Tus retos</h2><ul>
+    <li id="ch-r1"><span class="casilla"></span>Acierta 4 de 6 productos</li>
+    <li id="ch-r2"><span class="casilla"></span>No caigas en la subida de 5 semanas antes (la que cumple la regla de los 30 días)</li>
+    <li id="ch-r3"><span class="casilla"></span>Encuentra un chollo de verdad</li>
+  </ul></div>
+
+  <footer class="pie">
+    <span>Lo explicamos en el Especial Black Friday del canal <a href="https://www.youtube.com/@soynumerito">Soy Numerito en YouTube</a>.</span>
+    <span>Productos y precios inventados. Cada punto del gráfico es lo que costó el producto ese día. La regla del 20 % es la del juego, no una norma legal.</span>
+    <span>Esta página no usa cookies ni guarda nada de lo que hagas.</span>
+    <span>© 2026 Soy Numerito. Todos los derechos reservados: no se permite copiar ni reutilizar este juego, sus textos ni sus diseños sin permiso por escrito.</span>
+  </footer>
+</div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const euros = (x) => Math.round(x).toLocaleString('es-ES') + ' €';
+  const pct = (x) => Math.round(x * 100) + ' %';
+  const mediana = (xs) => { const s = [...xs].sort((a, b) => a - b), n = s.length; return n % 2 ? s[(n - 1) / 2] : (s[n / 2 - 1] + s[n / 2]) / 2; };
+  const media = (xs) => xs.reduce((a, b) => a + b, 0) / xs.length;
+
+  // Azar con semilla: la partida del día es la misma para todo el mundo (fecha de Madrid).
+  const mulberry32 = (a) => () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  const hoy = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Madrid' }).format(new Date());   // 2026-11-12
+  const hoyBonito = new Intl.DateTimeFormat('es-ES', { timeZone: 'Europe/Madrid', day: 'numeric', month: 'short' }).format(new Date());
+  let rnd = Math.random;
+  const elegir = (xs) => xs[Math.floor(rnd() * xs.length)];
+  const barajar = (xs) => { const a = [...xs]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+  const MASCOTA = '<path d="M70 40 Q118 4 140 18 Q156 28 156 60 L156 228 L190 228 Q206 228 206 246 L206 262 Q206 280 188 280 L46 280 Q28 280 28 262 L28 246 Q28 228 46 228 L82 228 L82 96 Q66 104 52 100 Q34 94 36 76 Q38 58 70 40 Z" fill="#FFD23F" stroke="#141414" stroke-width="8" stroke-linejoin="round"/><ellipse cx="102" cy="132" rx="15" ry="19" fill="#fff" stroke="#141414" stroke-width="5"/><circle cx="106" cy="136" r="8" fill="#141414"/><ellipse cx="140" cy="132" rx="15" ry="19" fill="#fff" stroke="#141414" stroke-width="5"/><circle cx="144" cy="136" r="8" fill="#141414"/><ellipse cx="94" cy="166" rx="9" ry="6" fill="#FF8A8A"/><ellipse cx="150" cy="166" rx="9" ry="6" fill="#FF8A8A"/><path d="M110 164 Q122 180 134 164" fill="none" stroke="#141414" stroke-width="5" stroke-linecap="round"/>';
+  document.querySelectorAll('svg.mascota').forEach((s) => { s.innerHTML = MASCOTA; });
+  function marcar(id) { const li = $(id); if (li.classList.contains('hecho')) return; li.classList.add('hecho'); li.querySelector('.casilla').textContent = '✔'; }
+
+  const PRODUCTOS = ['Freidora de aire', 'Auriculares inalámbricos', 'Robot aspirador', 'Cafetera de cápsulas', 'Patinete eléctrico', 'Zapatillas de correr', 'Televisor de 50"', 'Chaqueta de plumas', 'Batidora de vaso', 'Silla de oficina'];
+  const UMBRAL = 0.20, SEGUNDOS = 15;
+  const ruido = (base, k) => base + elegir([0, 0, 0, 0, k, -k]);
+  // Cada patrón devuelve { dias: 90 precios, antes, ahora }
+  const PATRONES = {
+    // Como la freidora del vídeo: sube la última semana y anuncia −50 % sobre ese precio.
+    semanaInflada() { const b = elegir([40, 50, 60, 80]); const d = Array.from({ length: 90 }, (_, i) => i >= 83 ? b * 1.8 : ruido(b, b * 0.1)); return { dias: d, antes: b * 1.8, ahora: b * 0.9 }; },
+    // La otra tienda del vídeo: sube 35 días antes; el cartel cumple la regla de 30 días.
+    trampa35() { const b = elegir([40, 50, 60, 100]); const d = Array.from({ length: 90 }, (_, i) => i >= 55 ? b * 1.8 : ruido(b, b * 0.1)); return { dias: d, antes: b * 1.8, ahora: b * 0.9 }; },
+    // Precio estable y oferta de verdad.
+    chollo() { const b = elegir([50, 70, 90, 120]); const d = Array.from({ length: 90 }, () => ruido(b, b * 0.05)); return { dias: d, antes: b, ahora: Math.round(b * elegir([0.6, 0.65, 0.7])) }; },
+    // Con picos sueltos (que suben la media), pero la oferta es buena frente a la mediana.
+    cholloConPicos() { const b = elegir([60, 80, 100]); const d = Array.from({ length: 90 }, () => rnd() < 0.15 ? b * 1.5 : ruido(b, b * 0.05)); return { dias: d, antes: b * 1.5, ahora: Math.round(b * 0.72) }; },
+    // Ya había costado casi eso muchas veces: la oferta solo iguala lo de siempre.
+    siempreAsi() { const b = elegir([40, 60, 80]); const d = Array.from({ length: 90 }, () => rnd() < 0.5 ? b * 0.92 : b); return { dias: d, antes: b * 1.4, ahora: Math.round(b * 0.88) }; },
+  };
+  // 3 chollos y 3 trampas: contestar siempre lo mismo da 3 de 6, así que el reto de 4 pide mirar el gráfico.
+  const SECUENCIA = ['semanaInflada', 'trampa35', 'siempreAsi', 'chollo', 'cholloConPicos', 'chollo'];
+  let rondas, i, aciertos, cuadros, ronda, reloj, restante, pausado = false, delDia = true;
+
+  function nueva(diaria) {
+    delDia = diaria;
+    rnd = diaria ? mulberry32(+hoy.replace(/-/g, '')) : Math.random;
+    const prods = barajar(PRODUCTOS);
+    rondas = barajar(SECUENCIA).map((p, k) => {
+      const r = PATRONES[p](); r.dias = r.dias.map((x) => Math.round(x)); r.antes = Math.round(r.antes); r.ahora = Math.round(r.ahora);
+      r.patron = p; r.producto = prods[k]; r.mediana = mediana(r.dias); r.media = media(r.dias); r.min30 = Math.min(...r.dias.slice(60));
+      r.real = 1 - r.ahora / r.mediana; r.esChollo = r.real >= UMBRAL - 1e-9; return r;
+    });
+    i = 0; aciertos = 0; cuadros = [];
+    $('ch-inicio').hidden = true; $('ch-final').hidden = true; $('ch-juego').hidden = false;
+    mostrar();
+  }
+
+  function grafico(r, revelado) {
+    const W = 640, H = 220, m = { l: 44, r: 12, t: 14, b: 28 };
+    const max = Math.max(...r.dias, r.antes) * 1.08, min = 0;
+    const x = (d) => m.l + (d / 89) * (W - m.l - m.r), y = (v) => H - m.b - ((v - min) / (max - min)) * (H - m.t - m.b);
+    let s = '';
+    [0, 0.25, 0.5, 0.75, 1].forEach((f) => { const v = Math.round(max * f / 10) * 10; s += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}" stroke="#D9CFBB" stroke-width="1.5"/><text x="${m.l - 6}" y="${y(v) + 4}" text-anchor="end" font-size="12" fill="#6E6658">${v} €</text>`; });
+    s += `<text x="${m.l}" y="${H - 8}" font-size="12" fill="#6E6658">hace 90 días</text><text x="${W - m.r}" y="${H - 8}" text-anchor="end" font-size="12" fill="#6E6658">ayer</text>`;
+    if (revelado) {
+      s += `<rect x="${x(60)}" y="${m.t}" width="${x(89) - x(60)}" height="${H - m.t - m.b}" fill="#FFD23F" opacity=".25"/>`;
+      s += `<text x="${x(74.5)}" y="${m.t + 12}" text-anchor="middle" font-size="12" font-weight="800" fill="#141414">últimos 30 días</text>`;
+    }
+    r.dias.forEach((v, d) => { s += `<circle cx="${x(d)}" cy="${y(v)}" r="3.2" fill="#3A5BFF" stroke="#141414" stroke-width="1"/>`; });
+    if (revelado) {
+      s += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(r.mediana)}" y2="${y(r.mediana)}" stroke="#22C27A" stroke-width="4"/><text x="${m.l + 6}" y="${y(r.mediana) - 6}" font-size="13" font-weight="800" fill="#141414">mediana ${euros(r.mediana)}</text>`;
+      s += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(r.ahora)}" y2="${y(r.ahora)}" stroke="#FF5A36" stroke-width="3" stroke-dasharray="7 5"/><text x="${W - m.r - 4}" y="${y(r.ahora) + 16}" text-anchor="end" font-size="13" font-weight="800" fill="#141414">oferta ${euros(r.ahora)}</text>`;
+    }
+    $('ch-grafico').innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Precio de cada día de los últimos 90 días"><title>Precio de cada día</title>${s}</svg>`;
+  }
+
+  function mostrar() {
+    ronda = rondas[i];
+    $('ch-ronda').textContent = `${delDia ? 'Partida del día' : 'Partida libre'} · producto ${i + 1} de ${rondas.length}`;
+    $('ch-marcador').textContent = `${aciertos} aciertos`;
+    $('ch-producto').textContent = ronda.producto;
+    $('ch-antes').textContent = 'Antes ' + euros(ronda.antes);
+    $('ch-ahora').textContent = euros(ronda.ahora);
+    $('ch-pct').textContent = '−' + pct(1 - ronda.ahora / ronda.antes);
+    $('ch-chips').hidden = true; $('ch-siguiente').hidden = true;
+    $('ch-botones').querySelectorAll('button').forEach((b) => { b.disabled = false; });
+    $('ch-numerito').textContent = i === 0 ? 'Mira los puntos: ¿cuánto costaba casi siempre?' : 'Otro. Fíjate en lo que costó la mayoría de los días.';
+    grafico(ronda, false);
+    restante = SEGUNDOS; arrancarReloj();
+  }
+
+  function arrancarReloj() {
+    clearInterval(reloj); pintarReloj();
+    reloj = setInterval(() => { if (pausado) return; restante -= 0.1; pintarReloj(); if (restante <= 0) responder(null); }, 100);
+  }
+  function pintarReloj() { $('ch-reloj').style.width = Math.max(0, restante / SEGUNDOS) * 100 + '%'; }
+  // Si cambias de pestaña o bloqueas el móvil, el reloj se para.
+  document.addEventListener('visibilitychange', () => { pausado = document.hidden; });
+
+  function responder(resp) {
+    clearInterval(reloj);
+    $('ch-botones').querySelectorAll('button').forEach((b) => { b.disabled = true; });
+    const ok = resp !== null && (resp === 'si') === ronda.esChollo;
+    if (ok) aciertos++;
+    cuadros.push(resp === null ? '⬜' : ok ? '🟩' : '🟥');
+    if (ok && ronda.patron === 'trampa35') marcar('ch-r2');
+    if (ok && ronda.esChollo) marcar('ch-r3');
+    grafico(ronda, true);
+    $('ch-chips').innerHTML = `<span class="chip"><small>Descuento del cartel</small>−${pct(1 - ronda.ahora / ronda.antes)}</span><span class="chip" style="background:var(--verde)"><small>Frente a la mediana</small>${ronda.real >= 0 ? '−' : '+'}${pct(Math.abs(ronda.real))}</span><span class="chip"><small>Más bajo de 30 días</small>${euros(ronda.min30)}</span>`;
+    $('ch-chips').hidden = false;
+    const inicio = resp === null ? '¡Se acabó el tiempo! ' : ok ? '¡Bien visto! ' : '¡Uy! ';
+    const veredicto = ronda.esChollo ? `Es chollo: ${euros(ronda.ahora)} está un ${pct(ronda.real)} por debajo de lo que costó la mayoría de los días.` : `No es chollo: frente a su precio habitual (${euros(ronda.mediana)}), el descuento real es ${ronda.real > 0 ? 'de un ' + pct(ronda.real) : 'nulo'}.`;
+    const pista = {
+      semanaInflada: ' El precio tachado es el de la última semana, cuando lo subieron.',
+      trampa35: ` Lo subieron 5 semanas antes, así que el cartel cumple la regla de los 30 días (el más bajo de 30 días es ${euros(ronda.min30)}). Mirando más atrás, el precio habitual era más bajo.`,
+      chollo: ' El precio fue estable durante 90 días y la oferta baja de verdad.',
+      cholloConPicos: ` Los picos suben la media (${euros(ronda.media)}), pero la mediana casi no se mueve, y frente a ella la oferta es buena.`,
+      siempreAsi: ' Ya había costado eso, o casi, muchos días: la oferta solo iguala lo de siempre.',
+    }[ronda.patron];
+    $('ch-numerito').textContent = inicio + veredicto + pista;
+    $('ch-marcador').textContent = `${aciertos} aciertos`;
+    i++;
+    if (i < rondas.length) { $('ch-siguiente').textContent = 'Siguiente producto'; $('ch-siguiente').hidden = false; }
+    else { $('ch-siguiente').textContent = 'Ver mi resultado'; $('ch-siguiente').hidden = false; }
+  }
+
+  function terminar() {
+    if (aciertos >= 4) marcar('ch-r1');
+    $('ch-juego').hidden = true; $('ch-siguiente').hidden = true;
+    $('ch-ronda').textContent = delDia ? 'Partida del día · terminada' : 'Partida libre · terminada';
+    $('ch-final-tipo').textContent = delDia ? `Partida del día · ${hoyBonito}` : 'Partida libre';
+    $('ch-final-marcador').textContent = `${aciertos} de ${rondas.length}`;
+    $('ch-final-cuadros').textContent = cuadros.join('');
+    $('ch-final-texto').textContent = aciertos === 6 ? 'Ni una trampa se te ha escapado.' : aciertos >= 4 ? 'Buen ojo. Alguna trampa todavía cuela.' : 'Las tiendas saben lo que hacen: el precio tachado engaña mucho.';
+    $('ch-copiado').textContent = '';
+    $('ch-numerito').textContent = 'La lección: un descuento depende del precio con el que lo comparas. Antes de comprar, mira el histórico y su mediana.';
+    $('ch-final').hidden = false;
+  }
+
+  function textoCompartir() {
+    return `¿Chollo o no? · ${delDia ? hoyBonito : 'partida libre'}\n${cuadros.join('')} ${aciertos}/${rondas.length}\n¿Cuántas trampas detectas tú?\nhttps://soynumerito.com/chollo`;
+  }
+  $('ch-compartir').onclick = async () => {
+    const texto = textoCompartir();
+    if (navigator.share) { try { await navigator.share({ text: texto }); return; } catch (e) { if (e.name === 'AbortError') return; } }
+    try { await navigator.clipboard.writeText(texto); $('ch-copiado').textContent = '¡Copiado! Pégalo donde quieras.'; }
+    catch (e) { window.prompt('Copia tu resultado:', texto); }
+  };
+
+  $('ch-botones').addEventListener('click', (e) => { const b = e.target.closest('[data-resp]'); if (b && !b.disabled) responder(b.dataset.resp); });
+  $('ch-siguiente').onclick = () => (i < rondas.length ? mostrar() : terminar());
+  $('ch-empezar').onclick = () => nueva(true);
+  $('ch-otra').onclick = () => nueva(false);
+})();
+</script>
+</body>
+</html>
