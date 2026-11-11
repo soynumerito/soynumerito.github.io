@@ -349,6 +349,103 @@
     <small>Estadística que se entiende. Esta web no usa cookies; los vídeos de YouTube solo se cargan si pulsas play.<br>© 2026 Soy Numerito. Todos los derechos reservados: no se permite copiar ni reutilizar los vídeos, textos, simuladores, diseños ni la mascota Numerito sin permiso por escrito.</small>
   </div>
 </footer>
+<script id="calculos">
+// ---- CÁLCULOS (sin nada de la página: las pruebas los cargan con node) ----
+const Calc = (() => {
+  // Histórico exacto del guion (Especial Black Friday, «Notas para revisar»).
+  const DIAS_55 = [3, 7, 10, 14, 17, 21, 28, 31, 35, 38, 42, 45, 49, 52, 56, 63, 67, 70, 74, 78];
+  const DIA_FLASH = 25, DIAS = 90, SUBIDA = 90, OFERTA = 45, ANTES = 90, INICIO_VIDEO = 84, VENTANA = 30;
+
+  const base = (d) => (d === DIA_FLASH ? 30 : DIAS_55.includes(d) ? 55 : 50);
+  // inicio = primer día a 90 € (1..90). Los días desde «inicio» hasta el 90 están a 90 €.
+  const freidora = (inicio) => Array.from({ length: DIAS }, (_, i) => (i + 1 >= inicio ? SUBIDA : base(i + 1)));
+
+  const suma = (a) => a.reduce((s, x) => s + x, 0);
+  const media = (a) => suma(a) / a.length;
+  const ordenar = (a) => [...a].sort((x, y) => x - y);
+  function mediana(a) {
+    const o = ordenar(a), n = o.length, m = Math.floor(n / 2);
+    return n % 2 ? o[m] : (o[m - 1] + o[m]) / 2;
+  }
+  const minUltimos = (a, n = VENTANA) => Math.min(...a.slice(-n));
+  // Descuento en %: positivo = más barato que la referencia.
+  const descuento = (oferta, ref) => ((ref - oferta) / ref) * 100;
+
+  function estado(inicio) {
+    const v = freidora(inicio), o = ordenar(v);
+    const med = mediana(v), min30 = minUltimos(v);
+    return {
+      inicio, v, dias90: DIAS + 1 - inicio,
+      suma: suma(v), media: media(v), mediana: med, min30,
+      p45: o[44], p46: o[45],
+      cumple: ANTES <= min30,               // art. 20.1: el «antes» no puede pasar del más bajo de los 30 días previos
+      real: descuento(OFERTA, med),
+      cartel: descuento(OFERTA, ANTES),
+      cuenta: { 30: v.filter((x) => x === 30).length, 50: v.filter((x) => x === 50).length, 55: v.filter((x) => x === 55).length, 90: v.filter((x) => x === 90).length },
+    };
+  }
+
+  // ---- Lectura del histórico pegado ----
+  // Una cifra suelta: 49,99 · 49.99 · 1.299 · 1.299,50 · 50 €
+  function numero(t) {
+    t = t.trim().replace(/^\+/, '');
+    if (/^\d+(,\d+)?$/.test(t)) return parseFloat(t.replace(',', '.'));
+    if (/^\d{1,3}(\.\d{3})+(,\d+)?$/.test(t)) return parseFloat(t.replace(/\./g, '').replace(',', '.'));
+    if (/^\d+\.\d{1,2}$/.test(t)) return parseFloat(t);
+    if (/^,\d+$/.test(t)) return parseFloat('0' + t.replace(',', '.'));
+    return NaN;
+  }
+  function leerPrecios(texto) {
+    const limpio = String(texto || '').replace(/€|\beur(os)?\b/gi, ' ');
+    let t = limpio.replace(/,(?=\s|$)/g, ' ');            // «coma y espacio» separa
+    let trozos = t.split(/[\s;|]+/).filter(Boolean), comasSeparan = false;
+    // Sin espacios y con varias comas («50,52,49»): las comas separan.
+    if (trozos.length === 1 && (trozos[0].match(/,/g) || []).length > 1) { trozos = trozos[0].split(',').filter(Boolean); comasSeparan = true; }
+    const precios = [], raros = [], noPositivos = [];
+    for (const tr of trozos) {
+      const x = numero(tr);
+      if (Number.isNaN(x)) raros.push(tr);
+      else if (x <= 0) noPositivos.push(tr);
+      else precios.push(x);
+    }
+    return { precios, raros, noPositivos, comasSeparan };
+  }
+
+  function analizar(precios, oferta) {
+    const n = precios.length;
+    if (!n) return null;
+    const r = { n, media: media(precios), mediana: mediana(precios), min30: minUltimos(precios), ventana: Math.min(VENTANA, n) };
+    if (oferta > 0) {
+      r.dMedia = descuento(oferta, r.media);
+      r.dMediana = descuento(oferta, r.mediana);
+      r.dMin30 = descuento(oferta, r.min30);
+    }
+    return r;
+  }
+
+  // ---- Formato español ----
+  const NB = ' ';
+  function eur(x) {
+    const r = Math.round(x * 100) / 100;
+    const entero = Math.abs(r - Math.round(r)) < 1e-9;
+    return r.toLocaleString('es-ES', { minimumFractionDigits: entero ? 0 : 2, maximumFractionDigits: entero ? 0 : 2, useGrouping: true }) + NB + '€';
+  }
+  function num1(x) {
+    const r = Math.round(x * 10) / 10;
+    return Math.abs(r).toLocaleString('es-ES', { minimumFractionDigits: Number.isInteger(r) ? 0 : 1, maximumFractionDigits: 1 });
+  }
+  // −10 % si es más barato; +5 % si es más caro.
+  function pct(d) {
+    const r = Math.round(d * 10) / 10;
+    if (r === 0) return '0' + NB + '%';
+    return (r > 0 ? '−' : '+') + num1(r) + NB + '%';
+  }
+
+  return { DIAS, SUBIDA, OFERTA, ANTES, INICIO_VIDEO, VENTANA, base, freidora, media, mediana, minUltimos, descuento, estado, numero, leerPrecios, analizar, eur, num1, pct };
+})();
+if (typeof module !== 'undefined') module.exports = Calc;
+</script>
+
 <script>
 (() => {
   const { DIAS, OFERTA, ANTES, INICIO_VIDEO, estado, eur, pct, num1 } = Calc;
