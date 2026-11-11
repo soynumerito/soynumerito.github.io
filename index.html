@@ -20,7 +20,8 @@
     <nav class="menu" aria-label="Principal">
       <a href="./#episodios">Episodios</a>
       <a href="./#simuladores">Simuladores</a>
-      <a class="boton coral" href="https://ko-fi.com/soynumerito">Invítame a un café</a>
+      <a href="./#juegos">Juegos</a>
+      <a class="boton coral" href="https://ko-fi.com/soynumerito"><span class="solo-ancho">Invítame a un café</span><span class="solo-movil">Café ☕</span></a>
     </nav>
   </div>
 </header>
@@ -87,18 +88,26 @@
         <span class="tarjeta-titulo">¿Ese descuento es real?</span>
         <span>Decide cuántos días costó 90 € la freidora, mira si su −50 % es real y calcula el descuento real de lo que quieres comprar.</span>
       </a>
-      <a class="tarjeta sim-tarjeta" href="chollo">
-        <span class="mini-grafico" aria-hidden="true"><span style="height:50%;background:#FF5A36"></span><span style="height:50%;background:#FF5A36"></span><span style="height:55%;background:#FF5A36"></span><span style="height:30%;background:#FF5A36"></span><span style="height:50%;background:#FF5A36"></span><span style="height:90%;background:#FF5A36"></span></span>
-        <span class="antetitulo">Especial · Juego</span>
-        <span class="tarjeta-titulo">¿Chollo o no?</span>
-        <span>Seis ofertas, 15 segundos por producto: mira sus 90 días y decide si el descuento es real.</span>
-      </a>
     </div>
   </div>
 </section>
 
-<section id="episodios" class="ancho seccion">
-  <div class="seccion-cabeza"><h2>Todos los episodios</h2><span class="antetitulo">Temporada 1 · Describir datos</span></div>
+<section id="juegos" class="ancho seccion">
+  <div class="seccion-cabeza"><div><h2>Juegos</h2><p>Partidas rápidas para poner a prueba lo que has visto. Gratis y sin registrarte.</p></div></div>
+  <div class="rejilla">
+      <a class="tarjeta sim-tarjeta" href="chollo">
+        <span class="mini-grafico" aria-hidden="true"><span style="height:50%;background:#FF5A36"></span><span style="height:50%;background:#FF5A36"></span><span style="height:55%;background:#FF5A36"></span><span style="height:30%;background:#FF5A36"></span><span style="height:50%;background:#FF5A36"></span><span style="height:90%;background:#FF5A36"></span></span>
+        <span class="antetitulo">Especial · Descuento real</span>
+        <span class="tarjeta-titulo">¿Chollo o no?</span>
+        <span>Seis ofertas, 15 segundos por producto: mira sus 90 días y decide si el descuento es real.</span>
+      </a>
+  </div>
+</section>
+
+<section id="episodios" class="franja blanca">
+  <div class="ancho seccion">
+  <div class="seccion-cabeza"><h2>Todos los episodios</h2></div>
+  <h3 class="serie-titulo">Temporada 1 · Describir datos</h3>
   <div class="rejilla">
       <article class="tarjeta">
         <a class="mini" href="ep1" tabindex="-1" aria-hidden="true"><img src="mini_ep1.jpg" alt="" loading="lazy"></a>
@@ -140,14 +149,26 @@
           <div class="enlaces"><a href="ep5">Ver episodio</a><a href="ciudades">Simulador</a></div>
         </div>
       </article>
+  </div>
+  <h3 class="serie-titulo">Numerito en la Vida Real</h3>
+  <div class="rejilla">
+      <article class="tarjeta">
+        <a class="mini" href="ep2" tabindex="-1" aria-hidden="true"><img src="mini_ep2.jpg" alt="" loading="lazy"></a>
+        <div class="tarjeta-cuerpo">
+          <span class="antetitulo">Episodio 2<span data-hasta="2026-10-22T18:05:00+02:00"> · se estrena el 22 de octubre</span></span>
+          <span class="tarjeta-titulo">Salario medio o mediano: ¿cuál te dice lo que cobra la gente?</span>
+          <div class="enlaces"><a href="ep2">Ver episodio</a><a href="pais">Simulador</a></div>
+        </div>
+      </article>
       <article class="tarjeta">
         <a class="mini" href="black-friday" tabindex="-1" aria-hidden="true"><img src="mini_bf.jpg" alt="" loading="lazy"></a>
         <div class="tarjeta-cuerpo">
           <span class="antetitulo">Especial Black Friday<span data-hasta="2026-11-12T18:00:00+01:00"> · se estrena el 12 de noviembre</span></span>
           <span class="tarjeta-titulo">Especial Black Friday: ¿ese −50 % es real?</span>
-          <div class="enlaces"><a href="black-friday">Ver episodio</a><a href="descuento">Simulador</a></div>
+          <div class="enlaces"><a href="black-friday">Ver episodio</a><a href="descuento">Simulador</a><a href="chollo">Juego</a></div>
         </div>
       </article>
+  </div>
   </div>
 </section>
 </main>

@@ -190,3 +190,13 @@ button.mini:hover .play { transform: translate(calc(-50% - 2px), calc(-50% - 2px
 .volver { display: inline-block; background: var(--blanco); border: 3px solid var(--tinta); border-radius: 999px; padding: 6px 14px; font-weight: 800; font-size: 15px; text-decoration: none; box-shadow: 3px 3px 0 var(--tinta); }
 .volver:hover { background: var(--amarillo); }
 .volver-grupo { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* episodios agrupados por lista de reproducción (11-nov-2026) */
+.serie-titulo { font-size: 24px; margin: 30px 0 14px; }
+.seccion-cabeza + .serie-titulo { margin-top: 18px; }
+/* botón del café: texto corto en el móvil para que quepan los 4 enlaces del menú */
+.menu .solo-movil { display: none; }
+@media (max-width: 600px) {
+  .menu .solo-ancho { display: none; }
+  .menu .solo-movil { display: inline; }
+}
