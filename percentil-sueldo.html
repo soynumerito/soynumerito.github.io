@@ -1,0 +1,635 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>¿Cobras más que la mayoría? · Soy Numerito</title>
+<meta name="description" content="Vida Real: El percentil de un sueldo, con la escalera de sueldos de España del INE (2024): cuántos de cada 100 asalariados cobran menos, por qué hay que compararse en bruto, todo el año y con todas las pagas, y por qué un percentil no dice si un sueldo es bueno.">
+<meta property="og:title" content="¿Cobras más que la mayoría? · Soy Numerito">
+<meta property="og:description" content="Vida Real: El percentil de un sueldo, con la escalera de sueldos de España del INE (2024): cuántos de cada 100 asalariados cobran menos, por qué hay que compararse en bruto, todo el año y con todas las pagas, y por qué un percentil no dice si un sueldo es bueno.">
+<meta property="og:url" content="https://soynumerito.com/percentil-sueldo">
+<meta property="og:image" content="https://soynumerito.com/mini_vr03.jpg">
+<link rel="stylesheet" href="estilo.css">
+<style>
+  .cartel-fijo { display: inline-block; background: var(--blanco); border: 3px solid var(--tinta); border-radius: 14px; padding: 6px 14px; font-weight: 800; font-size: 15px; line-height: 1.35; margin: 0 0 22px; }
+  .cartel-fijo span { font-weight: 500; }
+
+  .ventana { background: var(--blanco); border: var(--borde); border-radius: 20px; box-shadow: var(--sombra); overflow: hidden; }
+  .ventana-barra { background: var(--tinta); color: var(--papel); display: flex; align-items: center; gap: 8px; padding: 10px 16px; font-size: 15px; }
+  .ventana-barra i { width: 12px; height: 12px; border-radius: 50%; display: block; flex: none; }
+  .ventana-barra span { margin-left: 8px; }
+  .ventana-cuerpo { padding: 18px 16px 16px; display: grid; gap: 16px; min-width: 0; }
+
+  /* La caja del sueldo y sus botones */
+  .mando { display: grid; gap: 12px; background: var(--papel); border: 3px solid var(--tinta); border-radius: 16px; padding: 14px; min-width: 0; }
+  .mando > label { font-weight: 800; font-size: 18px; }
+  .campo { display: flex; align-items: center; gap: 8px; background: var(--blanco); border: 4px solid var(--tinta); border-radius: 14px; padding: 4px 14px; max-width: 340px; }
+  .campo:focus-within { outline: 3px solid var(--azul); outline-offset: 2px; }
+  .campo input { font: inherit; font-weight: 800; font-size: clamp(30px, 8vw, 44px); color: var(--tinta); border: 0; background: transparent; width: 100%; min-width: 0;
+    padding: 2px 0; font-variant-numeric: tabular-nums; outline: none; }
+  .campo span { font-weight: 800; font-size: clamp(26px, 7vw, 36px); }
+  .pasos { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; max-width: 520px; }
+  .pasos .boton { min-height: 52px; padding: 8px 4px; font-size: 18px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .pasos .boton.menos { background: #FFE1D9; }
+  .pasos .boton.mas { background: #E3F7EC; }
+  .interruptores { display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center; }
+  .interruptor { display: inline-flex; border: 4px solid var(--tinta); border-radius: 999px; overflow: hidden; box-shadow: 3px 3px 0 var(--tinta); background: var(--blanco); }
+  .interruptor button { font: inherit; font-weight: 800; font-size: 17px; color: var(--tinta); background: var(--blanco); border: 0; padding: 10px 18px; min-height: 48px; cursor: pointer; }
+  .interruptor button + button { border-left: 4px solid var(--tinta); }
+  .interruptor button[aria-pressed="true"] { background: var(--amarillo); }
+  .interruptor button:focus-visible { outline: 3px solid var(--azul); outline-offset: -6px; }
+  .interruptor.apagado { opacity: .45; box-shadow: none; }
+  .interruptor.apagado button { cursor: not-allowed; }
+  .solo-mes { font-size: 14px; color: var(--gris); }
+  .conversion { margin: 0; font-size: 17px; font-variant-numeric: tabular-nums; }
+  .conversion b { white-space: nowrap; }
+  .error-campo { margin: 0; font-size: 15px; font-weight: 700; color: #B42A12; }
+  .error-campo:empty { display: none; }
+
+  /* El resultado */
+  .resultado { display: grid; gap: 6px; border: var(--borde); border-radius: 16px; box-shadow: 4px 4px 0 var(--tinta); padding: 10px 16px 12px; background: var(--amarillo); }
+  .resultado.fuera { background: var(--blanco); }
+  .resultado.vacio { background: var(--blanco); }
+  .resultado .frase { margin: 0; font-size: clamp(22px, 5.4vw, 30px); font-weight: 800; line-height: 1.15; }
+  .resultado .frase .n { font-size: 1.35em; font-variant-numeric: tabular-nums; }
+  .resultado .etiqueta-est { justify-self: start; font-size: 14px; font-weight: 800; background: var(--blanco); border: 2px solid var(--tinta); border-radius: 999px; padding: 2px 10px; }
+  .resultado .etiqueta-est:empty { display: none; }
+  .resultado .detalle { margin: 0; font-size: 15px; }
+  .resultado .detalle:empty { display: none; }
+
+  .grafico svg { display: block; width: 100%; overflow: visible; }
+  .grafico text { font-family: var(--letra); }
+  #sobre { transition: transform .45s cubic-bezier(.3, 1.4, .5, 1); }
+  .pista { color: var(--gris); font-size: 14px; margin: 0; }
+
+  .escalones { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); gap: 8px; }
+  .escalones li { border: 3px solid var(--tinta); border-radius: 12px; padding: 6px 10px; background: var(--blanco); display: grid; gap: 0; font-size: 14px; line-height: 1.3; }
+  .escalones li b { font-size: 17px; font-variant-numeric: tabular-nums; }
+  .escalones li.p50 { border-left: 10px solid var(--verde); }
+  .escalones li.aqui { background: var(--amarillo); }
+  .aviso-bruto { margin: 0; background: #FFF3C4; border: 3px solid var(--tinta); border-radius: 12px; padding: 8px 12px; font-size: 15px; }
+  .controles { display: flex; flex-wrap: wrap; gap: 10px; }
+  @media (max-width: 520px) {
+    .ventana-cuerpo { padding: 14px 10px 14px; }
+    .ventana-barra { font-size: 13px; }
+    .mando { padding: 10px; }
+    .pasos .boton { font-size: 16px; }
+    .interruptor button { font-size: 16px; padding: 8px 14px; }
+    .controles .boton { font-size: 14px; padding: 6px 12px; }
+  }
+
+  .comentario { display: flex; gap: 14px; align-items: flex-end; margin: 26px 0 0; }
+  .comentario svg { width: 64px; flex: none; }
+  .burbuja { position: relative; background: var(--blanco); border: var(--borde); border-radius: 18px; padding: 12px 16px;
+    box-shadow: 4px 4px 0 var(--tinta); font-size: 17px; min-width: 0; margin: 0; }
+  .burbuja::before { content: ''; position: absolute; left: -14px; bottom: 16px; border: 7px solid transparent; border-right: 10px solid var(--tinta); }
+
+  /* Retos */
+  .retos { margin-top: 30px; display: grid; gap: 14px; }
+  .retos > h2 { margin: 0; font-size: 26px; }
+  .retos > p { margin: 0; }
+  .lista-retos { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr)); gap: 14px; }
+  .reto { background: var(--blanco); border: var(--borde); border-radius: 18px; padding: 14px 16px; display: grid; grid-template-columns: 40px 1fr; gap: 4px 12px; align-content: start; min-width: 0; }
+  .reto > * { min-width: 0; }
+  .reto.hecho { background: #E3F7EC; }
+  .casilla { grid-row: span 3; width: 40px; height: 40px; border: 4px solid var(--tinta); border-radius: 10px; background: var(--blanco);
+    display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 800; line-height: 1; color: var(--tinta); }
+  .reto.hecho .casilla { background: var(--verde); }
+  .reto b { font-size: 18px; line-height: 1.25; }
+  .reto .ayuda { font-size: 15px; color: var(--gris); margin: 0; }
+  .reto .porque { font-size: 15px; margin: 2px 0 0; font-weight: 700; }
+  .reto .porque:empty { display: none; }
+  .marcador { font-weight: 800; }
+  .leccion { background: var(--verde); border: var(--borde); border-radius: 18px; box-shadow: var(--sombra); padding: 14px 18px; margin: 0; font-size: 18px; font-weight: 700; }
+  .leccion[hidden] { display: none; }
+
+  .no-dice { margin-top: 30px; background: var(--blanco); border: var(--borde); border-radius: 18px; padding: 14px 18px; display: grid; gap: 8px; }
+  .no-dice h2 { margin: 0; }
+  .no-dice p { margin: 0; }
+  .no-dice ul { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+
+  .cuentas { margin-top: 26px; border: 3px solid var(--tinta); border-radius: 16px; background: var(--blanco); padding: 10px 16px; }
+  .cuentas summary { font-weight: 800; font-size: 18px; cursor: pointer; }
+  .cuentas p { margin: 10px 0 0; }
+  .cuenta { font-variant-numeric: tabular-nums; background: var(--blanco); border: 2px solid var(--tinta); border-radius: 10px;
+    padding: 8px 12px; font-size: 15px; overflow-wrap: anywhere; margin-top: 10px; }
+  .estrecho { max-width: 1028px; }
+</style>
+<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "d432578ac00f445d86047dc522d7f8a1"}'></script><!-- End Cloudflare Web Analytics -->
+</head>
+<body>
+<a class="saltar" href="#contenido">Saltar al contenido</a>
+<header class="sitio-cabecera">
+  <div class="ancho">
+    <a class="logo" href="./"><svg viewBox="0 0 220 300" aria-hidden="true"><path d="M70 40 Q118 4 140 18 Q156 28 156 60 L156 228 L190 228 Q206 228 206 246 L206 262 Q206 280 188 280 L46 280 Q28 280 28 262 L28 246 Q28 228 46 228 L82 228 L82 96 Q66 104 52 100 Q34 94 36 76 Q38 58 70 40 Z" fill="#FFD23F" stroke="#141414" stroke-width="14" stroke-linejoin="round"/></svg>soy numerito</a>
+    <nav class="menu" aria-label="Principal">
+      <a href="./#episodios">Episodios</a>
+      <a href="./#simuladores">Simuladores</a>
+      <a href="./#juegos">Juegos</a>
+      <a class="boton coral" href="https://ko-fi.com/soynumerito"><span class="solo-ancho">Invítame a un café</span><span class="solo-movil">Café ☕</span></a>
+    </nav>
+  </div>
+</header>
+<main id="contenido" class="ancho estrecho episodio" data-publica="2026-11-17T18:00:00+01:00">
+  <p class="migas"><a href="./#episodios">Episodios</a> / Numerito en la Vida Real / Vida Real</p>
+  <h1>Percentil del sueldo: ¿cobras más que la mayoría?</h1>
+  <div class="video"><div data-antes><div class="mini"><img src="mini_vr03.jpg" alt="" loading="lazy"></div></div><div data-despues hidden><button class="mini" type="button" data-video="Y2BcVsK6DvY" aria-label="Reproducir el vídeo: Percentil del sueldo: ¿cobras más que la mayoría?"><img src="mini_vr03.jpg" alt="" loading="lazy"><span class="play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 4 L20 12 L6 20 Z" fill="#FFFFFF" stroke="#141414" stroke-width="2" stroke-linejoin="round"/></svg></span></button></div></div>
+  <p class="nota-video"><span data-antes>El vídeo se estrena en YouTube el 17 de noviembre. Mientras, ya puedes jugar con el simulador.</span><span data-despues hidden>El vídeo es de YouTube y solo se carga cuando pulsas play.</span></p>
+  <div data-despues hidden><ul class="capitulos" aria-label="Capítulos"><li><button type="button" data-seg="0"><b>0:00</b>¿Cuántos cobran menos que tú?</button></li><li><button type="button" data-seg="24"><b>0:24</b>Lo que vas a ver hoy</button></li><li><button type="button" data-seg="38"><b>0:38</b>Ya conoces un percentil</button></li><li><button type="button" data-seg="71"><b>1:11</b>La escalera de sueldos de España</button></li><li><button type="button" data-seg="137"><b>2:17</b>Tres sueldos en la escalera</button></li><li><button type="button" data-seg="173"><b>2:53</b>Error común: compararte con la cifra equivocada</button></li><li><button type="button" data-seg="232"><b>3:52</b>Lo que la escalera no dice</button></li><li><button type="button" data-seg="288"><b>4:48</b>Resumen en 3 puntos</button></li><li><button type="button" data-seg="309"><b>5:09</b>Cierre</button></li></ul></div>
+
+  <section style="margin-top:36px;display:grid;gap:16px">
+    <h2 class="titulo-seccion">El episodio en 3 ideas</h2>
+    <div class="ideas"><div class="idea"><span class="num" style="background:#FFD23F">1</span><b>El percentil es tu puesto en la fila</b><span>Te dice qué parte de los asalariados cobra menos que tú. La mediana es el percentil 50.</span></div><div class="idea"><span class="num" style="background:#22C27A">2</span><b>Compárate en bruto, todo el año</b><span>La escalera del INE es bruta y anual: suma todas tus pagas. Con 1.800 € al mes, 12 o 14 pagas cambian unos 12 de cada 100.</span></div><div class="idea"><span class="num" style="background:#FF5A36">3</span><b>Una posición, no si el sueldo es bueno</b><span>Un percentil no sabe en qué ciudad vives, cuánto te cuesta vivir, cuántas horas trabajas ni en qué momento de tu carrera estás.</span></div></div>
+  </section>
+
+  <section class="ahora-tu" aria-labelledby="t-sim">
+    <span class="antetitulo">Ahora tú</span>
+    <h2 id="t-sim">Juega con «La escalera del sueldo»</h2>
+    <p class="entradilla">Pon un sueldo y mira en qué escalón de España cae. Sirve para ver qué cambia según cuentes 12 o 14 pagas, o el mes o el año. No se guarda nada de lo que escribes: todo se calcula en tu navegador.</p>
+  <p class="cartel-fijo">Sueldo bruto anual · asalariados · INE, Encuesta Anual de Estructura Salarial 2024 · <span>jornada completa y parcial juntas</span></p>
+
+  <div class="ventana">
+    <div class="ventana-barra" aria-hidden="true"><i style="background:var(--coral)"></i><i style="background:var(--amarillo)"></i><i style="background:var(--verde)"></i><span>Simulador · La escalera del sueldo</span></div>
+    <div class="ventana-cuerpo">
+      <div class="mando">
+        <label for="sueldo">Tu sueldo bruto</label>
+        <div class="campo">
+          <input id="sueldo" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" aria-describedby="v-conversion e-sueldo">
+          <span aria-hidden="true">€</span>
+        </div>
+        <p class="error-campo" id="e-sueldo" aria-live="polite"></p>
+        <div class="pasos" role="group" aria-label="Subir o bajar el sueldo">
+          <button class="boton menos" type="button" data-paso="-1000" aria-label="Bajar 1.000 €">−1.000</button>
+          <button class="boton menos" type="button" data-paso="-100" aria-label="Bajar 100 €">−100</button>
+          <button class="boton mas" type="button" data-paso="100" aria-label="Subir 100 €">+100</button>
+          <button class="boton mas" type="button" data-paso="1000" aria-label="Subir 1.000 €">+1.000</button>
+        </div>
+        <div class="interruptores">
+          <div class="interruptor" role="group" aria-label="¿La cifra es al mes o al año?">
+            <button type="button" id="b-mes" aria-pressed="false">al mes</button>
+            <button type="button" id="b-ano" aria-pressed="true">al año</button>
+          </div>
+          <div class="interruptor" id="g-pagas" role="group" aria-label="Número de pagas al año">
+            <button type="button" id="b-12" aria-pressed="false">12 pagas</button>
+            <button type="button" id="b-14" aria-pressed="true">14 pagas</button>
+          </div>
+          <span class="solo-mes" id="v-solo-mes">Las pagas solo cuentan con «al mes».</span>
+        </div>
+        <p class="conversion" id="v-conversion" aria-live="polite"></p>
+      </div>
+
+      <div class="resultado" id="resultado" aria-live="polite">
+        <p class="frase" id="v-frase"></p>
+        <span class="etiqueta-est" id="v-est"></span>
+        <p class="detalle" id="v-detalle"></p>
+      </div>
+
+      <div class="grafico" id="grafico">
+        <svg id="svg" role="img"></svg>
+      </div>
+      <p class="pista">La línea negra es una regla de euros al año, de 0 a 60.000 € o más. Cada escalón empieza en su cifra del INE: P10, P25, P50 (la mediana, en verde), P75 y P90. El sobre es tu sueldo.</p>
+
+      <ol class="escalones" id="escalones" aria-label="Los cinco escalones oficiales"></ol>
+
+      <p class="aviso-bruto"><b>La escalera es en BRUTO</b>, antes de impuestos y cotizaciones: si pones tu neto (lo que te llega al banco), te colocará más abajo de donde estás.</p>
+
+      <div class="controles">
+        <button class="boton" id="b-video" type="button">Volver al sobre del vídeo (30.000 € al año)</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="comentario">
+    <svg viewBox="0 0 220 300" aria-hidden="true">
+      <path d="M70 40 Q118 4 140 18 Q156 28 156 60 L156 228 L190 228 Q206 228 206 246 L206 262 Q206 280 188 280 L46 280 Q28 280 28 262 L28 246 Q28 228 46 228 L82 228 L82 96 Q66 104 52 100 Q34 94 36 76 Q38 58 70 40 Z" fill="#FFD23F" stroke="#141414" stroke-width="8" stroke-linejoin="round"/>
+      <ellipse cx="102" cy="132" rx="15" ry="19" fill="#fff" stroke="#141414" stroke-width="5"/><circle cx="106" cy="136" r="8" fill="#141414"/>
+      <ellipse cx="140" cy="132" rx="15" ry="19" fill="#fff" stroke="#141414" stroke-width="5"/><circle cx="144" cy="136" r="8" fill="#141414"/>
+      <ellipse cx="94" cy="166" rx="9" ry="6" fill="#FF8A8A"/><ellipse cx="150" cy="166" rx="9" ry="6" fill="#FF8A8A"/>
+      <path d="M110 164 Q122 180 134 164" fill="none" stroke="#141414" stroke-width="5" stroke-linecap="round"/>
+    </svg>
+    <p class="burbuja" id="v-comentario" aria-live="polite"></p>
+  </div>
+
+  <section class="retos" aria-labelledby="t-retos">
+    <h2 id="t-retos">Cuatro retos <span class="marcador" id="v-marcador"></span></h2>
+    <p>Usa la caja, los botones y los interruptores de arriba. Cada reto se marca solo con un ✔ cuando lo consigues.</p>
+    <ol class="lista-retos" id="retos"></ol>
+    <p class="leccion" id="leccion" hidden>¡Cuatro de cuatro! La lección: la escalera es bruta y anual. Antes de colocarte, suma todas tus pagas.</p>
+  </section>
+
+  <section class="no-dice" aria-labelledby="t-no-dice">
+    <h2 id="t-no-dice">Lo que la escalera no dice</h2>
+    <p><b>Un percentil es una posición en la fila. No dice si un sueldo es bueno.</b> No sabe:</p>
+    <ul>
+      <li>en qué ciudad vives ni cuánto te cuesta vivir;</li>
+      <li>cuántas horas trabajas (la escalera mezcla jornada completa y parcial, y eso llena los escalones de abajo);</li>
+      <li>en qué momento de tu carrera estás.</li>
+    </ul>
+    <p>Además, solo cuenta asalariados (quedan fuera los autónomos, el campo y el empleo del hogar) y son sueldos de 2024, no de hoy.</p>
+  </section>
+
+  <details class="cuentas">
+    <summary>Ver las cuentas</summary>
+    <p><b>Los cinco escalones son oficiales</b> (INE, Encuesta Anual de Estructura Salarial 2024, ganancia bruta anual por trabajador). <b>Lo de entre escalones es una estimación propia</b>: el INE publica un gráfico con el porcentaje de asalariados en cada tramo de 1.000 € (de 0 a 100.000 €). Sumamos los tramos que quedan enteros por debajo de tu sueldo y, del tramo donde cae, la parte proporcional (interpolación lineal). No es un dato oficial.</p>
+    <p>Con este método salen los cinco escalones oficiales (10, 25, 50, 75 y 90 de cada 100), así que es una buena aproximación. Por debajo del P10 y por encima del P90 no damos cifra: ahí solo decimos «menos de 10» o «más de 90», que es lo que dice el INE.</p>
+    <div class="cuenta" id="c-cuenta"></div>
+  </details>
+
+  
+    <p class="pie" style="border-top:0;margin-top:20px;padding-top:0"><span>Datos: INE, Encuesta Anual de Estructura Salarial 2024 (percentiles de la ganancia bruta anual por trabajador, jornada completa y parcial juntas, y gráfico de la distribución por tramos de 1.000 €). Los sueldos entre escalones son una estimación propia, no un dato oficial. Esto es educativo, no asesoramiento.</span><span>© 2026 Soy Numerito. Todos los derechos reservados: no se permite copiar ni reutilizar este simulador, sus textos ni sus diseños sin permiso por escrito.</span><span><a href="sueldo">Abrir el simulador solo, a pantalla completa →</a></span></p>
+  </section>
+
+  <div class="siguiente">
+    <a class="tarjeta" href="./#episodios">
+      <span style="display:grid;gap:4px;min-width:0;padding:6px"><span class="antetitulo">Siguiente episodio</span><span class="tarjeta-titulo">Llega uno nuevo cada semana. Mira todos los episodios →</span></span>
+    </a>
+    <div class="caja-cafe"><b>¿Te ha servido este episodio?</b><a class="boton coral " href="https://ko-fi.com/soynumerito">Invita a Numerito a un café</a></div>
+  </div>
+</main>
+<div style="height:48px"></div>
+<section id="apoyar" class="franja amarilla">
+  <div class="ancho apoyar">
+    <svg viewBox="0 0 220 300" aria-hidden="true"><path d="M70 40 Q118 4 140 18 Q156 28 156 60 L156 228 L190 228 Q206 228 206 246 L206 262 Q206 280 188 280 L46 280 Q28 280 28 262 L28 246 Q28 228 46 228 L82 228 L82 96 Q66 104 52 100 Q34 94 36 76 Q38 58 70 40 Z" fill="#FFFFFF" stroke="#141414" stroke-width="7" stroke-linejoin="round"/><path d="M86 136 Q102 120 118 136" fill="none" stroke="#141414" stroke-width="8" stroke-linecap="round"/><ellipse cx="140" cy="132" rx="15" ry="19" fill="#fff" stroke="#141414" stroke-width="5"/><circle cx="144" cy="136" r="8" fill="#141414"/><ellipse cx="94" cy="166" rx="9" ry="6" fill="#FF8A8A"/><ellipse cx="150" cy="166" rx="9" ry="6" fill="#FF8A8A"/><path d="M106 162 Q124 184 142 160" fill="none" stroke="#141414" stroke-width="6" stroke-linecap="round"/></svg>
+    <div>
+      <h2>¿Te ha servido? Invita a Numerito a un café</h2>
+      <p>Los vídeos y los simuladores son gratis y lo seguirán siendo. Si quieres ayudar a que salga uno nuevo cada semana, puedes hacerlo aquí.</p>
+    </div>
+    <a class="boton coral grande" href="https://ko-fi.com/soynumerito">Invita a Numerito a un café</a>
+  </div>
+</section>
+<footer class="sitio-pie">
+  <div class="ancho">
+    <div class="redes">
+      <a class="boton" href="https://www.youtube.com/@soynumerito">YouTube</a>
+      <a class="boton" href="https://www.tiktok.com/@soynumerito">TikTok</a>
+      <a class="boton" href="https://www.instagram.com/soynumerito">Instagram</a>
+    </div>
+    <small>Estadística que se entiende. Esta web no usa cookies; los vídeos de YouTube solo se cargan si pulsas play.<br>© 2026 Soy Numerito. Todos los derechos reservados: no se permite copiar ni reutilizar los vídeos, textos, simuladores, diseños ni la mascota Numerito sin permiso por escrito.</small>
+  </div>
+</footer>
+<script>
+// ---- CÁLCULOS (sin nada de la página: las pruebas los cargan con node) ----
+const Sueldo = (() => {
+  // Escalera oficial: INE, EAES 2024, ganancia bruta anual por trabajador (percentiles 10, 25, 50, 75 y 90).
+  const P = [
+    { k: 'P10', v: 12018.46, pie: '1 de cada 10 cobra esto o menos' },
+    { k: 'P25', v: 17457.47, pie: '1 de cada 4' },
+    { k: 'P50', v: 24497.17, pie: 'la mediana: la mitad' },
+    { k: 'P75', v: 36969.61, pie: '3 de cada 4' },
+    { k: 'P90', v: 52515.27, pie: '9 de cada 10' },
+  ];
+  // Gráfico del INE (nota de prensa de la EAES 2024): % de asalariados con ganancia en [1.000·i, 1.000·(i+1)) €, i = 0…99.
+  // Mismo archivo que el vídeo (remotion/src/ep02/ine.json). Suma 99,17: el 0,83 % que falta cobra más de 100.000 €.
+  const TRAMOS = [0.0,0.230068348,0.25464169,0.741647302,0.837098237,0.774125656,0.74859922,1.079606961,1.334726027,1.326531381,1.313766027,1.336883851,1.633352134,1.687566596,2.517942047,3.533075327,3.841395947,3.830190726,3.819020101,3.644858919,3.77068125,3.572762769,3.542570384,3.147188027,2.992582004,2.763379702,2.528684669,2.336698666,2.24594688,2.007250614,2.2835578,1.777491282,1.678497833,1.57954985,1.522855085,1.437129841,1.364209195,1.384103335,1.324861417,1.274428194,1.275222062,1.113991102,1.088823559,0.953975465,0.949682227,0.878284008,0.819453339,0.844256318,0.724502037,0.723856798,0.693369237,0.603348535,0.578318741,0.491762049,0.490178546,0.429869255,0.579195511,0.37984843,0.328949586,0.335135684,0.331689555,0.281086732,0.288476222,0.279700138,0.250806507,0.224393167,0.248467623,0.21941152,0.205654419,0.189769831,0.168921329,0.179171301,0.193825461,0.17678611,0.172625036,0.15798408,0.159739758,0.125696255,0.117904057,0.114788804,0.128151778,0.10437945,0.136562208,0.1115821,0.110530696,0.096847753,0.084702007,0.093349937,0.0957673,0.092608524,0.085109151,0.079394801,0.078788355,0.077367962,0.077029169,0.06618055,0.056488381,0.070568003,0.055952471,0.07558385];
+  const ANCHO = 1000, MAX_ANUAL = 1000000;
+
+  /** % de asalariados que cobran menos que `euros` al año (estimación propia; mismo cálculo que el vídeo y cifras.json:
+   *  tramos enteros por debajo + parte proporcional del tramo donde cae, SIN normalizar). */
+  function pctDebajo(euros) {
+    let s = 0;
+    for (let i = 0; i < TRAMOS.length; i++) {
+      const a = i * ANCHO;
+      if (euros >= a + ANCHO) s += TRAMOS[i];
+      else { if (euros > a) s += TRAMOS[i] * (euros - a) / ANCHO; break; }
+    }
+    return s;
+  }
+
+  /** Desglose de la cuenta para «Ver las cuentas». */
+  function desglose(euros) {
+    const i = Math.min(TRAMOS.length, Math.floor(euros / ANCHO));
+    const enteros = TRAMOS.slice(0, i).reduce((s, x) => s + x, 0);
+    const frac = i < TRAMOS.length ? (euros - i * ANCHO) / ANCHO : 0;
+    return { i, enteros, tramo: TRAMOS[i] || 0, frac, parte: (TRAMOS[i] || 0) * frac, total: pctDebajo(euros) };
+  }
+
+  const anual = (cifra, mes, pagas) => (mes ? cifra * pagas : cifra);
+
+  /** Qué se enseña para un sueldo anual. zona: 'vacio' | 'abajo' (< P10) | 'dentro' | 'arriba' (> P90).
+   *  escalon: índice del escalón donde cae (−1 = antes del P10). */
+  function colocar(eurosAno) {
+    if (!(eurosAno > 0)) return { zona: 'vacio', escalon: -1, pct: 0, n: null };
+    const pct = pctDebajo(eurosAno);
+    let escalon = -1;
+    P.forEach((p, k) => { if (eurosAno >= p.v) escalon = k; });
+    if (eurosAno < P[0].v) return { zona: 'abajo', escalon, pct, n: null };
+    if (eurosAno > P[4].v) return { zona: 'arriba', escalon, pct, n: null };
+    return { zona: 'dentro', escalon, pct, n: Math.round(pct) };
+  }
+
+  /** Lee lo que escribe la persona: «30000», «30.000», «30 000 €», «1.800,50». Devuelve euros enteros o NaN. */
+  function leer(texto) {
+    let t = String(texto).replace(/€|eur(os)?/gi, '').replace(/[\s ]/g, '');
+    if (!t) return NaN;
+    if (/,\d{1,2}$/.test(t)) t = t.replace(/\./g, '').replace(',', '.');      // coma decimal española
+    else if (/^\d{1,3}(\.\d{3})+$/.test(t)) t = t.replace(/\./g, '');          // puntos de miles
+    else t = t.replace(/[.,]/g, '');
+    if (!/^\d+(\.\d+)?$/.test(t)) return NaN;
+    return Math.round(+t);
+  }
+
+  const eur = (x) => Math.round(x).toLocaleString('de-DE') + ' €';
+  const num1 = (x) => (Math.round(x * 10) / 10).toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+
+  return { P, TRAMOS, MAX_ANUAL, pctDebajo, desglose, anual, colocar, leer, eur, num1 };
+})();
+// ---- FIN CÁLCULOS ----
+
+(() => {
+  const { P, MAX_ANUAL, pctDebajo, desglose, anual, colocar, leer, eur, num1 } = Sueldo;
+  const C = { tinta: '#141414', azul: '#3A5BFF', coral: '#FF5A36', amarillo: '#FFD23F', verde: '#22C27A', blanco: '#FFFFFF', linea: '#D9CFBB', gris: '#6E6658', papel: '#F5EEDF' };
+  const REGLA_MAX = 60000, MEDIANA = P[2].v;
+  const $ = (id) => document.getElementById(id);
+  const svg = $('svg'), caja = $('sueldo');
+
+  // Estado: la cifra tal como la ve la persona, si es al mes y cuántas pagas. Arranca con el sobre del vídeo.
+  const INICIO = { cifra: 30000, mes: false, pagas: 14 };
+  let cifra = INICIO.cifra, mes = INICIO.mes, pagas = INICIO.pagas;
+  let movido = false, espera = null, logro = null, ultimo = '';
+  const visto = { 12: null, 14: null };       // reto 3: lo que salió con 1.800 € al mes en 12 y en 14 pagas
+
+  const fueraTxt = (zona) => zona === 'abajo' ? 'menos de 10' : 'más de 90';
+
+  // Retos: una meta cada uno. Se marcan solos cuando la cifra se queda quieta en un valor que lo cumple.
+  const RETOS = [
+    { titulo: 'El centro de la fila',
+      meta: 'Con «al año», pon un sueldo que deje por debajo a la mitad: entre 49 y 51 de cada 100.',
+      vale: (e) => !e.mes && e.pct >= 49 && e.pct <= 51,
+      porque: (e) => `✔ Con ${eur(e.ano)} al año, unos ${Math.round(e.pct)} de cada 100 cobran menos: estás en el centro de la fila. La mediana oficial es 24.497 €.` },
+    { titulo: 'Nueve de cada diez',
+      meta: 'Con «al año», encuentra el sueldo que deja por debajo a 90 de cada 100.',
+      vale: (e) => !e.mes && e.pct >= 89.5 && e.pct <= 90.5,
+      porque: (e) => `✔ ${eur(e.ano)} al año: ya estás en el último escalón. El percentil 90 del INE es 52.515 €: nueve de cada diez asalariados cobran eso o menos.` },
+    { titulo: 'Mismo mes, otro escalón',
+      meta: 'Con 1.800 € al mes, cambia de 12 a 14 pagas. ¿Cuántos de cada 100 sube el sobre?',
+      vale: (e) => e.mes && e.cifra === 1800 && visto[12] !== null && visto[14] !== null && ultimo === 'pagas',
+      porque: () => `✔ Misma cifra al mes: con 12 pagas son 21.600 € al año (unos ${visto[12]} de cada 100 cobran menos); con 14, 25.200 € (unos ${visto[14]}). El sobre sube unos ${visto[14] - visto[12]} de cada 100.` },
+    { titulo: 'Más que la mayoría',
+      meta: 'Con 14 pagas, encuentra la cifra al mes más baja (en euros) con la que pasas de la mitad.',
+      vale: (e) => e.mes && e.pagas === 14 && e.cifra * 14 > MEDIANA && (e.cifra - 1) * 14 <= MEDIANA,
+      porque: (e) => `✔ ${eur(e.cifra)} × 14 = ${eur(e.ano)} al año: pasas por poco de la mediana oficial (24.497 €). Con ${eur(e.cifra - 1)} al mes (${eur((e.cifra - 1) * 14)}) aún no.` },
+  ];
+  const AYUDAS = [
+    'Pista: la mediana es el escalón verde.',
+    'Pista: es la cifra del último escalón. Afina con los botones de 100 €.',
+    'Pista: escribe 1800, pulsa «al mes» y luego cambia entre «12 pagas» y «14 pagas».',
+    'Pista: 1.800 € al mes ya pasa y 1.700 € no. Prueba cifras entre medias.',
+  ];
+  const hecho = RETOS.map(() => false), porque = RETOS.map(() => '');
+
+  function estado() {
+    const ano = anual(cifra, mes, pagas);
+    return { cifra, mes, pagas, ano, ...colocar(ano) };
+  }
+
+  // ---------- la escalera (SVG) ----------
+  let geo = null;
+  function medir() {
+    const ancho = $('grafico').clientWidth, estrecho = ancho < 520;
+    const m = { izq: 12, der: estrecho ? 14 : 20, arr: estrecho ? 70 : 80, aba: 34 };
+    const sube = estrecho ? 26 : 36;
+    const alto = m.arr + 5 * sube + m.aba;
+    geo = { ancho, alto, m, estrecho, sube, pw: ancho - m.izq - m.der, suelo: m.arr + 5 * sube };
+  }
+  const xe = (v) => geo.m.izq + (Math.min(Math.max(v, 0), REGLA_MAX) / REGLA_MAX) * geo.pw;
+  const techo = (k) => geo.suelo - (k + 1) * geo.sube;     // y del peldaño k
+
+  function base() {
+    const { ancho, alto, m, pw, suelo, estrecho } = geo, fs = estrecho ? 10.5 : 13;
+    let s = '';
+    // escalones: cada uno empieza en su cifra oficial y llega al siguiente (el último, a 60.000 €)
+    P.forEach((p, k) => {
+      const x0 = xe(p.v), x1 = k < 4 ? xe(P[k + 1].v) : xe(REGLA_MAX), y = techo(k);
+      s += `<rect class="esc" data-k="${k}" x="${x0}" y="${y}" width="${x1 - x0}" height="${suelo - y}" fill="${k === 2 ? C.verde : C.blanco}" stroke="${C.tinta}" stroke-width="3" stroke-linejoin="round"/>`;
+      const w = x1 - x0;
+      s += `<text x="${x0 + 4}" y="${y + (estrecho ? 13 : 17)}" font-size="${estrecho ? 10.5 : 14}" font-weight="800" fill="${C.tinta}">${p.k}</text>`;
+      if (w > 78) s += `<text x="${x0 + 4}" y="${y + 33}" font-size="12.5" font-weight="700" fill="${C.tinta}">${eur(p.v)}</text>`;
+    });
+    // regla de euros
+    s += `<line x1="${m.izq}" x2="${m.izq + pw}" y1="${suelo}" y2="${suelo}" stroke="${C.tinta}" stroke-width="4" stroke-linecap="round"/>`;
+    for (let v = 0; v <= REGLA_MAX; v += 10000) {
+      s += `<line x1="${xe(v)}" x2="${xe(v)}" y1="${suelo}" y2="${suelo + 7}" stroke="${C.tinta}" stroke-width="2.5"/>`;
+      if (estrecho && v % 20000) continue;
+      const txt = v === 0 ? '0 €' : v === REGLA_MAX ? '60.000 o más' : v.toLocaleString('de-DE');
+      const anc = v === 0 ? 'start' : v === REGLA_MAX ? 'end' : 'middle';
+      s += `<text x="${xe(v)}" y="${suelo + 22}" text-anchor="${anc}" font-size="${fs}" fill="${C.gris}" font-weight="700">${txt}</text>`;
+    }
+    // el sobre: un grupo que se mueve (transición CSS) en vez de redibujarse
+    const sw = estrecho ? 34 : 46, sh = sw * 0.66;
+    s += `<g id="sobre" style="transform: translate(0px, 0px)">
+      <line id="sobre-guia" x1="0" x2="0" y1="0" y2="0" stroke="${C.coral}" stroke-width="3" stroke-dasharray="5 4"/>
+      <rect x="${-sw / 2 + 3}" y="${-sh + 3}" width="${sw}" height="${sh}" rx="4" fill="${C.tinta}"/>
+      <rect x="${-sw / 2}" y="${-sh}" width="${sw}" height="${sh}" rx="4" fill="${C.blanco}" stroke="${C.tinta}" stroke-width="3"/>
+      <path d="M${-sw / 2 + 2} ${-sh + 2} L0 ${-sh * 0.42} L${sw / 2 - 2} ${-sh + 2}" fill="none" stroke="${C.tinta}" stroke-width="3" stroke-linejoin="round"/>
+      <g id="sobre-cartel"><rect id="sobre-fondo" x="0" y="${-sh - 32}" width="10" height="24" rx="12" fill="${C.amarillo}" stroke="${C.tinta}" stroke-width="2.5"/>
+      <text id="sobre-txt" x="0" y="${-sh - 15}" text-anchor="middle" font-size="${estrecho ? 12.5 : 14}" font-weight="800" fill="${C.tinta}"></text></g>
+    </g>`;
+    svg.setAttribute('viewBox', `0 0 ${ancho} ${alto}`);
+    svg.setAttribute('height', alto);
+    svg.innerHTML = s;
+    geo.sw = sw; geo.sh = sh;
+  }
+
+  function moverSobre(e) {
+    const g = $('sobre');
+    if (!g) return;
+    g.style.display = e.zona === 'vacio' ? 'none' : '';
+    if (e.zona === 'vacio') return;
+    const { m, pw, suelo, sw, sh, estrecho } = geo;
+    const xReal = xe(e.ano);
+    const x = Math.max(m.izq + sw / 2, Math.min(m.izq + pw - sw / 2, xReal));
+    const y = e.escalon < 0 ? suelo - 2 : techo(e.escalon) - 2;
+    g.style.transform = `translate(${x}px, ${y}px)`;
+    const guia = $('sobre-guia');
+    guia.setAttribute('x1', xReal - x); guia.setAttribute('x2', xReal - x);
+    guia.setAttribute('y1', 0); guia.setAttribute('y2', suelo - y);
+    // cartel con la cifra anual, sin salirse por los lados
+    const txt = eur(e.ano) + (e.ano > REGLA_MAX ? ' →' : '');
+    const w = txt.length * (estrecho ? 7.4 : 8.4) + 16;
+    const izq = Math.max(m.izq - x, Math.min(m.izq + pw - x - w, -w / 2));
+    $('sobre-fondo').setAttribute('x', izq); $('sobre-fondo').setAttribute('width', w);
+    $('sobre-txt').setAttribute('x', izq + w / 2);
+    $('sobre-txt').textContent = txt;
+    svg.querySelectorAll('.esc').forEach((r) => {
+      const k = +r.dataset.k;
+      r.setAttribute('fill', k === e.escalon ? (k === 2 ? C.verde : C.amarillo) : (k === 2 ? C.verde : C.blanco));
+      r.setAttribute('stroke-width', k === e.escalon ? 5 : 3);
+    });
+    const donde = e.escalon < 0 ? 'antes del primer escalón (P10)' : `en el escalón ${P[e.escalon].k}`;
+    svg.setAttribute('aria-label', `Escalera de sueldos: tu sobre de ${eur(e.ano)} al año está ${donde}.`);
+  }
+
+  // ---------- textos ----------
+  function pintar(desdeCaja) {
+    const e = estado();
+    if (!desdeCaja) caja.value = cifra > 0 ? cifra.toLocaleString('de-DE') : '';
+    $('b-mes').setAttribute('aria-pressed', mes);
+    $('b-ano').setAttribute('aria-pressed', !mes);
+    $('b-12').setAttribute('aria-pressed', mes && pagas === 12);
+    $('b-14').setAttribute('aria-pressed', mes && pagas === 14);
+    $('b-12').disabled = $('b-14').disabled = !mes;
+    $('g-pagas').classList.toggle('apagado', !mes);
+    $('v-solo-mes').hidden = mes;
+    caja.setAttribute('aria-label', `Tu sueldo bruto ${mes ? 'al mes' : 'al año'}, en euros`);
+
+    $('v-conversion').innerHTML = !(e.ano > 0) ? 'Escribe una cifra en euros, sin céntimos.'
+      : mes ? `${eur(cifra)} × ${pagas} pagas = <b>${eur(e.ano)} brutos al año</b>`
+      : `<b>${eur(e.ano)} brutos al año</b>, sumando todas las pagas`;
+
+    const r = $('resultado');
+    r.className = 'resultado' + (e.zona === 'vacio' ? ' vacio' : e.zona === 'dentro' ? '' : ' fuera');
+    if (e.zona === 'vacio') {
+      $('v-frase').textContent = 'Escribe un sueldo para colocar el sobre.';
+      $('v-est').textContent = ''; $('v-detalle').textContent = '';
+    } else if (e.zona === 'dentro') {
+      $('v-frase').innerHTML = `Unos <span class="n">${e.n}</span> de cada 100 asalariados cobran menos`;
+      $('v-est').textContent = 'estimación propia con el gráfico del INE, 2024';
+      $('v-detalle').textContent = e.escalon < 4 ? `Caes entre ${P[e.escalon].k} (${eur(P[e.escalon].v)}) y ${P[e.escalon + 1].k} (${eur(P[e.escalon + 1].v)}).` : `Caes justo en el P90 (${eur(P[4].v)}).`;
+    } else {
+      $('v-frase').innerHTML = `<span class="n">${e.zona === 'abajo' ? 'Menos de 10' : 'Más de 90'}</span> de cada 100 asalariados cobran menos`;
+      $('v-est').textContent = 'dato oficial del INE, 2024';
+      $('v-detalle').textContent = e.zona === 'abajo'
+        ? `Estás por debajo del primer escalón (P10: ${eur(P[0].v)}). Aquí no afinamos más: hay mucha gente a jornada parcial y una cifra exacta sería inventar precisión.`
+        : `Estás por encima del último escalón (P90: ${eur(P[4].v)}). El INE no da escalones más arriba, así que aquí no afinamos más.`;
+    }
+
+    $('escalones').innerHTML = P.map((p, k) => `<li class="${k === 2 ? 'p50' : ''}${k === e.escalon ? ' aqui' : ''}"><span>${p.k}${k === e.escalon ? ' · <b style="font-size:14px">tu sobre</b>' : ''}</span><b>${eur(p.v)}</b><span>${p.pie}</span></li>`).join('');
+
+    if (e.ano > 0) {
+      const d = desglose(e.ano);
+      $('c-cuenta').textContent = d.i >= 100
+        ? `${eur(e.ano)} pasa del final del gráfico (100.000 €): todos los tramos suman ${num1(d.enteros)} puntos.`
+        : `${eur(e.ano)} al año · tramos enteros de 0 a ${eur(d.i * 1000)}: ${num1(d.enteros)} puntos · del tramo ${eur(d.i * 1000)}–${eur(d.i * 1000 + 1000)} (${num1(d.tramo)} puntos) cuenta la parte ${num1(d.frac * 100)} %: ${num1(d.parte)} · total ≈ ${num1(d.total)} de cada 100${e.zona === 'dentro' ? '' : ' (fuera de la escalera; en la página solo se dice «' + fueraTxt(e.zona) + '»)'}.`;
+    } else $('c-cuenta').textContent = 'Escribe un sueldo para ver la cuenta.';
+
+    if (geo) moverSobre(e);
+    pintarRetos(e);
+  }
+
+  function pintarRetos(e) {
+    $('retos').innerHTML = RETOS.map((r, k) => `
+      <li class="reto${hecho[k] ? ' hecho' : ''}" id="reto-${k + 1}" data-hecho="${hecho[k]}">
+        <span class="casilla" aria-hidden="true">${hecho[k] ? '✔' : ''}</span>
+        <b>${k + 1}. ${r.titulo}<span class="saltar">${hecho[k] ? ' (conseguido)' : ' (pendiente)'}</span></b>
+        <p class="ayuda">${r.meta} ${hecho[k] ? '' : AYUDAS[k]}</p>
+        <p class="porque">${porque[k]}</p>
+      </li>`).join('');
+    $('v-marcador').textContent = `· ${hecho.filter(Boolean).length} de 4 ✔`;
+    $('leccion').hidden = !hecho.every(Boolean);
+    $('v-comentario').textContent = comentario(e);
+  }
+
+  function revisarRetos() {
+    if (!movido) return;
+    const e = estado();
+    let nuevo = -1;
+    RETOS.forEach((r, k) => { if (!hecho[k] && r.vale(e)) { hecho[k] = true; porque[k] = r.porque(e); nuevo = k; } });
+    if (nuevo < 0) return;
+    logro = { k: nuevo, en: clave() };
+    pintarRetos(e);
+  }
+  const clave = () => `${cifra}|${mes}|${pagas}`;
+
+  function comentario(e) {
+    if (logro && logro.en === clave()) {
+      if (hecho.every(Boolean)) return '¡Cuatro de cuatro! La escalera es bruta y anual. Antes de colocarte, suma todas tus pagas.';
+      return porque[logro.k].replace(/^✔ /, `¡Reto ${logro.k + 1} conseguido! `);
+    }
+    if (!movido) return 'Este es el sobre del vídeo: 30.000 € brutos al año. Unos 63 de cada 100 asalariados cobran menos. Cambia la cifra con la caja o los botones y prueba los retos.';
+    if (e.zona === 'vacio') return 'Escribe una cifra en la caja: por ejemplo, 1800 al mes o 25000 al año.';
+    // pistas del reto 4 mientras se busca
+    if (!hecho[3] && mes && pagas === 14) {
+      if (e.ano > MEDIANA) return `Con ${eur(cifra)} × 14 = ${eur(e.ano)} pasas de la mediana (24.497 €). ¿Puedes bajar algo más sin quedarte por debajo?`;
+      return `Con ${eur(cifra)} × 14 = ${eur(e.ano)} aún no pasas de la mediana (24.497 €). Sube un poco.`;
+    }
+    if (mes && visto[12] !== null && visto[14] === null && cifra === 1800) return 'Ahora pulsa «14 pagas» y mira cuánto sube el sobre.';
+    if (mes) return `Al mes, la cuenta usa todas las pagas: ${eur(cifra)} × ${pagas} = ${eur(e.ano)} al año. Así se compara con la escalera.`;
+    if (e.zona === 'abajo') return 'Por debajo del primer escalón. Ojo: si has puesto tu neto o lo que cobras al mes, pulsa «al mes» o suma tu bruto de todo el año.';
+    if (e.zona === 'arriba') return 'Por encima del último escalón: más de 90 de cada 100 cobran menos. Más arriba no hay escalones oficiales.';
+    if (e.ano < 6000) return '¿Seguro que es al año? Si es lo que cobras al mes, pulsa «al mes».';
+    return `Con ${eur(e.ano)} al año, unos ${e.n} de cada 100 asalariados cobran menos. Recuerda: es una posición en la fila, no dice si el sueldo es bueno.`;
+  }
+
+  // ---------- interacción ----------
+  function cambio(tipo, desdeCaja) {
+    movido = true; ultimo = tipo;
+    if (logro && logro.en !== clave()) logro = null;
+    // reto 3: apunta lo que sale con 1.800 € al mes en cada número de pagas
+    if (mes && cifra === 1800) visto[pagas] = Math.round(pctDebajo(1800 * pagas));
+    else { visto[12] = null; visto[14] = null; }
+    clearTimeout(espera);
+    pintar(desdeCaja);
+    espera = setTimeout(revisarRetos, tipo === 'caja' ? 700 : 450);
+  }
+  const tope = () => (mes ? Math.round(MAX_ANUAL / 12) : MAX_ANUAL);
+
+  caja.addEventListener('input', () => {
+    const v = leer(caja.value);
+    if (caja.value.trim() === '') { $('e-sueldo').textContent = ''; cifra = 0; cambio('caja', true); return; }
+    if (Number.isNaN(v)) { $('e-sueldo').textContent = 'Escribe solo números, por ejemplo 1800 o 25.000.'; return; }
+    $('e-sueldo').textContent = v > tope() ? `Como mucho ${eur(tope())}.` : '';
+    cifra = Math.min(v, tope());
+    cambio('caja', true);
+  });
+  caja.addEventListener('blur', () => { if (!Number.isNaN(leer(caja.value)) || caja.value.trim() === '') { $('e-sueldo').textContent = ''; pintar(false); } });
+  caja.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') { ev.preventDefault(); caja.blur(); } });
+
+  document.querySelectorAll('[data-paso]').forEach((b) => b.addEventListener('click', () => {
+    cifra = Math.max(0, Math.min(tope(), cifra + +b.dataset.paso));
+    $('e-sueldo').textContent = '';
+    cambio('paso');
+  }));
+
+  // Al cambiar entre «al mes» y «al año» se convierte la cifra (mismo sueldo, otra forma de escribirlo).
+  $('b-mes').onclick = () => { if (mes) return; mes = true; cifra = Math.round(cifra / pagas); cambio('modo'); };
+  $('b-ano').onclick = () => { if (!mes) return; cifra = cifra * pagas; mes = false; cambio('modo'); };
+  $('b-12').onclick = () => { if (!mes || pagas === 12) return; pagas = 12; cambio('pagas'); };
+  $('b-14').onclick = () => { if (!mes || pagas === 14) return; pagas = 14; cambio('pagas'); };
+  $('b-video').onclick = () => {
+    clearTimeout(espera);
+    cifra = INICIO.cifra; mes = INICIO.mes; pagas = INICIO.pagas; movido = false; logro = null;
+    $('e-sueldo').textContent = '';
+    pintar();
+  };
+
+  new ResizeObserver(() => { medir(); base(); moverSobre(estado()); }).observe($('grafico'));
+  medir(); base(); pintar();
+})();
+</script>
+<script>
+// Cada episodio se muestra a su hora: antes, «se estrena el…»; después, el vídeo. Así se puede subir todo antes.
+(() => {
+  const ahora = Date.now();
+  document.querySelectorAll('[data-publica]').forEach((raiz) => {
+    if (ahora < Date.parse(raiz.dataset.publica)) return;
+    raiz.querySelectorAll('[data-antes]').forEach((x) => x.remove());
+    raiz.querySelectorAll('[data-despues]').forEach((x) => { x.hidden = false; });
+  });
+  document.querySelectorAll('[data-hasta]').forEach((x) => { if (ahora >= Date.parse(x.dataset.hasta)) x.remove(); });
+})();
+</script>
+<script>
+// El vídeo de YouTube no se carga hasta que alguien pulsa play (así no hay cookies antes).
+(() => {
+  const caja = document.querySelector('[data-video]');
+  if (!caja) return;
+  const poner = (seg) => {
+    const f = document.createElement('iframe');
+    f.src = 'https://www.youtube-nocookie.com/embed/' + caja.dataset.video + '?autoplay=1&rel=0' + (seg ? '&start=' + seg : '');
+    f.title = caja.getAttribute('aria-label');
+    f.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+    f.allowFullscreen = true;
+    const sitio = document.createElement('div');
+    sitio.className = 'mini';
+    sitio.appendChild(f);
+    (document.querySelector('.video .mini') || caja).replaceWith(sitio);
+  };
+  caja.addEventListener('click', () => poner(0));
+  document.querySelectorAll('[data-seg]').forEach((b) => b.addEventListener('click', () => {
+    poner(+b.dataset.seg);
+    document.querySelector('.video').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }));
+})();
+</script>
+</body>
+</html>
