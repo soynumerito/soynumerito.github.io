@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>La goma elástica · Soy Numerito</title>
+<meta name="description" content="Simulador gratis de la desviación típica: arrastra los retrasos de un autobús de lunes a viernes y mira cómo se estiran las gomas alrededor de la media. Con las cuentas en cuatro pasos y cuatro retos.">
+<link rel="stylesheet" href="estilo.css">
+<style>
+  .ventana { background: var(--blanco); border: var(--borde); border-radius: 20px; box-shadow: var(--sombra); overflow: hidden; }
+  .ventana-barra { background: var(--tinta); color: var(--papel); display: flex; align-items: center; gap: 8px; padding: 10px 16px; font-size: 15px; }
+  .ventana-barra i { width: 12px; height: 12px; border-radius: 50%; display: block; flex: none; }
+  .ventana-barra span { margin-left: 8px; }
+  .ventana-cuerpo { padding: 18px 16px 16px; display: grid; gap: 16px; min-width: 0; }
+
+  .marcadores { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 12px; }
+  .marca { border: var(--borde); border-radius: 16px; box-shadow: 4px 4px 0 var(--tinta); padding: 8px 14px 10px; background: var(--blanco); display: grid; gap: 2px; }
+  .marca.dt { background: var(--amarillo); }
+  .marca span { font-size: 15px; font-weight: 700; }
+  .marca b { font-size: clamp(30px, 7.5vw, 42px); line-height: 1.05; font-variant-numeric: tabular-nums; }
+
+  .grafico { position: relative; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+  .grafico svg { display: block; width: 100%; overflow: visible; }
+  .grafico text { font-family: var(--letra); }
+  .punto { cursor: grab; }
+  .punto:focus { outline: none; }
+  .punto:focus-visible .bola { stroke: var(--azul); stroke-width: 6; }
+  .arrastrando, .arrastrando .punto { cursor: grabbing; }
+  .pista { color: var(--gris); font-size: 14px; margin: 0; }
+
+  .tabla-pasos { width: 100%; border-collapse: separate; border-spacing: 0 6px; font-variant-numeric: tabular-nums; font-size: 16px; }
+  .tabla-pasos th { font-size: 13px; text-align: center; padding: 4px 6px; background: var(--tinta); color: var(--papel); }
+  .tabla-pasos th:first-child { border-radius: 8px 0 0 8px; }
+  .tabla-pasos th:last-child { border-radius: 0 8px 8px 0; }
+  .tabla-pasos td { text-align: center; padding: 4px 6px; background: var(--papel); border-top: 2px solid var(--tinta); border-bottom: 2px solid var(--tinta); font-weight: 700; }
+  .tabla-pasos td:first-child { border-left: 2px solid var(--tinta); border-radius: 8px 0 0 8px; text-align: left; }
+  .tabla-pasos td:last-child { border-right: 2px solid var(--tinta); border-radius: 0 8px 8px 0; }
+  .tabla-pasos tr.larga td { background: #FFE1D9; }
+  .cadena { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 16px; font-variant-numeric: tabular-nums; }
+  .cadena span { background: var(--blanco); border: 3px solid var(--tinta); border-radius: 12px; padding: 4px 10px; font-weight: 700; }
+  .cadena span.fin { background: var(--amarillo); font-weight: 800; }
+  .cadena i { font-style: normal; font-weight: 800; }
+  .no-es { margin: 0; background: #FFF3C4; border: 3px solid var(--tinta); border-radius: 12px; padding: 8px 12px; font-size: 15px; }
+  .controles { display: flex; flex-wrap: wrap; gap: 10px; }
+  @media (max-width: 520px) {
+    .ventana-cuerpo { padding: 14px 10px 14px; }
+    .ventana-barra { font-size: 13px; }
+    .tabla-pasos { font-size: 14px; }
+    .tabla-pasos th { font-size: 11.5px; padding: 4px 3px; }
+    .tabla-pasos td { padding: 4px 3px; }
+    .cadena { font-size: 14px; }
+    .controles .boton { font-size: 14px; padding: 6px 12px; }
+  }
+
+  .comentario { display: flex; gap: 14px; align-items: flex-end; margin: 26px 0 0; }
+  .comentario svg { width: 64px; flex: none; }
+  .burbuja { position: relative; background: var(--blanco); border: var(--borde); border-radius: 18px; padding: 12px 16px;
+    box-shadow: 4px 4px 0 var(--tinta); font-size: 17px; min-width: 0; margin: 0; }
+  .burbuja::before { content: ''; position: absolute; left: -14px; bottom: 16px; border: 7px solid transparent; border-right: 10px solid var(--tinta); }
+
+  /* Retos */
+  .retos { margin-top: 30px; display: grid; gap: 14px; }
+  .retos > h2 { margin: 0; font-size: 26px; }
+  .retos > p { margin: 0; }
+  .lista-retos { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr)); gap: 14px; }
+  .reto { background: var(--blanco); border: var(--borde); border-radius: 18px; padding: 14px 16px; display: grid; grid-template-columns: 40px 1fr; gap: 4px 12px; align-content: start; min-width: 0; }
+  .reto > * { min-width: 0; }
+  .reto.hecho { background: #E3F7EC; }
+  .casilla { grid-row: span 3; width: 40px; height: 40px; border: 4px solid var(--tinta); border-radius: 10px; background: var(--blanco);
+    display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 800; line-height: 1; color: var(--tinta); }
+  .reto.hecho .casilla { background: var(--verde); }
+  .reto b { font-size: 18px; line-height: 1.25; }
+  .reto .ayuda { font-size: 15px; color: var(--gris); margin: 0; }
+  .reto .porque { font-size: 15px; margin: 2px 0 0; font-weight: 700; }
+  .reto .porque:empty { display: none; }
+  .marcador { font-weight: 800; }
+  .leccion { background: var(--verde); border: var(--borde); border-radius: 18px; box-shadow: var(--sombra); padding: 14px 18px; margin: 0; font-size: 18px; font-weight: 700; }
+  .leccion[hidden] { display: none; }
+
+  .no-dice { margin-top: 30px; background: var(--blanco); border: var(--borde); border-radius: 18px; padding: 14px 18px; display: grid; gap: 8px; }
+  .no-dice h2 { margin: 0; }
+  .no-dice p { margin: 0; }
+  .no-dice ul { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+
+  .cuentas { margin-top: 26px; border: 3px solid var(--tinta); border-radius: 16px; background: var(--blanco); padding: 10px 16px; }
+  .cuentas summary { font-weight: 800; font-size: 18px; cursor: pointer; }
+  .cuentas p { margin: 10px 0 0; }
+</style>
+<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "d432578ac00f445d86047dc522d7f8a1"}'></script><!-- End Cloudflare Web Analytics -->
+</head>
+<body>
+<div class="pagina">
+  <header class="cabecera">
+    <a class="logo" href="./" title="Ir a la portada">
+      <svg viewBox="0 0 220 300" aria-hidden="true"><path d="M70 40 Q118 4 140 18 Q156 28 156 60 L156 228 L190 228 Q206 228 206 246 L206 262 Q206 280 188 280 L46 280 Q28 280 28 262 L28 246 Q28 228 46 228 L82 228 L82 96 Q66 104 52 100 Q34 94 36 76 Q38 58 70 40 Z" fill="#FFD23F" stroke="#141414" stroke-width="14" stroke-linejoin="round"/></svg>
+      soy numerito
+    </a>
+    <nav class="volver-grupo" aria-label="Volver"><a class="volver" href="./">Inicio</a><a class="volver" href="./#simuladores">← Todos los simuladores</a></nav>
+  </header>
+
+  <h1>La goma elástica</h1>
+  <p class="entradilla">Cada punto es el retraso de un autobús, de lunes a viernes. Arrástralos y mira cómo se estiran las gomas que los atan a la media: la desviación típica resume, en un solo número, cuánto se estiran todas juntas. Arranca con la línea 7 del vídeo.</p>
+
+  <div class="ventana">
+    <div class="ventana-barra" aria-hidden="true"><i style="background:var(--coral)"></i><i style="background:var(--amarillo)"></i><i style="background:var(--verde)"></i><span>Simulador · La goma elástica</span></div>
+    <div class="ventana-cuerpo">
+      <div class="marcadores" aria-live="polite">
+        <div class="marca"><span>Retraso medio</span><b id="v-media"></b></div>
+        <div class="marca dt"><span>Desviación típica</span><b id="v-dt"></b></div>
+      </div>
+
+      <div class="grafico" id="grafico">
+        <svg id="svg" role="group" aria-label="Retrasos de lunes a viernes, de 0 a 25 minutos. Cada punto se mueve con el ratón, el dedo o las flechas del teclado."></svg>
+      </div>
+      <p class="pista">Arrastra cada punto a izquierda o derecha (o tócalo y usa las flechas del teclado). La raya discontinua es la media; cada goma va de la media a su punto. Cuanto más lejos, más se estira y más roja se pone.</p>
+
+      <table class="tabla-pasos" aria-label="La cuenta en cuatro pasos">
+        <thead><tr><th>Día</th><th>Retraso</th><th>① Distancia a la media</th><th>② Al cuadrado</th></tr></thead>
+        <tbody id="filas"></tbody>
+      </table>
+      <div class="cadena" id="cadena" aria-live="polite"></div>
+      <p class="no-es" id="no-es"></p>
+
+      <div class="controles">
+        <button class="boton" id="b-video" type="button">Volver a la línea 7 del vídeo</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="comentario">
+    <svg viewBox="0 0 220 300" aria-hidden="true">
+      <path d="M70 40 Q118 4 140 18 Q156 28 156 60 L156 228 L190 228 Q206 228 206 246 L206 262 Q206 280 188 280 L46 280 Q28 280 28 262 L28 246 Q28 228 46 228 L82 228 L82 96 Q66 104 52 100 Q34 94 36 76 Q38 58 70 40 Z" fill="#FFD23F" stroke="#141414" stroke-width="8" stroke-linejoin="round"/>
+      <ellipse cx="102" cy="132" rx="15" ry="19" fill="#fff" stroke="#141414" stroke-width="5"/><circle cx="106" cy="136" r="8" fill="#141414"/>
+      <ellipse cx="140" cy="132" rx="15" ry="19" fill="#fff" stroke="#141414" stroke-width="5"/><circle cx="144" cy="136" r="8" fill="#141414"/>
+      <ellipse cx="94" cy="166" rx="9" ry="6" fill="#FF8A8A"/><ellipse cx="150" cy="166" rx="9" ry="6" fill="#FF8A8A"/>
+      <path d="M110 164 Q122 180 134 164" fill="none" stroke="#141414" stroke-width="5" stroke-linecap="round"/>
+    </svg>
+    <p class="burbuja" id="v-comentario" aria-live="polite"></p>
+  </div>
+
+  <section class="retos" aria-labelledby="t-retos">
+    <h2 id="t-retos">Cuatro retos <span class="marcador" id="v-marcador"></span></h2>
+    <p>Mueve los puntos de arriba. Cada reto se marca solo con un ✔ cuando lo consigues.</p>
+    <ol class="lista-retos" id="retos"></ol>
+    <p class="leccion" id="leccion" hidden>¡Cuatro de cuatro! La lección: la desviación típica resume en un número cuánto se alejan los datos de su media, en las mismas unidades, y da más peso a los que se alejan mucho.</p>
+  </section>
+
+  <section class="no-dice" aria-labelledby="t-no-dice">
+    <h2 id="t-no-dice">Lo que la desviación típica no es</h2>
+    <ul>
+      <li><b>No es la distancia de un día concreto.</b> Con la línea 12, la desviación típica es 10 y ningún día se aleja 10 minutos: cuatro se alejan 5 y uno, 20.</li>
+      <li><b>No es la distancia media a la media.</b> Se parece, pero al elevar al cuadrado los datos lejanos pesan más, así que suele salir algo mayor.</li>
+      <li><b>No puede ser negativa.</b> Lo más pequeña que puede ser es 0, cuando todos los datos son iguales.</li>
+    </ul>
+  </section>
+
+  <details class="cuentas">
+    <summary>Ver las cuentas</summary>
+    <p>Los cuatro pasos del vídeo: ① cuánto se aleja cada dato de la media; ② cada distancia al cuadrado (así no quedan negativos); ③ la media de esos cuadrados, que se llama <b>varianza</b> y está en minutos al cuadrado; ④ la raíz de la varianza, que vuelve a minutos: la <b>desviación típica</b>.</p>
+    <p>Aquí dividimos entre 5, los días que miramos, como en el vídeo. Si esos 5 días fueran una muestra para estimar cómo llega el autobús todo el año, se dividiría entre 4 (n − 1) y saldría algo mayor: la línea 7 daría unos 2,2 minutos en vez de 2.</p>
+    <p>En la tabla, las distancias y los cuadrados se ven redondeados a un decimal; las cuentas se hacen sin redondear.</p>
+  </details>
+
+  <footer class="pie">
+    <span>Lo explicamos en el vídeo «Desviación típica sin fórmula» del canal <a href="https://www.youtube.com/@soynumerito">Soy Numerito en YouTube</a>.</span>
+    <span>Las líneas de autobús y sus retrasos son inventados para el ejemplo.</span>
+    <span>Esta página no usa cookies ni guarda nada: todo se calcula en tu navegador.</span>
+    <span>© 2026 Soy Numerito. Todos los derechos reservados: no se permite copiar ni reutilizar este simulador, sus textos ni sus diseños sin permiso por escrito.</span>
+  </footer>
+</div>
+<script>
+// ---- CÁLCULOS (sin nada de la página: las pruebas los cargan con node) ----
+const Gomas = (() => {
+  const MAX = 25;                              // minutos de retraso, de 0 a 25 (como la recta del vídeo)
+  const DIAS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie'];
+  const DIAS_LARGO = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes'];
+  const L7 = [4, 6, 2, 8, 5], L12 = [0, 0, 25, 0, 0];   // las dos líneas del vídeo
+  const suma = (v) => v.reduce((s, x) => s + x, 0);
+  const media = (v) => suma(v) / v.length;
+  /** Los cuatro pasos del vídeo, dividiendo entre n. */
+  function pasos(v) {
+    const m = media(v);
+    const dist = v.map((x) => x - m);
+    const cuad = dist.map((d) => d * d);
+    const sc = suma(cuad);
+    const varianza = sc / v.length;
+    return { m, dist, cuad, sc, varianza, dt: Math.sqrt(varianza), distMedia: suma(dist.map(Math.abs)) / v.length };
+  }
+  // Con valores enteros, comparar con sumas enteras evita errores de coma flotante.
+  const sumaCuadrados5 = (v) => { const s = suma(v); return v.reduce((a, x) => a + (5 * x - s) ** 2, 0); }; // = 25 · suma de cuadrados
+  const fmt = (x) => { const r = Math.round(x * 10) / 10; return (Object.is(r, -0) ? 0 : r).toLocaleString('es-ES', { maximumFractionDigits: 1 }); };
+  const conSigno = (x) => { const t = fmt(x); return t === '0' ? '0' : x > 0 ? '+' + t : '−' + t.replace('-', ''); };
+  return { MAX, DIAS, DIAS_LARGO, L7, L12, suma, media, pasos, sumaCuadrados5, fmt, conSigno };
+})();
+// ---- FIN CÁLCULOS ----
+(() => {
+  const { MAX, DIAS, DIAS_LARGO, L7, suma, pasos, sumaCuadrados5, fmt, conSigno } = Gomas;
+  const C = { tinta: '#141414', azul: '#3A5BFF', coral: '#FF5A36', amarillo: '#FFD23F', verde: '#22C27A', blanco: '#FFFFFF', linea: '#D9CFBB', gris: '#6E6658', papel: '#F5EEDF' };
+  const $ = (id) => document.getElementById(id);
+  const svg = $('svg');
+  let v = L7.slice(), movido = false, logro = null, espera = null, arrastre = null;
+
+  // Retos: se revisan al soltar un punto (o al dejar de pulsar las flechas).
+  const RETOS = [
+    { titulo: 'Todos a la misma hora',
+      meta: 'Consigue una desviación típica de 0.',
+      ayuda: 'Pista: pon los cinco puntos en el mismo minuto, el que quieras.',
+      vale: (p) => v.every((x) => x === v[0]),
+      porque: () => `✔ Los cinco días llegan a los ${v[0]} min: ninguna goma se estira y la desviación típica es 0. Es lo más pequeña que puede ser: nunca es negativa.` },
+    { titulo: 'Mismas gomas, otra media',
+      meta: 'Consigue un retraso medio de 15 min con una desviación típica de 2, como la línea 7.',
+      ayuda: 'Pista: pulsa «Volver a la línea 7» y mueve los cinco puntos 10 minutos a la derecha.',
+      vale: () => suma(v) === 75 && sumaCuadrados5(v) === 25 * 20,
+      porque: () => '✔ Media 15 y desviación típica 2. Las gomas son las mismas que en la línea 7: la desviación típica no mira dónde está la media, solo cuánto se separan los datos de ella.' },
+    { titulo: 'La línea 12',
+      meta: 'Con un retraso medio de 5 min, consigue una desviación típica de 10.',
+      ayuda: 'Pista: cuatro días a su hora (0) y uno muy tarde. ¿Cuánto tiene que llegar tarde ese día para que la media sea 5?',
+      vale: () => suma(v) === 25 && sumaCuadrados5(v) === 25 * 500,
+      porque: () => '✔ La misma media que la línea 7, pero una desviación típica de 10: cinco veces más. Mismo retraso medio y un autobús mucho menos previsible.' },
+    { titulo: 'Un solo día raro',
+      meta: 'Desde la línea 7, mueve un solo día hasta que la desviación típica pase de 5.',
+      ayuda: 'Pista: pulsa «Volver a la línea 7» y arrastra un solo punto muy a la derecha.',
+      vale: (p) => v.filter((x, i) => x !== L7[i]).length === 1 && p.dt > 5,
+      porque: (p) => `✔ Solo has movido un día y la desviación típica ha pasado de 2 a ${fmt(p.dt)} min. Al elevar al cuadrado, una goma muy larga pesa más que todas las demás juntas.` },
+  ];
+  const hecho = RETOS.map(() => false), porque = RETOS.map(() => '');
+
+  // ---------- el gráfico (SVG): se construye una vez y luego solo se mueven sus piezas ----------
+  let geo = null;
+  function medir() {
+    const ancho = $('grafico').clientWidth, estrecho = ancho < 520;
+    const m = { izq: estrecho ? 40 : 52, der: estrecho ? 16 : 24, arr: 40, aba: 78 };
+    const fila = estrecho ? 50 : 58;
+    geo = { ancho, estrecho, m, fila, pw: ancho - m.izq - m.der, alto: m.arr + 5 * fila + m.aba, eje: m.arr + 5 * fila + 6 };
+  }
+  const xm = (min) => geo.m.izq + (Math.min(Math.max(min, 0), MAX) / MAX) * geo.pw;
+  const yf = (i) => geo.m.arr + i * geo.fila + geo.fila / 2;
+  const NS = 'http://www.w3.org/2000/svg';
+  function base() {
+    const { ancho, alto, m, pw, eje, estrecho, fila } = geo;
+    let s = '';
+    for (let i = 0; i < 5; i++) {
+      s += `<line x1="${m.izq}" x2="${m.izq + pw}" y1="${yf(i)}" y2="${yf(i)}" stroke="${C.linea}" stroke-width="2"/>`;
+      s += `<text x="${m.izq - 10}" y="${yf(i) + 5}" text-anchor="end" font-size="${estrecho ? 13 : 15}" font-weight="800" fill="${C.tinta}">${DIAS[i]}</text>`;
+    }
+    // eje de minutos
+    s += `<line x1="${m.izq}" x2="${m.izq + pw}" y1="${eje}" y2="${eje}" stroke="${C.tinta}" stroke-width="3" stroke-linecap="round"/>`;
+    for (let t = 0; t <= MAX; t += 5) {
+      s += `<line x1="${xm(t)}" x2="${xm(t)}" y1="${eje}" y2="${eje + 7}" stroke="${C.tinta}" stroke-width="2.5"/>`;
+      s += `<text x="${xm(t)}" y="${eje + 22}" text-anchor="middle" font-size="${estrecho ? 12 : 13}" font-weight="700" fill="${C.gris}">${t === MAX ? '25 min' : t}</text>`;
+    }
+    // la regla de la desviación típica, debajo del eje
+    s += `<g id="regla"><rect id="regla-banda" y="${eje + 34}" height="10" rx="5" fill="${C.amarillo}" stroke="${C.tinta}" stroke-width="2.5"/>
+      <text id="regla-txt" y="${eje + 66}" text-anchor="middle" font-size="${estrecho ? 13 : 15}" font-weight="800" fill="${C.tinta}"></text></g>`;
+    // el poste (la media)
+    s += `<g id="poste"><line id="poste-l" y1="${m.arr - 8}" y2="${eje}" stroke="${C.tinta}" stroke-width="3" stroke-dasharray="7 5"/>
+      <text id="poste-t" y="${m.arr - 16}" text-anchor="middle" font-size="${estrecho ? 13 : 15}" font-weight="800" fill="${C.tinta}"></text></g>`;
+    svg.setAttribute('viewBox', `0 0 ${ancho} ${alto}`);
+    svg.setAttribute('height', alto);
+    svg.innerHTML = s;
+    // gomas y puntos (después, para que queden encima)
+    for (let i = 0; i < 5; i++) {
+      const g = document.createElementNS(NS, 'g');
+      g.innerHTML = `<line class="goma" stroke-linecap="round"/><text class="dist" text-anchor="middle" font-size="${estrecho ? 11.5 : 13}" font-weight="800" fill="${C.tinta}"></text>`;
+      g.setAttribute('id', 'goma-' + i);
+      svg.appendChild(g);
+    }
+    for (let i = 0; i < 5; i++) {
+      const p = document.createElementNS(NS, 'g');
+      p.setAttribute('class', 'punto');
+      p.setAttribute('tabindex', '0');
+      p.setAttribute('role', 'slider');
+      p.setAttribute('aria-valuemin', '0');
+      p.setAttribute('aria-valuemax', String(MAX));
+      p.dataset.i = i;
+      const r = estrecho ? 12 : 14;
+      p.innerHTML = `<circle r="${fila / 2}" fill="transparent"/><circle class="bola" r="${r}" fill="${C.azul}" stroke="${C.tinta}" stroke-width="3"/>
+        <text class="valor" y="5" text-anchor="middle" font-size="${estrecho ? 11 : 12.5}" font-weight="800" fill="#fff"></text>`;
+      p.addEventListener('keydown', teclado);
+      svg.appendChild(p);
+    }
+  }
+
+  function dibujar(p) {
+    if (!geo) return;
+    const X = xm(p.m);
+    $('poste-l').setAttribute('x1', X); $('poste-l').setAttribute('x2', X);
+    const tPoste = $('poste-t');
+    tPoste.textContent = `media ${fmt(p.m)} min`;
+    tPoste.setAttribute('x', Math.min(Math.max(X, geo.m.izq + 50), geo.m.izq + geo.pw - 50));
+    for (let i = 0; i < 5; i++) {
+      const x = xm(v[i]), y = yf(i), d = Math.abs(p.dist[i]);
+      const t = Math.min(1, d / 15);                       // tensión: 0 = floja, 1 = muy estirada
+      const g = $('goma-' + i), l = g.querySelector('.goma'), txt = g.querySelector('.dist');
+      l.setAttribute('x1', X); l.setAttribute('x2', x); l.setAttribute('y1', y); l.setAttribute('y2', y);
+      l.setAttribute('stroke', t > 0.55 ? C.coral : C.amarillo);
+      l.setAttribute('stroke-width', 4 + 6 * t);
+      l.setAttribute('opacity', d < 0.05 ? 0 : 1);
+      // la distancia encima de la goma, solo si cabe
+      const ancho = Math.abs(x - X);
+      txt.textContent = ancho > 66 ? conSigno(p.dist[i]) : '';
+      txt.setAttribute('x', (x + X) / 2); txt.setAttribute('y', y - 10);
+      const pt = svg.querySelector(`.punto[data-i="${i}"]`);
+      pt.setAttribute('transform', `translate(${x} ${y})`);
+      pt.querySelector('.valor').textContent = v[i];
+      pt.setAttribute('aria-valuenow', v[i]);
+      pt.setAttribute('aria-label', `${DIAS_LARGO[i]}: ${v[i]} minutos de retraso`);
+    }
+    // regla: de media − DT a media + DT (recortada a la recta)
+    const a = xm(p.m - p.dt), b = xm(p.m + p.dt);
+    $('regla-banda').setAttribute('x', a); $('regla-banda').setAttribute('width', Math.max(10, b - a));
+    if (p.dt < 0.05) $('regla-banda').setAttribute('x', X - 5);
+    const rt = $('regla-txt');
+    rt.textContent = `desviación típica: ${fmt(p.dt)} min a cada lado de la media`;
+    rt.setAttribute('x', Math.min(Math.max(X, geo.m.izq + 150), geo.m.izq + geo.pw - 150));
+    if (geo.estrecho) rt.textContent = `desviación típica: ${fmt(p.dt)} min`;
+  }
+
+  // ---------- textos ----------
+  function pintar() {
+    const p = pasos(v);
+    $('v-media').textContent = `${fmt(p.m)} min`;
+    $('v-dt').textContent = `${fmt(p.dt)} min`;
+    const maxD = Math.max(...p.dist.map(Math.abs));
+    $('filas').innerHTML = v.map((x, i) => `<tr class="${maxD >= 8 && Math.abs(p.dist[i]) === maxD ? 'larga' : ''}"><td>${DIAS[i]}</td><td>${x}</td><td>${conSigno(p.dist[i])}</td><td>${fmt(p.cuad[i])}</td></tr>`).join('');
+    $('cadena').innerHTML = `<span>③ Suma ${fmt(p.sc)} ÷ 5 = ${fmt(p.varianza)} min²</span><i>→</i><span>varianza</span><i>→</i><span class="fin">④ √${fmt(p.varianza)} = ${fmt(p.dt)} min</span>`;
+    $('no-es').innerHTML = `Distancia media sin signos: <b>${fmt(p.distMedia)} min</b>. Se parece, pero no es la desviación típica (${fmt(p.dt)} min): al elevar al cuadrado, las gomas largas pesan más.`;
+    dibujar(p);
+    pintarRetos(p);
+  }
+  function pintarRetos(p) {
+    $('retos').innerHTML = RETOS.map((r, k) => `
+      <li class="reto${hecho[k] ? ' hecho' : ''}" id="reto-${k + 1}" data-hecho="${hecho[k]}">
+        <span class="casilla" aria-hidden="true">${hecho[k] ? '✔' : ''}</span>
+        <b>${k + 1}. ${r.titulo}<span class="saltar">${hecho[k] ? ' (conseguido)' : ' (pendiente)'}</span></b>
+        <p class="ayuda">${r.meta} ${hecho[k] ? '' : r.ayuda}</p>
+        <p class="porque">${porque[k]}</p>
+      </li>`).join('');
+    $('v-marcador').textContent = `· ${hecho.filter(Boolean).length} de 4 ✔`;
+    $('leccion').hidden = !hecho.every(Boolean);
+    $('v-comentario').textContent = comentario(p);
+  }
+  const clave = () => v.join(',');
+  function revisarRetos() {
+    if (!movido) return;
+    const p = pasos(v);
+    let nuevo = -1;
+    RETOS.forEach((r, k) => { if (!hecho[k] && r.vale(p)) { hecho[k] = true; porque[k] = r.porque(p); nuevo = k; } });
+    if (nuevo < 0) return;
+    logro = { k: nuevo, en: clave() };
+    pintarRetos(p);
+  }
+  function comentario(p) {
+    if (logro && logro.en === clave()) {
+      if (hecho.every(Boolean)) return '¡Cuatro de cuatro! Con la misma media, el día que no puedes llegar tarde elige el autobús con menos desviación típica.';
+      return porque[logro.k].replace(/^✔ /, `¡Reto ${logro.k + 1} conseguido! `);
+    }
+    if (!movido) return 'Esta es la línea 7 del vídeo: 4, 6, 2, 8 y 5 minutos de retraso. Media 5 y desviación típica 2. Arrastra un punto y mira qué le pasa a su goma.';
+    if (p.dt < 0.05) return 'Todos los días a la misma hora: ninguna goma se estira y la desviación típica es 0.';
+    const dmax = p.dist.map(Math.abs), i = dmax.indexOf(Math.max(...dmax));
+    const resto = p.sc - p.cuad[i];
+    if (p.cuad[i] > resto && dmax[i] >= 6) return `La goma del ${DIAS_LARGO[i]} se aleja ${fmt(dmax[i])} min. Al cuadrado son ${fmt(p.cuad[i])}: pesa más que las otras cuatro juntas (${fmt(resto)}).`;
+    return `Media ${fmt(p.m)} min y desviación típica ${fmt(p.dt)} min. La goma más estirada es la del ${DIAS_LARGO[i]}: ${fmt(dmax[i])} min.`;
+  }
+
+  // ---------- interacción ----------
+  function poner(i, min) {
+    const n = Math.max(0, Math.min(MAX, Math.round(min)));
+    if (n === v[i]) return false;
+    v[i] = n; movido = true;
+    if (logro && logro.en !== clave()) logro = null;
+    pintar();
+    return true;
+  }
+  const minDe = (ev) => {
+    const r = svg.getBoundingClientRect(), esc = geo.ancho / r.width;
+    return ((ev.clientX - r.left) * esc - geo.m.izq) / geo.pw * MAX;
+  };
+  const filaDe = (ev) => {
+    const r = svg.getBoundingClientRect(), y = (ev.clientY - r.top) * (geo.ancho / r.width);
+    const i = Math.floor((y - geo.m.arr) / geo.fila);
+    return i >= 0 && i < 5 ? i : -1;
+  };
+  svg.addEventListener('pointerdown', (ev) => {
+    const i = filaDe(ev);
+    if (i < 0) return;
+    arrastre = { i, id: ev.pointerId };
+    svg.setPointerCapture(ev.pointerId);
+    $('grafico').classList.add('arrastrando');
+    clearTimeout(espera);
+    poner(i, minDe(ev));
+    svg.querySelector(`.punto[data-i="${i}"]`).focus({ preventScroll: true });
+  });
+  svg.addEventListener('pointermove', (ev) => { if (arrastre && ev.pointerId === arrastre.id) poner(arrastre.i, minDe(ev)); });
+  const soltar = (ev) => {
+    if (!arrastre || ev.pointerId !== arrastre.id) return;
+    arrastre = null;
+    $('grafico').classList.remove('arrastrando');
+    revisarRetos();
+  };
+  svg.addEventListener('pointerup', soltar);
+  svg.addEventListener('pointercancel', soltar);
+  function teclado(ev) {
+    const i = +ev.currentTarget.dataset.i;
+    const paso = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1, PageUp: 5, PageDown: -5 }[ev.key];
+    let hay = false;
+    if (paso) hay = poner(i, v[i] + paso);
+    else if (ev.key === 'Home') hay = poner(i, 0);
+    else if (ev.key === 'End') hay = poner(i, MAX);
+    else return;
+    ev.preventDefault();
+    if (hay) { clearTimeout(espera); espera = setTimeout(revisarRetos, 450); }
+  }
+  $('b-video').onclick = () => {
+    clearTimeout(espera);
+    v = L7.slice(); logro = null;
+    pintar();
+  };
+  new ResizeObserver(() => { medir(); base(); pintar(); }).observe($('grafico'));
+  medir(); base(); pintar();
+})();
+</script>
+</body>
+</html>
