@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>¿Quién acaba con más? · Soy Numerito</title>
+<meta name="description" content="Juego gratis del interés compuesto: dos huchas, cinco rondas. Comisiones, inflación, años y dinero de salida: toca la que crees que acaba con más. Partida nueva cada día para compararte con tus amigos.">
+<meta property="og:title" content="¿Quién acaba con más? · Soy Numerito">
+<meta property="og:description" content="Dos huchas, cinco rondas. ¿Sabes cuál acaba con más?">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://soynumerito.com/quien-acaba-con-mas">
+<link rel="stylesheet" href="estilo.css">
+<style>
+  .ventana { background: var(--blanco); border: var(--borde); border-radius: 20px; box-shadow: var(--sombra); overflow: hidden; }
+  .ventana-barra { background: var(--tinta); color: var(--papel); display: flex; align-items: center; gap: 8px; padding: 10px 16px; font-size: 15px; flex-wrap: wrap; }
+  .ventana-barra i { width: 12px; height: 12px; border-radius: 50%; display: block; flex: none; }
+  .ventana-barra span { margin-left: 8px; }
+  .ventana-barra .derecha { margin-left: auto; font-variant-numeric: tabular-nums; font-weight: 800; }
+  .ventana-cuerpo { padding: 18px 16px; display: grid; gap: 16px; min-width: 0; }
+  .regla { margin: 0; background: var(--papel); border: 3px solid var(--tinta); border-radius: 14px; padding: 10px 14px; font-size: 16px; }
+  [hidden] { display: none !important; }
+  .pila { display: grid; gap: 16px; }
+  .acciones { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+  .huchas { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 14px; }
+  .hucha { font: inherit; text-align: left; color: var(--tinta); cursor: pointer; display: grid; gap: 6px; padding: 14px 16px; border: var(--borde); border-radius: 18px;
+    box-shadow: 4px 4px 0 var(--tinta); transition: transform .08s, box-shadow .08s; }
+  .hucha:hover:not(:disabled) { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 var(--tinta); }
+  .hucha:disabled { cursor: default; }
+  .hucha.a { background: var(--amarillo); }
+  .hucha.b { background: #CFE0FF; }
+  .hucha .nombre { font-size: 26px; font-weight: 800; line-height: 1; }
+  .hucha ul { margin: 0; padding-left: 18px; font-weight: 600; }
+  .hucha .total { font-size: clamp(26px, 6vw, 34px); font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .hucha .total small { display: block; font-size: 14px; font-weight: 600; }
+  .hucha.gana { outline: 5px solid var(--verde); outline-offset: 3px; }
+  .hucha .sello { justify-self: start; border: 3px solid var(--tinta); border-radius: 999px; padding: 0 10px; font-weight: 800; background: var(--verde); }
+
+  .comentario { display: flex; gap: 14px; align-items: flex-end; }
+  .comentario svg { width: 58px; flex: none; }
+  .burbuja { position: relative; background: var(--blanco); border: var(--borde); border-radius: 18px; padding: 12px 16px;
+    box-shadow: 4px 4px 0 var(--tinta); font-size: 17px; min-width: 0; margin: 0; flex: 1; }
+  .burbuja::before { content: ''; position: absolute; left: -14px; bottom: 16px; border: 7px solid transparent; border-right: 10px solid var(--tinta); }
+
+  .resultado { background: var(--amarillo); border: var(--borde); border-radius: 18px; box-shadow: 4px 4px 0 var(--tinta); padding: 14px 16px; display: grid; gap: 10px; justify-items: start; }
+  .resultado .marcador { font-size: clamp(30px, 7vw, 44px); font-weight: 800; line-height: 1; }
+  .resultado .cuadros { font-size: 30px; letter-spacing: 4px; line-height: 1; }
+  .resultado p { margin: 0; }
+  .copiado { font-weight: 800; }
+  .suscribete { background: var(--blanco); border: var(--borde); border-radius: 18px; padding: 14px 16px; display: grid; gap: 10px; justify-items: start; }
+  .suscribete b { font-size: 20px; line-height: 1.2; }
+  .suscribete p { margin: 0; }
+
+  .retos { display: grid; gap: 10px; margin: 28px 0 0; }
+  .retos h2 { margin: 0; }
+  .retos ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .retos li { display: flex; gap: 12px; align-items: center; background: var(--blanco); border: 3px solid var(--tinta); border-radius: 14px; padding: 8px 14px; font-weight: 700; }
+  .casilla { flex: none; width: 28px; height: 28px; border: 3px solid var(--tinta); border-radius: 8px; display: grid; place-items: center; font-weight: 800; background: var(--blanco); }
+  .retos li.hecho { background: var(--verde); }
+  .retos li.hecho .casilla { background: var(--tinta); color: var(--verde); }
+
+  @media (max-width: 520px) {
+    .ventana-cuerpo { padding: 14px 10px; }
+    .ventana-barra { font-size: 13px; }
+    .comentario svg { width: 44px; }
+  }
+</style>
+<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "d432578ac00f445d86047dc522d7f8a1"}'></script><!-- End Cloudflare Web Analytics -->
+</head>
+<body>
+<div class="pagina">
+  <header class="cabecera">
+    <a class="logo" href="./" title="Ir a la portada">
+      <svg viewBox="0 0 220 300" aria-hidden="true"><path d="M70 40 Q118 4 140 18 Q156 28 156 60 L156 228 L190 228 Q206 228 206 246 L206 262 Q206 280 188 280 L46 280 Q28 280 28 262 L28 246 Q28 228 46 228 L82 228 L82 96 Q66 104 52 100 Q34 94 36 76 Q38 58 70 40 Z" fill="#FFD23F" stroke="#141414" stroke-width="14" stroke-linejoin="round"/></svg>
+      soy numerito
+    </a>
+    <nav class="volver-grupo" aria-label="Volver"><a class="volver" href="./">Inicio</a><a class="volver" href="./#juegos">← Todos los juegos</a></nav>
+  </header>
+
+  <span class="etiqueta" style="margin-top:24px">Juego · Vida Real</span>
+  <h1>¿Quién acaba con más?</h1>
+  <p class="entradilla">Dos huchas, cinco rondas. Comisiones, inflación, años y dinero de salida: toca la hucha que crees que acaba con más. Cada día hay una partida nueva, la misma para todo el mundo: compárate con tus amigos.</p>
+
+  <section class="ventana" aria-label="Juego">
+    <div class="ventana-barra"><i style="background:var(--coral)"></i><i style="background:var(--amarillo)"></i><i style="background:var(--verde)"></i><span id="q-ronda">Partida del día</span><span class="derecha" id="q-marcador"></span></div>
+    <div class="ventana-cuerpo">
+      <p class="regla"><b>Reglas:</b> cada hucha empieza con 10.000 € salvo que se diga otra cosa. Cada año crece su porcentaje y después se resta la comisión sobre todo el saldo. Sin impuestos ni aportaciones. Escenario inventado, no es una previsión.</p>
+
+      <div id="q-inicio" class="acciones"><button class="boton negro grande" type="button" id="q-empezar">Empezar la partida del día</button></div>
+
+      <div id="q-juego" class="pila" hidden>
+        <div class="huchas" id="q-huchas"></div>
+      </div>
+
+      <div class="comentario">
+        <svg viewBox="0 0 220 300" aria-hidden="true" class="mascota"></svg>
+        <p class="burbuja" id="q-numerito" aria-live="polite">A veces gana la que parece peor. Piensa en cuánto crece de verdad cada una al año y durante cuántos años.</p>
+      </div>
+      <div class="acciones"><button class="boton negro" type="button" id="q-siguiente" hidden>Siguiente ronda</button></div>
+
+      <div id="q-final" class="pila" hidden>
+        <div class="resultado">
+          <span class="antetitulo" id="q-final-tipo">Partida del día</span>
+          <span class="marcador" id="q-final-marcador"></span>
+          <span class="cuadros" id="q-final-cuadros" aria-hidden="true"></span>
+          <p id="q-final-texto"></p>
+          <div class="acciones"><button class="boton negro grande" type="button" id="q-compartir">Compartir mi resultado</button><span class="copiado" id="q-copiado" aria-live="polite"></span></div>
+        </div>
+        <div class="suscribete">
+          <b>Lo explicamos con calma en el vídeo del interés compuesto</b>
+          <p>Por qué los intereses dan intereses, qué hace la inflación y cómo se compone una comisión del 2 %.</p>
+          <div class="acciones">
+            <a class="boton coral" href="https://www.youtube.com/@soynumerito?sub_confirmation=1">Suscribirme en YouTube</a>
+            <a class="boton" href="bola-de-nieve">Prueba tus números en «La bola de nieve» →</a>
+          </div>
+        </div>
+        <div class="acciones"><button class="boton" type="button" id="q-otra">Jugar otra partida (rondas al azar)</button></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="retos"><h2>Tus retos</h2><ul>
+    <li id="q-r1"><span class="casilla"></span>Acierta 3 de 5 rondas</li>
+    <li id="q-r2"><span class="casilla"></span>Acierta las 5</li>
+    <li id="q-r3"><span class="casilla"></span>Acierta una ronda ajustada (menos de 300 € de diferencia)</li>
+  </ul></div>
+
+  <footer class="pie">
+    <span>Lo explicamos en el vídeo «Interés compuesto» de la serie Vida Real del canal <a href="https://www.youtube.com/@soynumerito">Soy Numerito en YouTube</a>.</span>
+    <span>Huchas y porcentajes inventados: no representan ningún producto, índice ni banco. Sin impuestos. Esto es educativo, no asesoramiento.</span>
+    <span>Esta página no usa cookies ni guarda nada de lo que hagas.</span>
+    <span>© 2026 Soy Numerito. Todos los derechos reservados: no se permite copiar ni reutilizar este juego, sus textos ni sus diseños sin permiso por escrito.</span>
+  </footer>
+</div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const euros = (x) => Math.round(x).toLocaleString('es-ES') + '\u00a0€';
+  const pct = (x) => (x * 100).toLocaleString('es-ES', { maximumFractionDigits: 1 }) + ' %';
+
+  // Azar con semilla: la partida del día es la misma para todo el mundo (fecha de Madrid).
+  const mulberry32 = (a) => () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  const hoy = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Madrid' }).format(new Date());
+  const hoyBonito = new Intl.DateTimeFormat('es-ES', { timeZone: 'Europe/Madrid', day: 'numeric', month: 'short' }).format(new Date());
+  let rnd = Math.random;
+  const barajar = (xs) => { const a = [...xs]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+  const MASCOTA = '<path d="M70 40 Q118 4 140 18 Q156 28 156 60 L156 228 L190 228 Q206 228 206 246 L206 262 Q206 280 188 280 L46 280 Q28 280 28 262 L28 246 Q28 228 46 228 L82 228 L82 96 Q66 104 52 100 Q34 94 36 76 Q38 58 70 40 Z" fill="#FFD23F" stroke="#141414" stroke-width="8" stroke-linejoin="round"/><ellipse cx="102" cy="132" rx="15" ry="19" fill="#fff" stroke="#141414" stroke-width="5"/><circle cx="106" cy="136" r="8" fill="#141414"/><ellipse cx="140" cy="132" rx="15" ry="19" fill="#fff" stroke="#141414" stroke-width="5"/><circle cx="144" cy="136" r="8" fill="#141414"/><ellipse cx="94" cy="166" rx="9" ry="6" fill="#FF8A8A"/><ellipse cx="150" cy="166" rx="9" ry="6" fill="#FF8A8A"/><path d="M110 164 Q122 180 134 164" fill="none" stroke="#141414" stroke-width="5" stroke-linecap="round"/>';
+  document.querySelectorAll('svg.mascota').forEach((s) => { s.innerHTML = MASCOTA; });
+  function marcar(id) { const li = $(id); if (li.classList.contains('hecho')) return; li.classList.add('hecho'); li.querySelector('.casilla').textContent = '✔'; }
+
+  // Misma regla que el vídeo y que episodios/vr01_interes_compuesto/calculos.py (hucha()).
+  function valor(h) {
+    const P = h.P || 10000, n = h.n;
+    let B;
+    if (h.simple) B = P * (1 + h.r * n);
+    else { B = P; for (let a = 0; a < n; a++) { B *= 1 + h.r; B -= B * (h.c || 0); } }
+    return B / Math.pow(1 + (h.i || 0), n);
+  }
+  function lineas(h) {
+    const l = [];
+    l.push(`${euros(h.P || 10000)} al principio`);
+    l.push(h.r === 0 ? 'Guardada en casa (0 %)' : `${pct(h.r)} al año${h.simple ? ' de interés simple' : ''}`);
+    if (h.c) l.push(`Comisión del ${pct(h.c)} al año`);
+    else if (h.r > 0 && !h.simple) l.push('Sin comisión');
+    l.push(`${h.n} años`);
+    if (h.i !== undefined) l.push(`Inflación del ${pct(h.i)}: se cuenta en euros de hoy`);
+    return l;
+  }
+  // Las 10 rondas del guion (episodios/vr01_interes_compuesto/guion.md, tabla del juego).
+  const RONDAS = [
+    { a: { r: 0.05, c: 0.02, n: 20 }, b: { r: 0.04, n: 20 }, por: 'La comisión del 2 % deja el 5 % en un 2,9 % al año. El 4 % entero crece más.' },
+    { a: { r: 0.06, c: 0.01, n: 20 }, b: { r: 0.05, c: 0.002, n: 20 }, por: 'No siempre gana la comisión más baja: el 6 % con un 1 % de comisión crece un 4,94 % al año; el 5 % con un 0,2 %, un 4,79 %.' },
+    { a: { r: 0.05, n: 30 }, b: { P: 20000, r: 0.05, n: 15 }, por: 'Quince años más de bola de nieve pesan más que empezar con el doble de dinero.' },
+    { a: { r: 0.07, n: 10 }, b: { r: 0.035, n: 20 }, por: 'Mitad de porcentaje y doble de años no da lo mismo: con interés compuesto, los años extra multiplican.' },
+    { a: { r: 0.05, n: 20, i: 0.04 }, b: { r: 0.03, n: 20, i: 0.01 }, por: 'Lo que cuenta es la tasa real: 5 % con un 4 % de inflación es menos que 3 % con un 1 %.' },
+    { a: { r: 0, n: 20, i: 0.02 }, b: { r: 0.03, c: 0.01, n: 20, i: 0.02 }, por: 'Quieta en casa también pierde: con un 2 % de inflación, 10.000 € compran como 6.730 € de hoy.' },
+    { a: { r: 0.05, n: 30, simple: true }, b: { r: 0.04, n: 30 }, por: 'Con interés simple siempre ganas lo mismo; con compuesto, intereses sobre intereses. A 30 años, el 4 % compuesto pasa al 5 % simple.' },
+    { a: { r: 0.04, n: 20 }, b: { r: 0.02, n: 40 }, por: 'Otra vez mitad de porcentaje y doble de años: casi empate, pero no exacto.' },
+    { a: { r: 0.08, c: 0.02, n: 25 }, b: { r: 0.06, n: 25 }, por: '8 menos 2 no es exactamente 6: la comisión se cobra sobre el saldo ya crecido, así que la hucha crece un 5,84 %.' },
+    { a: { P: 15000, r: 0.04, n: 10 }, b: { r: 0.04, n: 20 }, por: 'A veces más dinero de salida gana al tiempo: aquí, por poco.' },
+  ].map((x) => { const va = valor(x.a), vb = valor(x.b); return { ...x, va, vb, gana: va > vb ? 'a' : 'b', dif: Math.abs(va - vb) }; });
+
+  const N = 5;
+  let partida, k, aciertos, cuadros, delDia = true;
+
+  function nueva(diaria) {
+    delDia = diaria;
+    rnd = diaria ? mulberry32(+hoy.replace(/-/g, '') * 7 + 1) : Math.random;
+    // El lado de la hucha que gana se sortea para que no siempre sea la misma.
+    partida = barajar(RONDAS).slice(0, N).map((x) => (rnd() < 0.5 ? x : { ...x, a: x.b, b: x.a, va: x.vb, vb: x.va, gana: x.gana === 'a' ? 'b' : 'a' }));
+    k = 0; aciertos = 0; cuadros = [];
+    $('q-inicio').hidden = true; $('q-final').hidden = true; $('q-juego').hidden = false;
+    mostrar();
+  }
+
+  function tarjeta(lado, h, ronda, revelado) {
+    const v = lado === 'a' ? ronda.va : ronda.vb, gana = revelado && ronda.gana === lado;
+    return `<button type="button" class="hucha ${lado}${gana ? ' gana' : ''}" data-lado="${lado}" ${revelado ? 'disabled' : ''}>
+      <span class="nombre">Hucha ${lado.toUpperCase()}</span>
+      <ul>${lineas(h).map((t) => `<li>${t}</li>`).join('')}</ul>
+      ${revelado ? `<span class="total">${euros(v)}<small>${h.i !== undefined ? 'en euros de hoy' : 'al final'}</small></span>${gana ? '<span class="sello">Acaba con más</span>' : ''}` : ''}
+    </button>`;
+  }
+
+  function mostrar(revelado = false) {
+    const r = partida[k];
+    $('q-ronda').textContent = `${delDia ? 'Partida del día' : 'Partida libre'} · ronda ${k + 1} de ${N}`;
+    $('q-marcador').textContent = `${aciertos} aciertos`;
+    $('q-huchas').innerHTML = tarjeta('a', r.a, r, revelado) + tarjeta('b', r.b, r, revelado);
+    if (!revelado) { $('q-siguiente').hidden = true; $('q-numerito').textContent = k === 0 ? '¿Cuál acaba con más? Toca una hucha.' : 'Otra ronda. ¿Cuánto crece de verdad cada una?'; }
+  }
+
+  function responder(lado) {
+    const r = partida[k], ok = lado === r.gana;
+    if (ok) aciertos++;
+    if (ok && r.dif < 300) marcar('q-r3');
+    cuadros.push(ok ? '🟩' : '🟥');
+    mostrar(true);
+    $('q-numerito').textContent = `${ok ? '¡Bien! ' : '¡Uy! '}Gana la hucha ${r.gana.toUpperCase()} por ${euros(r.dif)}. ${r.por}`;
+    $('q-marcador').textContent = `${aciertos} aciertos`;
+    k++;
+    $('q-siguiente').textContent = k < N ? 'Siguiente ronda' : 'Ver mi resultado';
+    $('q-siguiente').hidden = false;
+  }
+
+  function terminar() {
+    if (aciertos >= 3) marcar('q-r1');
+    if (aciertos === N) marcar('q-r2');
+    $('q-juego').hidden = true; $('q-siguiente').hidden = true;
+    $('q-ronda').textContent = delDia ? 'Partida del día · terminada' : 'Partida libre · terminada';
+    $('q-final-tipo').textContent = delDia ? `Partida del día · ${hoyBonito}` : 'Partida libre';
+    $('q-final-marcador').textContent = `${aciertos} de ${N}`;
+    $('q-final-cuadros').textContent = cuadros.join('');
+    $('q-final-texto').textContent = aciertos === N ? 'Ni una hucha se te ha escapado.' : aciertos >= 3 ? 'Buen ojo. Alguna todavía engaña.' : 'El interés compuesto engaña a la intuición: prueba otra partida.';
+    $('q-copiado').textContent = '';
+    $('q-numerito').textContent = 'La lección: compara cuánto crece de verdad cada hucha al año (después de comisiones y de inflación) y durante cuántos años.';
+    $('q-final').hidden = false;
+  }
+
+  function textoCompartir() {
+    return `¿Quién acaba con más? · ${delDia ? hoyBonito : 'partida libre'}\n${cuadros.join('')} ${aciertos}/${N}\n¿Aciertas tú qué hucha acaba con más?\nhttps://soynumerito.com/quien-acaba-con-mas`;
+  }
+  $('q-compartir').onclick = async () => {
+    const texto = textoCompartir();
+    if (navigator.share) { try { await navigator.share({ text: texto }); return; } catch (e) { if (e.name === 'AbortError') return; } }
+    try { await navigator.clipboard.writeText(texto); $('q-copiado').textContent = '¡Copiado! Pégalo donde quieras.'; }
+    catch (e) { window.prompt('Copia tu resultado:', texto); }
+  };
+
+  $('q-huchas').addEventListener('click', (e) => { const b = e.target.closest('[data-lado]'); if (b && !b.disabled) responder(b.dataset.lado); });
+  $('q-siguiente').onclick = () => (k < N ? mostrar() : terminar());
+  $('q-empezar').onclick = () => nueva(true);
+  $('q-otra').onclick = () => nueva(false);
+})();
+</script>
+</body>
+</html>

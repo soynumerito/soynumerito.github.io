@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>¿Se dobla tu dinero? · Soy Numerito</title>
+<meta name="description" content="Vida Real: El interés compuesto contado con dos huchas inventadas, Ana y Bea: por qué el dinero se multiplica en vez de sumar, qué le hace la inflación (la tasa real) y por qué una comisión sobre el saldo también se compone. Con dos trucos: la regla del 72 y dónde ver la comisión de un fondo.">
+<meta property="og:title" content="¿Se dobla tu dinero? · Soy Numerito">
+<meta property="og:description" content="Vida Real: El interés compuesto contado con dos huchas inventadas, Ana y Bea: por qué el dinero se multiplica en vez de sumar, qué le hace la inflación (la tasa real) y por qué una comisión sobre el saldo también se compone. Con dos trucos: la regla del 72 y dónde ver la comisión de un fondo.">
+<meta property="og:url" content="https://soynumerito.com/interes-compuesto">
+<meta property="og:image" content="https://soynumerito.com/mini_vr01.jpg">
+<link rel="stylesheet" href="estilo.css">
+<style>
+  .ventana { background: var(--blanco); border: var(--borde); border-radius: 20px; box-shadow: var(--sombra); overflow: hidden; }
+  .ventana-barra { background: var(--tinta); color: var(--papel); display: flex; align-items: center; gap: 8px; padding: 10px 16px; font-size: 15px; }
+  .ventana-barra i { width: 12px; height: 12px; border-radius: 50%; display: block; flex: none; }
+  .ventana-barra span { margin-left: 8px; }
+  .ventana-cuerpo { padding: 18px 16px 16px; display: grid; gap: 16px; min-width: 0; }
+
+  .mandos { display: grid; gap: 12px; }
+  .mando { display: grid; gap: 6px; }
+  .mando > span { font-weight: 800; font-size: 15px; }
+  .mando > span small { font-weight: 500; color: var(--gris); }
+  .opciones { display: flex; gap: 8px; flex-wrap: wrap; }
+  .opciones .boton { min-width: 64px; font-variant-numeric: tabular-nums; }
+
+  .marcadores { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 12px; }
+  .marca { border: var(--borde); border-radius: 16px; box-shadow: 4px 4px 0 var(--tinta); padding: 8px 14px 10px; background: var(--blanco); display: grid; gap: 2px; }
+  .marca.final { background: var(--amarillo); }
+  .marca.comision { background: #FFD9CF; }
+  .marca span { font-size: 15px; font-weight: 700; }
+  .marca b { font-size: clamp(28px, 7vw, 38px); line-height: 1.05; font-variant-numeric: tabular-nums; }
+  .marca small { color: var(--gris); font-size: 14px; }
+
+  .grafico svg { display: block; width: 100%; height: auto; }
+  .grafico text { font-family: var(--letra); }
+  .leyenda { display: flex; gap: 8px 18px; flex-wrap: wrap; font-size: 14px; font-weight: 700; margin: 0; }
+  .leyenda i { display: inline-block; width: 22px; height: 6px; border-radius: 3px; vertical-align: middle; margin-right: 6px; border: 1.5px solid var(--tinta); }
+  .aviso-fijo { margin: 0; background: var(--papel); border: 3px solid var(--tinta); border-radius: 14px; padding: 8px 14px; font-size: 15px; font-weight: 700; }
+
+  .comentario { display: flex; gap: 14px; align-items: flex-end; }
+  .comentario svg { width: 58px; flex: none; }
+  .burbuja { position: relative; background: var(--blanco); border: var(--borde); border-radius: 18px; padding: 12px 16px;
+    box-shadow: 4px 4px 0 var(--tinta); font-size: 17px; min-width: 0; margin: 0; flex: 1; }
+  .burbuja::before { content: ''; position: absolute; left: -14px; bottom: 16px; border: 7px solid transparent; border-right: 10px solid var(--tinta); }
+
+  .retos { display: grid; gap: 10px; margin: 28px 0 0; }
+  .retos h2 { margin: 0; }
+  .retos ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .retos li { display: flex; gap: 12px; align-items: center; background: var(--blanco); border: 3px solid var(--tinta); border-radius: 14px; padding: 8px 14px; font-weight: 700; }
+  .retos li small { display: block; font-weight: 500; color: var(--gris); }
+  .casilla { flex: none; width: 28px; height: 28px; border: 3px solid var(--tinta); border-radius: 8px; display: grid; place-items: center; font-weight: 800; background: var(--blanco); }
+  .retos li.hecho { background: var(--verde); }
+  .retos li.hecho small { color: var(--tinta); }
+  .retos li.hecho .casilla { background: var(--tinta); color: var(--verde); }
+  .acciones { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+  @media (max-width: 520px) {
+    .ventana-cuerpo { padding: 14px 10px; }
+    .comentario svg { width: 44px; }
+    .opciones .boton { min-width: 56px; padding: 8px 12px; }
+  }
+  .estrecho { max-width: 1028px; }
+</style>
+<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "d432578ac00f445d86047dc522d7f8a1"}'></script><!-- End Cloudflare Web Analytics -->
+</head>
+<body>
+<a class="saltar" href="#contenido">Saltar al contenido</a>
+<header class="sitio-cabecera">
+  <div class="ancho">
+    <a class="logo" href="./"><svg viewBox="0 0 220 300" aria-hidden="true"><path d="M70 40 Q118 4 140 18 Q156 28 156 60 L156 228 L190 228 Q206 228 206 246 L206 262 Q206 280 188 280 L46 280 Q28 280 28 262 L28 246 Q28 228 46 228 L82 228 L82 96 Q66 104 52 100 Q34 94 36 76 Q38 58 70 40 Z" fill="#FFD23F" stroke="#141414" stroke-width="14" stroke-linejoin="round"/></svg>soy numerito</a>
+    <nav class="menu" aria-label="Principal">
+      <a href="./#episodios">Episodios</a>
+      <a href="./#simuladores">Simuladores</a>
+      <a href="./#juegos">Juegos</a>
+      <a class="boton coral" href="https://ko-fi.com/soynumerito"><span class="solo-ancho">Invítame a un café</span><span class="solo-movil">Café ☕</span></a>
+    </nav>
+  </div>
+</header>
+<main id="contenido" class="ancho estrecho episodio" data-publica="2026-11-26T18:00:00+01:00">
+  <p class="migas"><a href="./#episodios">Episodios</a> / Numerito en la Vida Real / Vida Real</p>
+  <h1>Interés compuesto: inflación y comisiones, explicado</h1>
+  <div class="video"><div data-antes><div class="mini"><img src="mini_vr01.jpg" alt="" loading="lazy"></div></div><div data-despues hidden><button class="mini" type="button" data-video="XckCy1XVDB4" aria-label="Reproducir el vídeo: Interés compuesto: inflación y comisiones, explicado"><img src="mini_vr01.jpg" alt="" loading="lazy"><span class="play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 4 L20 12 L6 20 Z" fill="#FFFFFF" stroke="#141414" stroke-width="2" stroke-linejoin="round"/></svg></span></button></div></div>
+  <p class="nota-video"><span data-antes>El vídeo se estrena en YouTube el 26 de noviembre. Mientras, ya puedes jugar con el simulador.</span><span data-despues hidden>El vídeo es de YouTube y solo se carga cuando pulsas play.</span></p>
+  <div data-despues hidden><ul class="capitulos" aria-label="Capítulos"><li><button type="button" data-seg="0"><b>0:00</b>Ana y Bea: casi 8.000 € de diferencia</button></li><li><button type="button" data-seg="26"><b>0:26</b>Lo que vas a ver hoy</button></li><li><button type="button" data-seg="39"><b>0:39</b>La cuenta de cabeza</button></li><li><button type="button" data-seg="69"><b>1:09</b>La bola de nieve: qué es el interés compuesto</button></li><li><button type="button" data-seg="88"><b>1:28</b>Paso a paso, año a año</button></li><li><button type="button" data-seg="135"><b>2:15</b>Error común: sumar porcentajes</button></li><li><button type="button" data-seg="155"><b>2:35</b>💡 Truco: la regla del 72</button></li><li><button type="button" data-seg="171"><b>2:51</b>La inflación: euros de hoy y tasa real</button></li><li><button type="button" data-seg="251"><b>4:11</b>La comisión: una bola de nieve al revés</button></li><li><button type="button" data-seg="325"><b>5:25</b>💡 Truco: dónde ver la comisión de un fondo (DFI)</button></li><li><button type="button" data-seg="346"><b>5:46</b>Resumen en 3 puntos</button></li><li><button type="button" data-seg="372"><b>6:12</b>Lo que viene: +10 % y −10 %</button></li><li><button type="button" data-seg="385"><b>6:25</b>Pregunta para los comentarios y cierre</button></li></ul></div>
+
+  <section style="margin-top:36px;display:grid;gap:16px">
+    <h2 class="titulo-seccion">El episodio en 3 ideas</h2>
+    <div class="ideas"><div class="idea"><span class="num" style="background:#FFD23F">1</span><b>Los intereses dan intereses</b><span>Cada año se multiplica por el mismo número: 10.000 € al 5 % durante 20 años son unos 26.500 €, no 20.000.</span></div><div class="idea"><span class="num" style="background:#22C27A">2</span><b>Lo que cuenta es la tasa real</b><span>Lo que crece lo que puedes comprar. Restar la inflación es una aproximación; la cuenta exacta es dividir: 1,05 ÷ 1,02.</span></div><div class="idea"><span class="num" style="background:#FF5A36">3</span><b>Una comisión sobre el saldo también se compone</b><span>Con un 2 % al año, Bea acaba con casi 8.000 € menos que Ana. Truco: la regla del 72 (72 ÷ el % anual ≈ años para doblar).</span></div></div>
+  </section>
+
+  <section class="ahora-tu" aria-labelledby="t-sim">
+    <span class="antetitulo">Ahora tú</span>
+    <h2 id="t-sim">Juega con «La bola de nieve»</h2>
+    <p class="entradilla">Empiezas con 10.000 €. Elige cuánto crecen al año, qué comisión pagas, cuánto suben los precios y cuántos años pasan, y mira cómo rueda la bola: en euros y en euros de hoy, lo que de verdad puedes comprar.</p>
+  <section class="ventana" aria-label="Simulador">
+    <div class="ventana-barra"><i style="background:var(--coral)"></i><i style="background:var(--amarillo)"></i><i style="background:var(--verde)"></i><span>10.000 € al principio · sin aportaciones</span></div>
+    <div class="ventana-cuerpo">
+      <div class="mandos">
+        <div class="mando"><span>Lo que crece al año <small>(antes de comisiones)</small></span><div class="opciones" data-mando="r"></div></div>
+        <div class="mando"><span>Comisión al año <small>(sobre todo el saldo)</small></span><div class="opciones" data-mando="c"></div></div>
+        <div class="mando"><span>Inflación al año <small>(cuánto suben los precios)</small></span><div class="opciones" data-mando="i"></div></div>
+        <div class="mando"><span>Años</span><div class="opciones" data-mando="n"></div></div>
+        <div class="mando"><span>Cómo lo cuento</span><div class="opciones" data-mando="hoy"></div></div>
+      </div>
+
+      <div class="marcadores">
+        <div class="marca final"><span id="m-final-t">Al final</span><b id="m-final"></b><small id="m-final-s"></small></div>
+        <div class="marca comision"><span>Comisiones pagadas</span><b id="m-com"></b><small id="m-com-s"></small></div>
+        <div class="marca"><span>Tasa real al año</span><b id="m-real"></b><small id="m-real-s"></small></div>
+      </div>
+
+      <div class="grafico" id="grafico"></div>
+      <p class="leyenda"><span><i style="background:#FFD23F"></i>Interés compuesto (con tu comisión)</span><span><i style="background:#3A5BFF"></i>Interés simple, sin comisión</span><span><i style="background:#fff;border-style:dashed"></i>Los 10.000 € del principio</span></p>
+      <p class="aviso-fijo">Escenario inventado, sin impuestos, no es una previsión.</p>
+
+      <div class="comentario">
+        <svg viewBox="0 0 220 300" aria-hidden="true" class="mascota"></svg>
+        <p class="burbuja" id="numerito" aria-live="polite"></p>
+      </div>
+    </div>
+  </section>
+
+  <div class="retos"><h2>Tus retos</h2><ul>
+    <li id="r1"><span class="casilla"></span><span>Duplica la hucha<small>Con un 5 % y sin comisión, llega a 20.000 € en el menor número de años.</small></span></li>
+    <li id="r2"><span class="casilla"></span><span>Alcanza a la recta<small>Con un 5 % y 20 años, elige la comisión más alta con la que la curva aún supera a la recta del interés simple.</small></span></li>
+    <li id="r3"><span class="casilla"></span><span>Para la bola<small>A 20 años, que tus 10.000 € se queden entre 9.500 € y 10.500 € en euros de hoy.</small></span></li>
+    <li id="r4"><span class="casilla"></span><span>Pilla a la cuenta rápida<small>Sin comisión y en euros de hoy, encuentra un caso en el que restar la inflación se pase más de 1.000 € de la cuenta exacta.</small></span></li>
+  </ul></div>
+
+  <div class="acciones" style="margin-top:20px">
+    <a class="boton" href="quien-acaba-con-mas">Juega a «¿Quién acaba con más?» →</a>
+    <a class="boton coral" href="https://www.youtube.com/@soynumerito?sub_confirmation=1">Suscribirme en YouTube</a>
+  </div>
+
+  
+    <p class="pie" style="border-top:0;margin-top:20px;padding-top:0"><span>Cada año el saldo crece lo que eliges y después se resta la comisión sobre todo el saldo. Euros de hoy = saldo ÷ (1 + inflación) elevado a los años. Sin impuestos ni aportaciones. Los botones son solo números: no representan ningún producto. Esto es educativo, no asesoramiento.</span><span>© 2026 Soy Numerito. Todos los derechos reservados: no se permite copiar ni reutilizar este simulador, sus textos ni sus diseños sin permiso por escrito.</span><span><a href="bola-de-nieve">Abrir el simulador solo, a pantalla completa →</a></span><span><a href="quien-acaba-con-mas">Juega también a «¿Quién acaba con más?» →</a></span></p>
+  </section>
+
+  <div class="siguiente">
+    <a class="tarjeta" href="./#episodios">
+      <span style="display:grid;gap:4px;min-width:0;padding:6px"><span class="antetitulo">Siguiente episodio</span><span class="tarjeta-titulo">Llega uno nuevo cada semana. Mira todos los episodios →</span></span>
+    </a>
+    <div class="caja-cafe"><b>¿Te ha servido este episodio?</b><a class="boton coral " href="https://ko-fi.com/soynumerito">Invita a Numerito a un café</a></div>
+  </div>
+</main>
+<div style="height:48px"></div>
+<section id="apoyar" class="franja amarilla">
+  <div class="ancho apoyar">
+    <svg viewBox="0 0 220 300" aria-hidden="true"><path d="M70 40 Q118 4 140 18 Q156 28 156 60 L156 228 L190 228 Q206 228 206 246 L206 262 Q206 280 188 280 L46 280 Q28 280 28 262 L28 246 Q28 228 46 228 L82 228 L82 96 Q66 104 52 100 Q34 94 36 76 Q38 58 70 40 Z" fill="#FFFFFF" stroke="#141414" stroke-width="7" stroke-linejoin="round"/><path d="M86 136 Q102 120 118 136" fill="none" stroke="#141414" stroke-width="8" stroke-linecap="round"/><ellipse cx="140" cy="132" rx="15" ry="19" fill="#fff" stroke="#141414" stroke-width="5"/><circle cx="144" cy="136" r="8" fill="#141414"/><ellipse cx="94" cy="166" rx="9" ry="6" fill="#FF8A8A"/><ellipse cx="150" cy="166" rx="9" ry="6" fill="#FF8A8A"/><path d="M106 162 Q124 184 142 160" fill="none" stroke="#141414" stroke-width="6" stroke-linecap="round"/></svg>
+    <div>
+      <h2>¿Te ha servido? Invita a Numerito a un café</h2>
+      <p>Los vídeos y los simuladores son gratis y lo seguirán siendo. Si quieres ayudar a que salga uno nuevo cada semana, puedes hacerlo aquí.</p>
+    </div>
+    <a class="boton coral grande" href="https://ko-fi.com/soynumerito">Invita a Numerito a un café</a>
+  </div>
+</section>
+<footer class="sitio-pie">
+  <div class="ancho">
+    <div class="redes">
+      <a class="boton" href="https://www.youtube.com/@soynumerito">YouTube</a>
+      <a class="boton" href="https://www.tiktok.com/@soynumerito">TikTok</a>
+      <a class="boton" href="https://www.instagram.com/soynumerito">Instagram</a>
+    </div>
+    <small>Estadística que se entiende. Esta web no usa cookies; los vídeos de YouTube solo se cargan si pulsas play.<br>© 2026 Soy Numerito. Todos los derechos reservados: no se permite copiar ni reutilizar los vídeos, textos, simuladores, diseños ni la mascota Numerito sin permiso por escrito.</small>
+  </div>
+</footer>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const P = 10000;
+  const euros = (x) => Math.round(x).toLocaleString('es-ES') + '\u00a0€';
+  const pct = (x, d = 1) => (x * 100).toLocaleString('es-ES', { minimumFractionDigits: d, maximumFractionDigits: d }) + ' %';
+  const num = (x) => x.toLocaleString('es-ES');
+
+  const MASCOTA = '<path d="M70 40 Q118 4 140 18 Q156 28 156 60 L156 228 L190 228 Q206 228 206 246 L206 262 Q206 280 188 280 L46 280 Q28 280 28 262 L28 246 Q28 228 46 228 L82 228 L82 96 Q66 104 52 100 Q34 94 36 76 Q38 58 70 40 Z" fill="#FFD23F" stroke="#141414" stroke-width="8" stroke-linejoin="round"/><ellipse cx="102" cy="132" rx="15" ry="19" fill="#fff" stroke="#141414" stroke-width="5"/><circle cx="106" cy="136" r="8" fill="#141414"/><ellipse cx="140" cy="132" rx="15" ry="19" fill="#fff" stroke="#141414" stroke-width="5"/><circle cx="144" cy="136" r="8" fill="#141414"/><ellipse cx="94" cy="166" rx="9" ry="6" fill="#FF8A8A"/><ellipse cx="150" cy="166" rx="9" ry="6" fill="#FF8A8A"/><path d="M110 164 Q122 180 134 164" fill="none" stroke="#141414" stroke-width="5" stroke-linecap="round"/>';
+  document.querySelectorAll('svg.mascota').forEach((s) => { s.innerHTML = MASCOTA; });
+  function marcar(id) { const li = $(id); if (li.classList.contains('hecho')) return; li.classList.add('hecho'); li.querySelector('.casilla').textContent = '✔'; }
+
+  // Botones: solo números (nunca el nombre de un producto, índice ni banco).
+  const MANDOS = {
+    r: [[0.03, '3 %'], [0.05, '5 %'], [0.07, '7 %']],
+    c: [[0, '0 %'], [0.002, '0,2 %'], [0.01, '1 %'], [0.02, '2 %']],
+    i: [[0, '0 %'], [0.02, '2 %'], [0.04, '4 %'], [0.08, '8 %']],
+    n: [[5, '5'], [10, '10'], [15, '15'], [20, '20'], [30, '30'], [40, '40']],
+    hoy: [[false, 'En euros'], [true, 'En euros de hoy']],
+  };
+  // Arranca con Ana sin comisión: 5 %, 0 %, 0 %, 20 años.
+  const est = { r: 0.05, c: 0, i: 0, n: 20, hoy: false };
+
+  document.querySelectorAll('[data-mando]').forEach((caja) => {
+    const k = caja.dataset.mando;
+    MANDOS[k].forEach(([v, txt]) => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'boton'; b.textContent = txt;
+      b.addEventListener('click', () => { est[k] = v; pintar(); });
+      b.dataset.v = String(v); caja.appendChild(b);
+    });
+  });
+
+  // Misma regla que el vídeo: cada año saldo × (1 + r) y después se resta la comisión sobre ese saldo.
+  function serie(r, c, n) {
+    const s = [P]; let B = P, com = 0;
+    for (let a = 1; a <= n; a++) { B *= 1 + r; const q = B * c; B -= q; com += q; s.push(B); }
+    return { s, com };
+  }
+
+  function pintar() {
+    document.querySelectorAll('[data-mando]').forEach((caja) => {
+      const k = caja.dataset.mando;
+      caja.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === String(est[k]))));
+    });
+    const { r, c, i, n, hoy } = est;
+    const { s, com } = serie(r, c, n);
+    const def = (a) => (hoy ? Math.pow(1 + i, a) : 1);
+    const curva = s.map((v, a) => v / def(a));
+    const recta = s.map((_, a) => P * (1 + r * a) / def(a));
+    const fin = s[n], finHoy = fin / Math.pow(1 + i, n);
+    const neto = (1 + r) * (1 - c) - 1;
+    const realExacta = (1 + neto) / (1 + i) - 1, realRapida = neto - i;
+    const rapidaHoy = P * Math.pow(1 + realRapida, n);
+
+    $('m-final-t').textContent = hoy ? `A los ${n} años, en euros de hoy` : `A los ${n} años`;
+    $('m-final').textContent = euros(hoy ? finHoy : fin);
+    $('m-final-s').textContent = hoy ? `Con la cuenta rápida (restar): ${euros(rapidaHoy)}` : (i > 0 ? `En euros de hoy: ${euros(finHoy)}` : `${fin >= P ? '+' : ''}${euros(fin - P)} frente al principio`);
+    $('m-com').textContent = euros(com);
+    $('m-com-s').textContent = c > 0 ? `Crece un ${pct(neto, 2)} al año, no un ${pct(r, 0)}` : 'Sin comisión';
+    $('m-real').textContent = pct(realExacta, 2);
+    $('m-real-s').textContent = `Exacta: ${num(+(1 + neto).toFixed(4))} ÷ ${num(1 + i)}. Rápida (restar): ${pct(realRapida, 2)}`;
+
+    // Gráfico
+    const W = 420, H = 260, m = { l: 76, r: 12, t: 12, b: 30 }; // viewBox estrecho: en el móvil las etiquetas se leen
+    const max = Math.max(...curva, ...recta, P) * 1.08;
+    const paso = [2000, 5000, 10000, 20000, 50000].find((p) => max / p <= 6) || 100000;
+    const x = (a) => m.l + (a / n) * (W - m.l - m.r), y = (v) => H - m.b - (v / max) * (H - m.t - m.b);
+    let g = '';
+    for (let v = 0; v <= max; v += paso) g += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}" stroke="#D9CFBB" stroke-width="1.5"/><text x="${m.l - 6}" y="${y(v) + 4}" text-anchor="end" font-size="14" fill="#6E6658">${num(v)}&nbsp;€</text>`;
+    const marcasX = n <= 20 ? [0, n / 2, n] : [0, 10, 20, 30, 40].filter((a) => a <= n);
+    marcasX.forEach((a, j) => { const anc = j === 0 ? 'start' : j === marcasX.length - 1 ? 'end' : 'middle'; g += `<text x="${x(a)}" y="${H - 8}" text-anchor="${anc}" font-size="14" fill="#6E6658">año ${num(a)}</text>`; });
+    g += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(P)}" y2="${y(P)}" stroke="#141414" stroke-width="2" stroke-dasharray="6 5"/>`;
+    const linea = (vals) => vals.map((v, a) => `${a ? 'L' : 'M'}${x(a).toFixed(1)} ${y(v).toFixed(1)}`).join(' ');
+    g += `<path d="${linea(recta)}" fill="none" stroke="#3A5BFF" stroke-width="4"/>`;
+    g += `<path d="${linea(curva)}" fill="none" stroke="#141414" stroke-width="9" stroke-linejoin="round"/><path d="${linea(curva)}" fill="none" stroke="#FFD23F" stroke-width="5" stroke-linejoin="round"/>`;
+    g += `<circle cx="${x(n)}" cy="${y(curva[n])}" r="8" fill="#FFD23F" stroke="#141414" stroke-width="3"/>`;
+    $('grafico').innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Saldo año a año"><title>Saldo año a año</title>${g}</svg>`;
+
+    // Numerito explica lo que ve
+    let t;
+    if (hoy && i > 0 && finHoy < P) t = `Ojo: en euros de hoy tus 10.000 € compran menos que al principio. Creces un ${pct(neto, 2)} y los precios un ${pct(i, 0)}: la tasa real es negativa.`;
+    else if (c >= 0.01) t = `Una comisión del ${pct(c, c < 0.01 ? 1 : 0)} se cobra sobre todo lo que tienes, cada año. En ${n} años pagas ${euros(com)} y, además, ese dinero ya no crece.`;
+    else if (hoy && i > 0) t = `En euros de hoy la bola crece más despacio: lo que importa es la tasa real, un ${pct(realExacta, 2)} al año.`;
+    else t = `Cada año ganas intereses sobre los intereses: la curva amarilla se separa de la recta azul. En ${n} años, ${euros(curva[n] - recta[n])} de diferencia.`;
+    $('numerito').textContent = t;
+
+    // Retos
+    if (r === 0.05 && c === 0 && n === 15 && fin >= 2 * P) marcar('r1');
+    if (r === 0.05 && n === 20 && c === 0.01) marcar('r2');
+    if (n === 20 && finHoy >= 9500 && finHoy <= 10500) marcar('r3');
+    if (c === 0 && hoy && rapidaHoy - finHoy > 1000) marcar('r4');
+  }
+  pintar();
+})();
+</script>
+<script>
+// Cada episodio se muestra a su hora: antes, «se estrena el…»; después, el vídeo. Así se puede subir todo antes.
+(() => {
+  const ahora = Date.now();
+  document.querySelectorAll('[data-publica]').forEach((raiz) => {
+    if (ahora < Date.parse(raiz.dataset.publica)) return;
+    raiz.querySelectorAll('[data-antes]').forEach((x) => x.remove());
+    raiz.querySelectorAll('[data-despues]').forEach((x) => { x.hidden = false; });
+  });
+  document.querySelectorAll('[data-hasta]').forEach((x) => { if (ahora >= Date.parse(x.dataset.hasta)) x.remove(); });
+})();
+</script>
+<script>
+// El vídeo de YouTube no se carga hasta que alguien pulsa play (así no hay cookies antes).
+(() => {
+  const caja = document.querySelector('[data-video]');
+  if (!caja) return;
+  const poner = (seg) => {
+    const f = document.createElement('iframe');
+    f.src = 'https://www.youtube-nocookie.com/embed/' + caja.dataset.video + '?autoplay=1&rel=0' + (seg ? '&start=' + seg : '');
+    f.title = caja.getAttribute('aria-label');
+    f.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+    f.allowFullscreen = true;
+    const sitio = document.createElement('div');
+    sitio.className = 'mini';
+    sitio.appendChild(f);
+    (document.querySelector('.video .mini') || caja).replaceWith(sitio);
+  };
+  caja.addEventListener('click', () => poner(0));
+  document.querySelectorAll('[data-seg]').forEach((b) => b.addEventListener('click', () => {
+    poner(+b.dataset.seg);
+    document.querySelector('.video').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }));
+})();
+</script>
+</body>
+</html>
